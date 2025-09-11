@@ -13,6 +13,11 @@ return new class extends Migration
     {
         Schema::create('portatiles', function (Blueprint $table) {
             $table->id();
+            $table->integer('portatil_id');
+            $table->foreignId('persona_id')->constrained('personas', 'idPersona')->onDelete('no action')->onUpdate('no action');
+            $table->string('qrCode');
+            $table->string('marca');
+            $table->string('modelo');
             $table->timestamps();
         });
     }

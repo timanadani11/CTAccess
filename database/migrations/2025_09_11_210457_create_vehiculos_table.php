@@ -13,6 +13,9 @@ return new class extends Migration
     {
         Schema::create('vehiculos', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('persona_id')->constrained('personas', 'idPersona')->onDelete('no action')->onUpdate('no action');
+            $table->string('tipo');
+            $table->string('placa');
             $table->timestamps();
         });
     }
