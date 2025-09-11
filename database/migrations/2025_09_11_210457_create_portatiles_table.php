@@ -12,8 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('portatiles', function (Blueprint $table) {
-            $table->id();
-            $table->integer('portatil_id');
+            $table->id('portatil_id');
             $table->foreignId('persona_id')->constrained('personas', 'idPersona')->onDelete('no action')->onUpdate('no action');
             $table->string('qrCode');
             $table->string('marca');
