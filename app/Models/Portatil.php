@@ -9,7 +9,8 @@ class Portatil extends Model
 {
     use HasFactory;
     
-    protected $fillable = ['portatil_id', 'persona_id', 'qrCode', 'marca', 'modelo'];
+    protected $primaryKey = 'portatil_id';
+    protected $fillable = ['persona_id', 'qrCode', 'marca', 'modelo'];
 
     public function persona()
     {

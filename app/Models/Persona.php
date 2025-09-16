@@ -12,6 +12,11 @@ class Persona extends Model
     protected $primaryKey = 'idPersona';
     protected $fillable = ['documento', 'Nombre', 'TipoPersona', 'Foto'];
 
+    public function getRouteKeyName(): string
+    {
+        return 'idPersona';
+    }
+
     public function portatiles()
     {
         return $this->hasMany(Portatil::class, 'persona_id');
