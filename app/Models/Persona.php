@@ -19,7 +19,7 @@ class Persona extends Model
 
     public function portatiles()
     {
-        return $this->hasMany(Portatil::class, 'persona_id');
+        return $this->hasMany(Portatiles::class, 'persona_id');
     }
 
     public function vehiculos()
