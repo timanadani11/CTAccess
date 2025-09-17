@@ -1,18 +1,15 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\System\Auth\LoginController as SystemLoginController;
+use App\Http\Controllers\System\DashboardController as SystemDashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Persona;
 
 Route::get('/', function () {
-    return Inertia::render('Welcome', [
-        'canLogin' => Route::has('login'),
-        'canRegister' => Route::has('register'),
-        'laravelVersion' => Application::VERSION,
-        'phpVersion' => PHP_VERSION,
-    ]);
+    return Inertia::render('Home');
 });
 
 Route::get('/debug/personas/{persona}', function (Persona $persona) {
@@ -40,4 +37,17 @@ Route::middleware('auth')->group(function () {
 });
 
 require __DIR__.'/auth.php';
+
+// Rutas del sistema (usuarios del sistema: celador, admin)
+Route::prefix('system')->name('system.')->group(function () {
+    Route::middleware('guest:system')->group(function () {
+        Route::get('/login', [SystemLoginController::class, 'create'])->name('login');
+        Route::post('/login', [SystemLoginController::class, 'store'])->middleware('throttle:6,1')->name('login.store');
+    });
+
+    Route::middleware('auth:system')->group(function () {
+        Route::post('/logout', [SystemLoginController::class, 'destroy'])->name('logout');
+        Route::get('/panel', [SystemDashboardController::class, 'index'])->name('panel');
+    });
+});
 

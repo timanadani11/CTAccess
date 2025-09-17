@@ -18,6 +18,7 @@ return new class extends Migration
             $table->string('TipoPersona');
             $table->string('qrCode')->nullable();
             $table->string('correo')->nullable();
+            $table->string('contraseña')->nullable();
             $table->timestamps();
         });
     }

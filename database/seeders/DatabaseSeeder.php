@@ -2,9 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+use Database\Seeders\UsuarioSistemaSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -13,11 +13,14 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Si deseas sembrar usuarios del modelo User, asegúrate de tener la migración de la tabla 'users'.
         // User::factory(10)->create();
+        // User::factory()->create([
+        //     'name' => 'Test User',
+        //     'email' => 'test@example.com',
+        // ]);
 
-        User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
-        ]);
+        // Usuarios del sistema (admin y celador)
+        $this->call(UsuarioSistemaSeeder::class);
     }
 }

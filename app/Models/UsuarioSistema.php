@@ -2,16 +2,45 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Foundation\Auth\User as Authenticatable;
+use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Facades\Hash;
 
-class UsuarioSistema extends Model
+class UsuarioSistema extends Authenticatable
 {
-    use HasFactory;
+    use HasFactory, Notifiable;
 
     protected $table = 'usuarios_sistema';
     protected $primaryKey = 'idUsuariio';
     protected $fillable = ['UserName', 'password', 'nombre', 'rol', 'activo'];
+
+    protected $hidden = [
+        'password',
+        'remember_token',
+    ];
+
+    protected $casts = [
+        'activo' => 'boolean',
+        'email_verified_at' => 'datetime',
+    ];
+
+    // Laravel guard name convenience (optional)
+    protected $guard = 'system';
+
+    // Username field for authentication (we'll use in controller)
+    public function getAuthIdentifierName()
+    {
+        return $this->getKeyName();
+    }
+
+    // Ensure passwords are always hashed when set
+    public function setPasswordAttribute($value): void
+    {
+        if (! empty($value)) {
+            $this->attributes['password'] = Hash::needsRehash($value) ? Hash::make($value) : $value;
+        }
+    }
 
     public function accesosEntrada()
     {
