@@ -10,6 +10,9 @@ use App\Http\Requests\UpdatePersonaRequest;
 use App\Http\Resources\PersonaResource;
 use App\Services\PersonaService;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\PersonaQrMailable;
+use Illuminate\Support\Facades\Log;
 
 class PersonaController extends Controller
 {
@@ -49,6 +52,20 @@ class PersonaController extends Controller
     {
         try {
             $persona = $this->service->createWithRelations($request->validated());
+
+            // Enviar email con el QR adjunto si hay correo (no bloquear en caso de error)
+            if (!empty($persona->correo)) {
+                try {
+                    Mail::to($persona->correo)->send(new PersonaQrMailable($persona));
+                } catch (\Throwable $mailEx) {
+                    // Registrar pero no interrumpir el flujo de creación
+                    Log::error('Error enviando correo de QR a persona', [
+                        'persona_id' => $persona->idPersona,
+                        'correo' => $persona->correo,
+                        'error' => $mailEx->getMessage(),
+                    ]);
+                }
+            }
             return (new PersonaResource($persona))
                 ->additional(['status' => 'success', 'message' => 'Persona creada correctamente'])
                 ->response()

@@ -16,7 +16,8 @@ return new class extends Migration
             $table->string('documento')->nullable();
             $table->string('Nombre');
             $table->string('TipoPersona');
-            $table->string('Foto')->nullable();
+            $table->string('qrCode')->nullable();
+            $table->string('correo')->nullable();
             $table->timestamps();
         });
     }

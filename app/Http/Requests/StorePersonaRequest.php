@@ -18,10 +18,10 @@ class StorePersonaRequest extends FormRequest
             'documento' => ['nullable', 'string', 'max:255', 'unique:personas,documento'],
             'nombre' => ['required', 'string', 'max:255'],
             'tipoPersona' => ['required', 'string', 'max:255'],
-            'foto' => ['nullable', 'string', 'max:2048'],
+            'correo' => ['nullable', 'string', 'email', 'max:255'],
 
             'portatiles' => ['sometimes', 'array'],
-            'portatiles.*.qrCode' => ['required_with:portatiles', 'string', 'max:255', 'unique:portatiles,qrCode'],
+            'portatiles.*.serial' => ['required_with:portatiles', 'string', 'max:255', 'unique:portatiles,serial'],
             'portatiles.*.marca' => ['required_with:portatiles', 'string', 'max:255'],
             'portatiles.*.modelo' => ['required_with:portatiles', 'string', 'max:255'],
 
@@ -36,9 +36,9 @@ class StorePersonaRequest extends FormRequest
         return [
             'nombre' => 'Nombre',
             'tipoPersona' => 'Tipo de Persona',
-            'foto' => 'Foto',
-            'portatiles.*.qrCode' => 'QR del portátil',
+            'portatiles.*.serial' => 'Serial del portátil',
             'vehiculos.*.placa' => 'Placa del vehículo',
         ];
     }
 }
+

@@ -10,7 +10,7 @@ class Persona extends Model
     use HasFactory;
     
     protected $primaryKey = 'idPersona';
-    protected $fillable = ['documento', 'Nombre', 'TipoPersona', 'Foto'];
+    protected $fillable = ['documento', 'Nombre', 'TipoPersona', 'qrCode', 'correo'];
 
     public function getRouteKeyName(): string
     {
