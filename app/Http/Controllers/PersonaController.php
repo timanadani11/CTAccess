@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\JsonResponse;
 use App\Models\Persona;
 use App\Http\Requests\StorePersonaRequest;
@@ -13,6 +14,8 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use App\Mail\PersonaQrMailable;
 use Illuminate\Support\Facades\Log;
+use Inertia\Inertia;
+use Inertia\Response;
 
 class PersonaController extends Controller
 {
@@ -22,33 +25,47 @@ class PersonaController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(): Response
     {
         $perPage = (int) request()->get('per_page', 15);
-        $query = Persona::query()->orderByDesc('idPersona');
+        $search = request()->get('search', '');
+        
+        $query = Persona::query()
+            ->orderByDesc('idPersona')
+            ->with(['portatiles', 'vehiculos']);
 
-        if (request()->boolean('with_relations')) {
-            $query->with(['portatiles', 'vehiculos']);
+        // Filtro de búsqueda opcional
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('Nombre', 'like', "%{$search}%")
+                  ->orWhere('documento', 'like', "%{$search}%")
+                  ->orWhere('TipoPersona', 'like', "%{$search}%");
+            });
         }
 
-        $paginator = $query->paginate($perPage);
-        return PersonaResource::collection($paginator)
-            ->additional(['status' => 'success'])
-            ->response();
+        $personas = $query->paginate($perPage)->withQueryString();
+
+        return Inertia::render('Personas/Index', [
+            'personas' => PersonaResource::collection($personas),
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage,
+            ],
+        ]);
     }
 
     /**
      * Show the form for creating a new resource.
      */
-    public function create()
+    public function create(): Response
     {
-        abort(404);
+        return Inertia::render('Personas/Create');
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StorePersonaRequest $request): JsonResponse
+    public function store(StorePersonaRequest $request): RedirectResponse
     {
         try {
             $persona = $this->service->createWithRelations($request->validated());
@@ -66,62 +83,67 @@ class PersonaController extends Controller
                     ]);
                 }
             }
-            return (new PersonaResource($persona))
-                ->additional(['status' => 'success', 'message' => 'Persona creada correctamente'])
-                ->response()
-                ->setStatusCode(201);
+
+            return redirect()
+                ->route('personas.index')
+                ->with('success', 'Persona creada correctamente');
+                
         } catch (\Throwable $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No se pudo crear la persona',
-                'error' => $e->getMessage(),
-            ], 422);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => 'No se pudo crear la persona: ' . $e->getMessage()]);
         }
     }
 
     /**
      * Display the specified resource.
      */
-    public function show(Persona $persona)
+    public function show(Persona $persona): Response
     {
         $persona->load(['portatiles', 'vehiculos']);
-        return (new PersonaResource($persona))
-            ->additional(['status' => 'success'])
-            ->response();
+        
+        return Inertia::render('Personas/Show', [
+            'persona' => new PersonaResource($persona),
+        ]);
     }
 
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(string $id)
+    public function edit(Persona $persona): Response
     {
-        abort(404);
+        $persona->load(['portatiles', 'vehiculos']);
+        
+        return Inertia::render('Personas/Edit', [
+            'persona' => new PersonaResource($persona),
+        ]);
     }
 
     /**
      * Update the specified resource in storage.
      */
-    public function update(UpdatePersonaRequest $request, Persona $persona): JsonResponse
+    public function update(UpdatePersonaRequest $request, Persona $persona): RedirectResponse
     {
         try {
-            $updated = $this->service->updateWithRelations($persona, $request->validated());
-            return (new PersonaResource($updated))
-                ->additional(['status' => 'success', 'message' => 'Persona actualizada correctamente'])
-                ->response()
-                ->setStatusCode(200);
+            $this->service->updateWithRelations($persona, $request->validated());
+            
+            return redirect()
+                ->route('personas.show', $persona)
+                ->with('success', 'Persona actualizada correctamente');
+                
         } catch (\Throwable $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No se pudo actualizar la persona',
-                'error' => $e->getMessage(),
-            ], 422);
+            return redirect()
+                ->back()
+                ->withInput()
+                ->withErrors(['error' => 'No se pudo actualizar la persona: ' . $e->getMessage()]);
         }
     }
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Persona $persona): JsonResponse
+    public function destroy(Persona $persona): RedirectResponse
     {
         try {
             DB::transaction(function () use ($persona) {
@@ -130,16 +152,15 @@ class PersonaController extends Controller
                 $persona->vehiculos()->delete();
                 $persona->delete();
             });
-            return response()->json([
-                'status' => 'success',
-                'message' => 'Persona eliminada correctamente',
-            ]);
+            
+            return redirect()
+                ->route('personas.index')
+                ->with('success', 'Persona eliminada correctamente');
+                
         } catch (\Throwable $e) {
-            return response()->json([
-                'status' => 'error',
-                'message' => 'No se pudo eliminar la persona',
-                'error' => $e->getMessage(),
-            ], 422);
+            return redirect()
+                ->back()
+                ->withErrors(['error' => 'No se pudo eliminar la persona: ' . $e->getMessage()]);
         }
     }
 }

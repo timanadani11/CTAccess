@@ -17,14 +17,8 @@ Route::get('/debug/personas/{persona}', function (Persona $persona) {
     return view('debug.persona', compact('persona'));
 });
 
-Route::get('/personas', function () {
-    return Inertia::render('Personas/Index');
-});
-
-// Personas: página de creación (formulario)
-Route::get('/personas/create', function () {
-    return Inertia::render('Personas/Create');
-})->name('personas.create');
+// Rutas de Personas optimizadas para Inertia.js
+Route::resource('personas', App\Http\Controllers\PersonaController::class);
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
