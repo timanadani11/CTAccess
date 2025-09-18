@@ -513,9 +513,14 @@ const submit = () => {
       // Redirigir al índice después del éxito
     },
     onError: (errors) => {
-      // Los errores se manejan automáticamente por Inertia
+      // Si hay error de token CSRF, recargar la página
+      if (errors.message && (errors.message.includes('CSRF') || errors.message.includes('expired'))) {
+        window.location.reload();
+      }
       console.log('Errores de validación:', errors)
-    }
+    },
+    preserveScroll: true,
+    preserveState: false,
   })
 }
 </script>

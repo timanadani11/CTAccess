@@ -17,14 +17,22 @@ defineProps({
 });
 
 const form = useForm({
-    email: '',
-    password: '',
+    correo: '',
+    contraseña: '',
     remember: false,
 });
 
 const submit = () => {
     form.post(route('login'), {
-        onFinish: () => form.reset('password'),
+        onFinish: () => form.reset('contraseña'),
+        onError: (errors) => {
+            // Si hay error de token CSRF, recargar la página
+            if (errors.message && errors.message.includes('CSRF') || errors.message && errors.message.includes('expired')) {
+                window.location.reload();
+            }
+        },
+        preserveScroll: true,
+        preserveState: false,
     });
 };
 </script>
@@ -39,34 +47,34 @@ const submit = () => {
 
         <form @submit.prevent="submit">
             <div>
-                <InputLabel for="email" value="Email" />
+                <InputLabel for="correo" value="Correo Electrónico" />
 
                 <TextInput
-                    id="email"
+                    id="correo"
                     type="email"
                     class="mt-1 block w-full"
-                    v-model="form.email"
+                    v-model="form.correo"
                     required
                     autofocus
                     autocomplete="username"
                 />
 
-                <InputError class="mt-2" :message="form.errors.email" />
+                <InputError class="mt-2" :message="form.errors.correo" />
             </div>
 
             <div class="mt-4">
-                <InputLabel for="password" value="Password" />
+                <InputLabel for="contraseña" value="Contraseña" />
 
                 <TextInput
-                    id="password"
+                    id="contraseña"
                     type="password"
                     class="mt-1 block w-full"
-                    v-model="form.password"
+                    v-model="form.contraseña"
                     required
                     autocomplete="current-password"
                 />
 
-                <InputError class="mt-2" :message="form.errors.password" />
+                <InputError class="mt-2" :message="form.errors.contraseña" />
             </div>
 
             <div class="mt-4 block">

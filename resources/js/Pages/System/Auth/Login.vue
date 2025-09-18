@@ -25,6 +25,14 @@ const form = useForm({
 const submit = () => {
     form.post(route('system.login.store'), {
         onFinish: () => form.reset('password'),
+        onError: (errors) => {
+            // Si hay error de token CSRF, recargar la página
+            if (errors.message && (errors.message.includes('CSRF') || errors.message.includes('expired'))) {
+                window.location.reload();
+            }
+        },
+        preserveScroll: true,
+        preserveState: false,
     });
 };
 </script>

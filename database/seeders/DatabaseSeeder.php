@@ -22,5 +22,8 @@ class DatabaseSeeder extends Seeder
 
         // Usuarios del sistema (admin y celador)
         $this->call(UsuarioSistemaSeeder::class);
+        
+        // Personas de prueba para autenticación
+        $this->call(PersonaSeeder::class);
     }
 }
