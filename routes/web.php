@@ -5,6 +5,10 @@ use App\Http\Controllers\System\Auth\LoginController as SystemLoginController;
 use App\Http\Controllers\System\DashboardController as SystemDashboardController;
 use App\Http\Controllers\System\AdminDashboardController;
 use App\Http\Controllers\System\CeladorDashboardController;
+use App\Http\Controllers\System\Celador\AccesoController as CeladorAccesoController;
+use App\Http\Controllers\System\Celador\IncidenciaController as CeladorIncidenciaController;
+use App\Http\Controllers\System\Celador\HistorialController as CeladorHistorialController;
+use App\Http\Controllers\System\Celador\QrController as CeladorQrController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -46,6 +50,21 @@ Route::prefix('system')->name('system.')->group(function () {
         Route::get('/panel', [SystemDashboardController::class, 'index'])->name('panel');
         Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
         Route::get('/celador/dashboard', [CeladorDashboardController::class, 'index'])->name('celador.dashboard');
+
+        // Módulo Celador
+        Route::prefix('celador')->name('celador.')->group(function () {
+            // Accesos
+            Route::get('/accesos', [CeladorAccesoController::class, 'index'])->name('accesos.index');
+
+            // Verificación QR
+            Route::get('/qr', [CeladorQrController::class, 'index'])->name('qr');
+
+            // Incidencias
+            Route::get('/incidencias', [CeladorIncidenciaController::class, 'index'])->name('incidencias.index');
+
+            // Historial
+            Route::get('/historial', [CeladorHistorialController::class, 'index'])->name('historial.index');
+        });
     });
 });
 

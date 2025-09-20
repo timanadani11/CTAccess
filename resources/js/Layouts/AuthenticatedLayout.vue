@@ -20,8 +20,8 @@ const secondaryText = computed(() => {
     const user = page.props?.auth?.user || {};
     return isSystem.value ? user.rol : user.correo;
 });
-const dashboardHref = computed(() => (isSystem.value ? route('system.panel') : route('dashboard')));
-const dashboardActive = computed(() => (isSystem.value ? route().current('system.*') : route().current('dashboard')));
+const dashboardHref = computed(() => (isSystem.value ? route('system.celador.dashboard') ?? route('system.panel') : route('dashboard')));
+const dashboardActive = computed(() => (isSystem.value ? route().current('system.celador.dashboard') : route().current('dashboard')));
 const logoutHref = computed(() => (isSystem.value ? route('system.logout') : route('logout')));
 </script>
 
@@ -48,12 +48,34 @@ const logoutHref = computed(() => (isSystem.value ? route('system.logout') : rou
                             <div
                                 class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
                             >
-                                <NavLink
-                                    :href="dashboardHref"
-                                    :active="dashboardActive"
-                                >
-                                    Dashboard
-                                </NavLink>
+                                <!-- Links para app normal -->
+                                <template v-if="!isSystem">
+                                    <NavLink
+                                        :href="dashboardHref"
+                                        :active="dashboardActive"
+                                    >
+                                        Dashboard
+                                    </NavLink>
+                                </template>
+
+                                <!-- Links para Sistema (Celador/Admin) -->
+                                <template v-else>
+                                    <NavLink :href="route('system.celador.dashboard')" :active="route().current('system.celador.dashboard')">
+                                        Dashboard
+                                    </NavLink>
+                                    <NavLink :href="route('system.celador.accesos.index')" :active="route().current('system.celador.accesos.*')">
+                                        Accesos
+                                    </NavLink>
+                                    <NavLink :href="route('system.celador.qr')" :active="route().current('system.celador.qr')">
+                                        Verificación QR
+                                    </NavLink>
+                                    <NavLink :href="route('system.celador.incidencias.index')" :active="route().current('system.celador.incidencias.*')">
+                                        Incidencias
+                                    </NavLink>
+                                    <NavLink :href="route('system.celador.historial.index')" :active="route().current('system.celador.historial.*')">
+                                        Historial
+                                    </NavLink>
+                                </template>
                             </div>
                         </div>
 
@@ -156,12 +178,34 @@ const logoutHref = computed(() => (isSystem.value ? route('system.logout') : rou
                     class="sm:hidden"
                 >
                     <div class="space-y-1 pb-3 pt-2">
-                        <ResponsiveNavLink
-                            :href="route('dashboard')"
-                            :active="route().current('dashboard')"
-                        >
-                            Dashboard
-                        </ResponsiveNavLink>
+                        <!-- Responsive links para app normal -->
+                        <template v-if="!isSystem">
+                            <ResponsiveNavLink
+                                :href="route('dashboard')"
+                                :active="route().current('dashboard')"
+                            >
+                                Dashboard
+                            </ResponsiveNavLink>
+                        </template>
+
+                        <!-- Responsive links para sistema -->
+                        <template v-else>
+                            <ResponsiveNavLink :href="route('system.celador.dashboard')" :active="route().current('system.celador.dashboard')">
+                                Dashboard
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('system.celador.accesos.index')" :active="route().current('system.celador.accesos.*')">
+                                Accesos
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('system.celador.qr')" :active="route().current('system.celador.qr')">
+                                Verificación QR
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('system.celador.incidencias.index')" :active="route().current('system.celador.incidencias.*')">
+                                Incidencias
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('system.celador.historial.index')" :active="route().current('system.celador.historial.*')">
+                                Historial
+                            </ResponsiveNavLink>
+                        </template>
                     </div>
 
                     <!-- Responsive Settings Options -->
