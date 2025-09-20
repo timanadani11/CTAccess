@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\System\Auth\LoginController as SystemLoginController;
 use App\Http\Controllers\System\DashboardController as SystemDashboardController;
+use App\Http\Controllers\System\AdminDashboardController;
+use App\Http\Controllers\System\CeladorDashboardController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -42,6 +44,8 @@ Route::prefix('system')->name('system.')->group(function () {
     Route::middleware('auth:system')->group(function () {
         Route::post('/logout', [SystemLoginController::class, 'destroy'])->name('logout');
         Route::get('/panel', [SystemDashboardController::class, 'index'])->name('panel');
+        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::get('/celador/dashboard', [CeladorDashboardController::class, 'index'])->name('celador.dashboard');
     });
 });
 

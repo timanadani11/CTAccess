@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
+use Illuminate\Validation\ValidationException;
+use App\Models\UsuarioSistema;
 
 class LoginController extends Controller
 {
@@ -19,20 +21,38 @@ class LoginController extends Controller
 
     public function store(Request $request)
     {
-        $credentials = $request->validate([
+        $data = $request->validate([
             'UserName' => ['required', 'string'],
             'password' => ['required', 'string'],
         ]);
 
-        // Nota: no usamos "remember me" porque la tabla no tiene remember_token
-        if (Auth::guard('system')->attempt($credentials, false)) {
+        // Validar que el usuario esté activo antes de intentar login
+        $user = UsuarioSistema::where('UserName', $data['UserName'])->first();
+        if (! $user || ! $user->activo) {
+            throw ValidationException::withMessages([
+                'UserName' => __('Este usuario está inactivo o no existe.'),
+            ]);
+        }
+
+        if (Auth::guard('system')->attempt($data, false)) {
             $request->session()->regenerate();
+
+            // Redirección por rol
+            $user = Auth::guard('system')->user();
+            if ($user->isAdmin()) {
+                return redirect()->intended(route('system.admin.dashboard'));
+            }
+            if ($user->isCelador()) {
+                return redirect()->intended(route('system.celador.dashboard'));
+            }
+
+            // Fallback al panel genérico si hubiera otro rol
             return redirect()->intended(route('system.panel'));
         }
 
-        return back()->withErrors([
-            'UserName' => 'Credenciales inválidas',
-        ])->onlyInput('UserName');
+        throw ValidationException::withMessages([
+            'UserName' => __('Credenciales inválidas'),
+        ]);
     }
 
     public function destroy(Request $request)

@@ -28,6 +28,10 @@ class UsuarioSistema extends Authenticatable
     // Laravel guard name convenience (optional)
     protected $guard = 'system';
 
+    // Roles
+    public const ROL_ADMIN = 'admin';
+    public const ROL_CELADOR = 'celador';
+
     // Username field for authentication (we'll use in controller)
     public function getAuthIdentifierName()
     {
@@ -55,5 +59,27 @@ class UsuarioSistema extends Authenticatable
     public function incidencias()
     {
         return $this->hasMany(Incidencia::class, 'usuario_id_fk');
+    }
+
+    // Role helpers
+    public function isAdmin(): bool
+    {
+        return $this->rol === self::ROL_ADMIN;
+    }
+
+    public function isCelador(): bool
+    {
+        return $this->rol === self::ROL_CELADOR;
+    }
+
+    public function hasRole(string $role): bool
+    {
+        return $this->rol === $role;
+    }
+
+    // Scope for active users
+    public function scopeActivos($query)
+    {
+        return $query->where('activo', true);
     }
 }
