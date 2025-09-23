@@ -48,11 +48,21 @@ Route::prefix('system')->name('system.')->group(function () {
     Route::middleware('auth:system')->group(function () {
         Route::post('/logout', [SystemLoginController::class, 'destroy'])->name('logout');
         Route::get('/panel', [SystemDashboardController::class, 'index'])->name('panel');
-        Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
-        Route::get('/celador/dashboard', [CeladorDashboardController::class, 'index'])->name('celador.dashboard');
 
-        // Módulo Celador
-        Route::prefix('celador')->name('celador.')->group(function () {
+        // Sección Admin (solo rol administrador)
+        Route::middleware('check.system.role:administrador')->group(function () {
+            Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+
+            // Gestión de usuarios del sistema
+            Route::prefix('admin')->name('admin.')->group(function () {
+                Route::resource('users', App\Http\Controllers\System\Admin\UsersController::class);
+            });
+        });
+
+        // Sección Celador (solo rol celador)
+        Route::middleware('check.system.role:celador')->prefix('celador')->name('celador.')->group(function () {
+            Route::get('/dashboard', [CeladorDashboardController::class, 'index'])->name('dashboard');
+
             // Accesos
             Route::get('/accesos', [CeladorAccesoController::class, 'index'])->name('accesos.index');
 
@@ -67,4 +77,5 @@ Route::prefix('system')->name('system.')->group(function () {
         });
     });
 });
+
 

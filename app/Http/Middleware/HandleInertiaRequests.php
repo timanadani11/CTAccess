@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use Illuminate\Http\Request;
 use Inertia\Middleware;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Gate;
 
 class HandleInertiaRequests extends Middleware
 {
@@ -31,15 +32,47 @@ class HandleInertiaRequests extends Middleware
     public function share(Request $request): array
     {
         // Si es una ruta del sistema, compartir el usuario autenticado del guard 'system'
-        $user = $request->routeIs('system.*')
-            ? Auth::guard('system')->user()
-            : $request->user();
+        $isSystemRoute = $request->routeIs('system.*');
+        $user = $isSystemRoute ? Auth::guard('system')->user() : $request->user();
+
+        // Rol del usuario del sistema (cuando aplica)
+        $role = null;
+        if ($isSystemRoute && $user) {
+            // Prefer principal role if set, otherwise detect via RBAC
+            if (method_exists($user, 'principalRole') && $user->principalRole) {
+                $role = $user->principalRole->nombre; // e.g. 'administrador', 'celador'
+            } elseif (method_exists($user, 'hasRole')) {
+                foreach (['administrador', 'celador'] as $r) {
+                    if ($user->hasRole($r)) { $role = $r; break; }
+                }
+            }
+        }
+
+        // Menús dinámicos del sistema por rol
+        $systemMenus = [];
+        if ($isSystemRoute) {
+            $allMenus = config('menus.system', []);
+            $rawMenus = $role ? ($allMenus[$role] ?? []) : [];
+            // Filtrar por permisos si el item define 'can'
+            $systemMenus = array_values(array_filter($rawMenus, function ($item) use ($user) {
+                if (!is_array($item)) return false;
+                if (!isset($item['can'])) return true;
+                $ability = $item['can'];
+                return $user && Gate::forUser($user)->allows($ability);
+            }));
+        }
 
         return [
             ...parent::share($request),
             'auth' => [
                 'user' => $user,
+                'guard' => $isSystemRoute ? 'system' : 'web',
+                'role' => $role,
+            ],
+            'menus' => [
+                'system' => $systemMenus,
             ],
         ];
     }
 }
+

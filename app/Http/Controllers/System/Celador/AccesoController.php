@@ -5,7 +5,6 @@ namespace App\Http\Controllers\System\Celador;
 use App\Http\Controllers\Controller;
 use App\Models\Acceso;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class AccesoController extends Controller
@@ -15,18 +14,8 @@ class AccesoController extends Controller
         $this->middleware('auth:system');
     }
 
-    protected function ensureRole(): void
-    {
-        $user = Auth::guard('system')->user();
-        if (! $user || ! method_exists($user, 'isCelador') || ! $user->isCelador()) {
-            abort(403, 'No autorizado');
-        }
-    }
-
     public function index(Request $request)
     {
-        $this->ensureRole();
-
         $query = Acceso::with(['persona', 'portatil', 'vehiculo'])
             ->latest('fecha_entrada');
 
@@ -45,3 +34,4 @@ class AccesoController extends Controller
         ]);
     }
 }
+

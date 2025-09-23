@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { Head, Link, router } from '@inertiajs/vue3'
 import { ref, watch } from 'vue'
 
@@ -15,7 +15,7 @@ watch(q, (val) => {
 </script>
 
 <template>
-  <AuthenticatedLayout>
+  <SystemLayout>
     <Head title="Historial" />
 
     <template #header>
@@ -60,5 +60,5 @@ watch(q, (val) => {
         </div>
       </div>
     </div>
-  </AuthenticatedLayout>
+  </SystemLayout>
 </template>

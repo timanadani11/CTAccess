@@ -5,6 +5,7 @@ namespace Database\Seeders;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\UsuarioSistemaSeeder;
+use Database\Seeders\RbacSeeder;
 
 class DatabaseSeeder extends Seeder
 {
@@ -25,5 +26,8 @@ class DatabaseSeeder extends Seeder
         
         // Personas de prueba para autenticación
         $this->call(PersonaSeeder::class);
+
+        // RBAC (roles y permisos)
+        $this->call(RbacSeeder::class);
     }
 }

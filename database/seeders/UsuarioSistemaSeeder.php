@@ -18,7 +18,6 @@ class UsuarioSistemaSeeder extends Seeder
             [
                 'password' => 'admin12345', // Se hasheará por el mutator del modelo
                 'nombre' => 'Administrador General',
-                'rol' => 'admin',
                 'activo' => true,
             ]
         );
@@ -29,7 +28,6 @@ class UsuarioSistemaSeeder extends Seeder
             [
                 'password' => 'celador12345', // Se hasheará por el mutator del modelo
                 'nombre' => 'Celador Principal',
-                'rol' => 'celador',
                 'activo' => true,
             ]
         );

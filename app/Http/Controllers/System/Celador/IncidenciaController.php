@@ -5,7 +5,6 @@ namespace App\Http\Controllers\System\Celador;
 use App\Http\Controllers\Controller;
 use App\Models\Incidencia;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Inertia\Inertia;
 
 class IncidenciaController extends Controller
@@ -15,18 +14,8 @@ class IncidenciaController extends Controller
         $this->middleware('auth:system');
     }
 
-    protected function ensureRole(): void
-    {
-        $user = Auth::guard('system')->user();
-        if (! $user || ! method_exists($user, 'isCelador') || ! $user->isCelador()) {
-            abort(403, 'No autorizado');
-        }
-    }
-
     public function index(Request $request)
     {
-        $this->ensureRole();
-
         $query = Incidencia::with(['acceso.persona'])
             ->latest('created_at');
 
@@ -42,3 +31,4 @@ class IncidenciaController extends Controller
         ]);
     }
 }
+

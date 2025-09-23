@@ -1,5 +1,5 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 
@@ -36,7 +36,7 @@ const quickLinks = computed(() => ([
 </script>
 
 <template>
-  <AuthenticatedLayout>
+  <SystemLayout>
     <Head title="Dashboard Celador" />
 
     <template #header>
@@ -62,5 +62,6 @@ const quickLinks = computed(() => ([
         </div>
       </div>
     </div>
-  </AuthenticatedLayout>
+  </SystemLayout>
 </template>
+

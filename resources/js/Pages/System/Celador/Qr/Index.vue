@@ -1,10 +1,10 @@
 <script setup>
-import AuthenticatedLayout from '@/Layouts/AuthenticatedLayout.vue'
+import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { Head } from '@inertiajs/vue3'
 </script>
 
 <template>
-  <AuthenticatedLayout>
+  <SystemLayout>
     <Head title="Verificación QR" />
 
     <template #header>
@@ -28,5 +28,5 @@ import { Head } from '@inertiajs/vue3'
         </div>
       </div>
     </div>
-  </AuthenticatedLayout>
+  </SystemLayout>
 </template>
