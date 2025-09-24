@@ -56,6 +56,8 @@ Route::prefix('system')->name('system.')->group(function () {
             // Gestión de usuarios del sistema
             Route::prefix('admin')->name('admin.')->group(function () {
                 Route::resource('users', App\Http\Controllers\System\Admin\UsersController::class);
+                Route::get('personas', [AdminDashboardController::class, 'personasView'])->name('personas');
+                Route::get('personas/data', [AdminDashboardController::class, 'personas'])->name('personas.data');
             });
         });
 

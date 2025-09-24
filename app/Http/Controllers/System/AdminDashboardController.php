@@ -7,8 +7,10 @@ use App\Models\Acceso;
 use App\Models\Incidencia;
 use App\Models\Persona;
 use App\Models\UsuarioSistema;
+use App\Http\Resources\PersonaResource;
 use Carbon\Carbon;
 use Inertia\Inertia;
+use Illuminate\Http\Request;
 
 class AdminDashboardController extends Controller
 {
@@ -69,6 +71,41 @@ class AdminDashboardController extends Controller
             ],
             'meta' => [
                 'generated_at' => now()->toDateTimeString(),
+            ],
+        ]);
+    }
+
+    public function personasView()
+    {
+        return Inertia::render('System/Admin/Personas', [
+            'title' => 'Gestión de Personas'
+        ]);
+    }
+
+    public function personas(Request $request)
+    {
+        $perPage = (int) $request->get('per_page', 15);
+        $search = $request->get('search', '');
+
+        $query = Persona::query()
+            ->orderByDesc('idPersona')
+            ->with(['portatiles', 'vehiculos']);
+
+        if ($search) {
+            $query->where(function ($q) use ($search) {
+                $q->where('Nombre', 'like', "%{$search}%")
+                  ->orWhere('documento', 'like', "%{$search}%")
+                  ->orWhere('TipoPersona', 'like', "%{$search}%");
+            });
+        }
+
+        $personas = $query->paginate($perPage)->withQueryString();
+
+        return response()->json([
+            'personas' => PersonaResource::collection($personas),
+            'filters' => [
+                'search' => $search,
+                'per_page' => $perPage,
             ],
         ]);
     }
