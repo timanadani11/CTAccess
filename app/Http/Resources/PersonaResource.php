@@ -15,15 +15,17 @@ class PersonaResource extends JsonResource
     public function toArray(Request $request): array
     {
         return [
-            'id' => $this->idPersona,
+            'idPersona' => $this->idPersona,
             'documento' => $this->documento,
-            'nombre' => $this->Nombre,
-            'tipoPersona' => $this->TipoPersona,
-            'foto' => $this->Foto,
-            'createdAt' => $this->created_at,
-            'updatedAt' => $this->updated_at,
-            'portatiles' => PortatilResource::collection($this->whenLoaded('portatiles')),
-            'vehiculos' => VehiculoResource::collection($this->whenLoaded('vehiculos')),
+            'Nombre' => $this->Nombre,
+            'TipoPersona' => $this->TipoPersona,
+            'correo' => $this->correo,
+            'qrCode' => $this->qrCode,
+            'created_at' => $this->created_at,
+            'updated_at' => $this->updated_at,
+            'portatiles' => $this->whenLoaded('portatiles'),
+            'vehiculos' => $this->whenLoaded('vehiculos'),
+            'accesos' => $this->whenLoaded('accesos'),
         ];
     }
 }

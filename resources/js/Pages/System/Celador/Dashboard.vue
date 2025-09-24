@@ -5,6 +5,13 @@ import { computed } from 'vue'
 
 const quickLinks = computed(() => ([
   {
+    title: 'Personas',
+    description: 'Consulta información de personas registradas.',
+    href: route('system.celador.personas.index'),
+    color: 'from-blue-500 to-indigo-500',
+    icon: '👥',
+  },
+  {
     title: 'Accesos',
     description: 'Gestiona entradas y salidas de personas y elementos.',
     href: route('system.celador.accesos.index'),
@@ -16,7 +23,7 @@ const quickLinks = computed(() => ([
     description: 'Escanea y valida códigos QR al instante.',
     href: route('system.celador.qr'),
     color: 'from-indigo-500 to-sky-500',
-    icon: '� QR',
+    icon: '📱',
   },
   {
     title: 'Incidencias',
@@ -60,7 +67,7 @@ const quickLinks = computed(() => ([
             </div>
             <div>
               <h3 class="text-xl font-bold text-white">¡Bienvenido, Celador!</h3>
-              <p class="text-forest-100 dark:text-forest-200">Gestiona el acceso y seguridad del centro educativo</p>
+              <p class="text-forest-100 dark:text-forest-200">Gestiona el acceso y seguridad del CTA</p>
             </div>
           </div>
           <p class="text-forest-50 dark:text-forest-100">Utiliza los accesos rápidos a continuación para gestionar entradas, salidas e incidencias de manera eficiente.</p>
@@ -68,7 +75,7 @@ const quickLinks = computed(() => ([
       </div>
 
       <!-- Accesos rápidos -->
-      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-4">
+      <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
         <Link v-for="item in quickLinks" :key="item.title" :href="item.href" class="group relative overflow-hidden rounded-2xl bg-white dark:bg-sage-800 p-6 shadow-md ring-1 ring-forest-200 dark:ring-sage-700 transition-all duration-300 hover:shadow-xl hover:ring-forest-300 dark:hover:ring-forest-600 hover:-translate-y-1">
           <div :class="['absolute inset-0 opacity-5 bg-gradient-to-br transition-opacity group-hover:opacity-10', item.color]" />
           <div class="relative">

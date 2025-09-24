@@ -9,6 +9,7 @@ use App\Http\Controllers\System\Celador\AccesoController as CeladorAccesoControl
 use App\Http\Controllers\System\Celador\IncidenciaController as CeladorIncidenciaController;
 use App\Http\Controllers\System\Celador\HistorialController as CeladorHistorialController;
 use App\Http\Controllers\System\Celador\QrController as CeladorQrController;
+use App\Http\Controllers\System\Celador\PersonaController as CeladorPersonaController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -64,6 +65,11 @@ Route::prefix('system')->name('system.')->group(function () {
         // Sección Celador (solo rol celador)
         Route::middleware('check.system.role:celador')->prefix('celador')->name('celador.')->group(function () {
             Route::get('/dashboard', [CeladorDashboardController::class, 'index'])->name('dashboard');
+
+            // Personas
+            Route::get('/personas', [CeladorPersonaController::class, 'index'])->name('personas.index');
+            Route::get('/personas/search', [CeladorPersonaController::class, 'search'])->name('personas.search');
+            Route::get('/personas/{persona}', [CeladorPersonaController::class, 'show'])->name('personas.show');
 
             // Accesos
             Route::get('/accesos', [CeladorAccesoController::class, 'index'])->name('accesos.index');

@@ -28,6 +28,11 @@ return [
                 'route' => 'system.celador.dashboard',
             ],
             [
+                'label' => 'Personas',
+                'icon'  => 'heroicon-m-users',
+                'route' => 'system.celador.personas.index',
+            ],
+            [
                 'label' => 'Accesos',
                 'icon'  => 'heroicon-m-key',
                 'route' => 'system.celador.accesos.index',
