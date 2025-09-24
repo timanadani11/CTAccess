@@ -21,7 +21,7 @@ const quickLinks = computed(() => ([
   {
     title: 'Verificación QR',
     description: 'Escanea y valida códigos QR al instante.',
-    href: route('system.celador.qr'),
+    href: route('system.celador.qr.index'),
     color: 'from-indigo-500 to-sky-500',
     icon: '📱',
   },
@@ -48,14 +48,14 @@ const quickLinks = computed(() => ([
 
     <template #header>
       <div class="flex items-center justify-between">
-        <h2 class="text-2xl font-bold text-forest-800 dark:text-forest-200">Dashboard • Celador</h2>
-        <div class="text-sm text-sage-600 dark:text-sage-400">Acceso rápido a funciones principales</div>
+        <h2 class="text-2xl font-bold text-gray-800">Dashboard • Celador</h2>
+        <div class="text-sm text-gray-600">Acceso rápido a funciones principales</div>
       </div>
     </template>
 
     <div class="space-y-8">
       <!-- Bienvenida -->
-      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-forest-600 to-forest-700 dark:from-forest-700 dark:to-forest-800 p-8 shadow-lg">
+      <div class="relative overflow-hidden rounded-2xl bg-gradient-to-r from-emerald-600 to-emerald-700 p-8 shadow-lg">
         <div class="absolute top-0 right-0 h-32 w-32 -translate-y-16 translate-x-16 rounded-full bg-white/10"></div>
         <div class="absolute bottom-0 left-0 h-24 w-24 translate-x-[-50%] translate-y-[50%] rounded-full bg-white/5"></div>
         <div class="relative">
@@ -67,22 +67,22 @@ const quickLinks = computed(() => ([
             </div>
             <div>
               <h3 class="text-xl font-bold text-white">¡Bienvenido, Celador!</h3>
-              <p class="text-forest-100 dark:text-forest-200">Gestiona el acceso y seguridad del CTA</p>
+              <p class="text-emerald-100">Gestiona el acceso y seguridad del CTA</p>
             </div>
           </div>
-          <p class="text-forest-50 dark:text-forest-100">Utiliza los accesos rápidos a continuación para gestionar entradas, salidas e incidencias de manera eficiente.</p>
+          <p class="text-emerald-50">Utiliza los accesos rápidos a continuación para gestionar entradas, salidas e incidencias de manera eficiente.</p>
         </div>
       </div>
 
       <!-- Accesos rápidos -->
       <div class="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5">
-        <Link v-for="item in quickLinks" :key="item.title" :href="item.href" class="group relative overflow-hidden rounded-2xl bg-white dark:bg-sage-800 p-6 shadow-md ring-1 ring-forest-200 dark:ring-sage-700 transition-all duration-300 hover:shadow-xl hover:ring-forest-300 dark:hover:ring-forest-600 hover:-translate-y-1">
+        <Link v-for="item in quickLinks" :key="item.title" :href="item.href" class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-200 transition-all duration-300 hover:shadow-xl hover:ring-gray-300 hover:-translate-y-1">
           <div :class="['absolute inset-0 opacity-5 bg-gradient-to-br transition-opacity group-hover:opacity-10', item.color]" />
           <div class="relative">
             <div class="mb-4 text-3xl">{{ item.icon }}</div>
-            <div class="text-xl font-bold text-forest-800 dark:text-forest-200 mb-2">{{ item.title }}</div>
-            <p class="text-sm text-sage-600 dark:text-sage-400 mb-4 leading-relaxed">{{ item.description }}</p>
-            <div class="flex items-center text-sm font-semibold text-forest-600 dark:text-forest-400 group-hover:text-forest-700 dark:group-hover:text-forest-300">
+            <div class="text-xl font-bold text-gray-800 mb-2">{{ item.title }}</div>
+            <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ item.description }}</p>
+            <div class="flex items-center text-sm font-semibold text-gray-600 group-hover:text-gray-700">
               <span class="mr-2">Acceder</span>
               <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />

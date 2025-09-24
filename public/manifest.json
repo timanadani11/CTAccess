@@ -76,10 +76,22 @@
       "name": "Gestionar Accesos",
       "short_name": "Accesos",
       "description": "Gestionar entradas y salidas",
-      "url": "/system/accesos",
+      "url": "/system/celador/accesos",
       "icons": [
         {
           "src": "/icons/access-96x96.png",
+          "sizes": "96x96"
+        }
+      ]
+    },
+    {
+      "name": "Verificación QR",
+      "short_name": "QR Scanner",
+      "description": "Escanear códigos QR para control de acceso",
+      "url": "/system/celador/qr",
+      "icons": [
+        {
+          "src": "/icons/qr-96x96.png",
           "sizes": "96x96"
         }
       ]

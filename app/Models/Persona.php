@@ -64,4 +64,46 @@ class Persona extends Authenticatable
     {
         return $this->hasMany(Acceso::class, 'persona_id');
     }
+
+    // Métodos para QR
+    public function tieneAccesoActivo()
+    {
+        return $this->accesos()->where('estado', Acceso::ESTADO_ACTIVO)->whereNull('fecha_salida')->exists();
+    }
+
+    public function getAccesoActivo()
+    {
+        return $this->accesos()->where('estado', Acceso::ESTADO_ACTIVO)->whereNull('fecha_salida')->first();
+    }
+
+    public function getPortatilPrincipal()
+    {
+        return $this->portatiles()->first();
+    }
+
+    public function getVehiculoPrincipal()
+    {
+        return $this->vehiculos()->first();
+    }
+
+    public static function buscarPorQr($qrCode)
+    {
+        return self::where('qrCode', $qrCode)->first();
+    }
+
+    public static function buscarPorDocumento($documento)
+    {
+        return self::where('documento', $documento)->first();
+    }
+
+    public function getInfoCompleta()
+    {
+        return [
+            'persona' => $this,
+            'portatiles' => $this->portatiles,
+            'vehiculos' => $this->vehiculos,
+            'acceso_activo' => $this->getAccesoActivo(),
+            'tiene_acceso_activo' => $this->tieneAccesoActivo()
+        ];
+    }
 }
