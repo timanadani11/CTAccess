@@ -46,7 +46,7 @@ const logoutHref = computed(() => (isSystem.value ? route('system.logout') : rou
 
                             <!-- Navigation Links -->
                             <div
-                                class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex"
+                                class="hidden space-x-9 sm:-my-px sm:ms-12 sm:flex"
                             >
                                 <!-- Links para app normal -->
                                 <template v-if="!isSystem">
@@ -74,6 +74,9 @@ const logoutHref = computed(() => (isSystem.value ? route('system.logout') : rou
                                     </NavLink>
                                     <NavLink :href="route('system.celador.historial.index')" :active="route().current('system.celador.historial.*')">
                                         Historial
+                                    </NavLink>
+                                    <NavLink :href="route('system.celador.personas.index')" :active="route().current('system.celador.personas.*')">
+                                        Personas
                                     </NavLink>
                                 </template>
                             </div>
@@ -204,6 +207,9 @@ const logoutHref = computed(() => (isSystem.value ? route('system.logout') : rou
                             </ResponsiveNavLink>
                             <ResponsiveNavLink :href="route('system.celador.historial.index')" :active="route().current('system.celador.historial.*')">
                                 Historial
+                            </ResponsiveNavLink>
+                            <ResponsiveNavLink :href="route('system.celador.personas.index')" :active="route().current('system.celador.personas.*')">
+                                Personas
                             </ResponsiveNavLink>
                         </template>
                     </div>
