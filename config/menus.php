@@ -8,6 +8,11 @@ return [
                 'icon'  => 'heroicon-m-home',
                 'route' => 'system.admin.dashboard',
             ],
+            [
+                'label' => 'Gestión de Personas',
+                'icon'  => 'heroicon-m-user-group',
+                'route' => 'system.admin.personas',
+            ],
             // Ejemplo de item controlado por Gate/Policy
             [
                 'label' => 'Gestión de Usuarios',
