@@ -232,7 +232,7 @@ onUnmounted(() => {
 
     <template #header>
       <div class="flex items-center justify-between">
-        <h2 class="text-xl font-semibold leading-tight text-gray-800">Verificación QR</h2>
+        <h2 class="text-xl font-semibold leading-tight text-theme-primary">Verificación QR</h2>
         <div class="flex items-center space-x-4">
           <!-- Estado de conexión -->
           <div class="flex items-center space-x-2 text-sm">
@@ -247,7 +247,7 @@ onUnmounted(() => {
             >
               <circle cx="10" cy="10" r="3"/>
             </svg>
-            <span :class="{ 'text-gray-600': isOnline, 'text-red-600': !isOnline }">
+            <span :class="{ 'text-theme-secondary': isOnline, 'text-red-600': !isOnline }">
               {{ isOnline ? 'En línea' : 'Sin conexión' }}
             </span>
           </div>
@@ -265,7 +265,7 @@ onUnmounted(() => {
             v-if="isOnline && hasPendingSync"
             @click="handleSyncData"
             :disabled="syncStatus.inProgress"
-            class="flex items-center space-x-1 px-3 py-1 text-xs bg-blue-100 text-blue-700 rounded-full hover:bg-blue-200 disabled:opacity-50"
+            class="flex items-center space-x-1 px-3 py-1 text-xs bg-theme-tertiary text-blue-700 rounded-full hover:bg-theme-secondary disabled:opacity-50"
           >
             <svg 
               :class="{ 'animate-spin': syncStatus.inProgress }"

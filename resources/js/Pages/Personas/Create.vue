@@ -1,347 +1,182 @@
 <template>
-  <Head title="Nueva Persona" />
+  <Head title="Nueva Persona - CTAccess" />
   
-  <!-- PWA Optimized Layout -->
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
-    <div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
-      <!-- Mobile-optimized Header -->
-      <div class="mb-4 sm:mb-6 lg:mb-8">
-        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-          <div class="flex-1">
-            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Nueva Persona</h1>
-            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Complete la información para registrar una nueva persona</p>
+  <div class="min-h-screen bg-theme-primary text-theme-primary flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div class="max-w-md w-full space-y-8">
+      <!-- Toggle de tema -->
+      <div class="flex justify-end">
+        <button @click="toggleTheme" class="p-2 rounded-lg bg-theme-card border border-theme-primary hover:bg-theme-secondary transition-all duration-200 shadow-theme-sm">
+          <Icon :name="isDark ? 'sun' : 'moon'" :size="20" class="text-theme-secondary" />
+        </button>
+      </div>
+
+      <!-- Logo y progreso -->
+      <div class="text-center">
+        <div class="mx-auto h-16 w-16 rounded-xl flex items-center justify-center mb-4 shadow-theme-lg" style="background: linear-gradient(135deg, #39A900, #50E5F9);">
+          <Icon name="user-plus" :size="32" class="text-white" />
+        </div>
+        <h2 class="text-3xl font-bold text-theme-primary mb-2">Nueva Persona</h2>
+        <p class="text-theme-secondary text-sm">{{ getStepDescription() }}</p>
+        
+        <!-- Indicador de progreso -->
+        <div class="mt-6 mb-8">
+          <div class="flex items-center justify-center space-x-2">
+            <div v-for="step in totalSteps" :key="step" class="flex items-center">
+              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
+                <Icon v-if="step < currentStep" name="check" :size="16" />
+                <span v-else>{{ step }}</span>
+              </div>
+              <div v-if="step < totalSteps" class="w-8 h-0.5 mx-2 transition-all duration-200" :class="step < currentStep ? 'bg-green-500' : 'bg-theme-secondary'"></div>
+            </div>
           </div>
-          <Link 
-            :href="route('personas.index')"
-            class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto"
-          >
-            <Icon name="arrow-left" :size="16" class="mr-2" />
-            Volver al Listado
-          </Link>
+          <div class="mt-2 text-xs text-theme-muted">Paso {{ currentStep }} de {{ totalSteps }}</div>
         </div>
       </div>
 
-      <!-- PWA Optimized Form -->
-      <form @submit.prevent="submit" class="space-y-4 sm:space-y-6 lg:space-y-8">
-        <!-- Sección 1: Datos Personales -->
-        <div class="bg-white shadow-lg rounded-xl p-4 sm:p-6 border border-gray-200">
-          <div class="flex items-center mb-6">
-            <div class="flex-shrink-0">
-              <div class="w-10 h-10 bg-[#39A900] rounded-lg flex items-center justify-center">
-                <Icon name="user" :size="20" class="text-white" />
-              </div>
-            </div>
-            <div class="ml-4">
-              <h2 class="text-xl font-semibold text-gray-900">Información Personal</h2>
-              <p class="text-sm text-gray-600">Datos básicos de identificación</p>
-            </div>
+      <!-- Formulario paso a paso -->
+      <div class="bg-theme-card backdrop-blur-lg rounded-2xl shadow-theme-lg p-8 border border-theme-primary">
+        
+        <!-- Paso 1: Información Personal -->
+        <div v-if="currentStep === 1" class="space-y-6">
+          <div class="text-center mb-6">
+            <Icon name="user" :size="48" class="mx-auto mb-4" style="color: #39A900;" />
+            <h3 class="text-xl font-semibold text-theme-primary mb-2">Información Personal</h3>
+            <p class="text-sm text-theme-muted">Ingresa los datos básicos de identificación</p>
           </div>
 
-          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
-            <!-- Documento -->
+          <div class="space-y-4">
             <div>
-              <label for="documento" class="block text-sm font-medium text-gray-700 mb-2">
-                Documento de Identidad
-              </label>
-              <input
-                id="documento"
-                v-model="form.documento"
-                type="text"
-                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
-                :class="{ 'border-red-500 ring-red-500': form.errors.documento }"
-                placeholder="Ej: 12345678"
-                autocomplete="off"
-              >
-              <div v-if="form.errors.documento" class="mt-1 text-sm text-red-600">
-                {{ form.errors.documento }}
+              <label for="nombre" class="block text-sm font-medium text-theme-primary mb-2">Nombre Completo *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Icon name="user" :size="20" class="text-theme-muted" />
+                </div>
+                <input id="nombre" v-model="form.nombre" type="text" required class="block w-full pl-10 pr-3 py-3 border border-theme-primary rounded-lg bg-theme-secondary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-green-500" placeholder="Ej: Juan Pérez García" />
+              </div>
+              <div v-if="form.errors.nombre" class="mt-2 text-sm text-red-500">{{ form.errors.nombre }}</div>
+            </div>
+
+            <div>
+              <label for="documento" class="block text-sm font-medium text-theme-primary mb-2">Documento de Identidad</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Icon name="credit-card" :size="20" class="text-theme-muted" />
+                </div>
+                <input id="documento" v-model="form.documento" type="text" class="block w-full pl-10 pr-3 py-3 border border-theme-primary rounded-lg bg-theme-secondary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-green-500" placeholder="Ej: 12345678" />
               </div>
             </div>
 
-            <!-- Nombre -->
             <div>
-              <label for="nombre" class="block text-sm font-medium text-gray-700 mb-2">
-                Nombre Completo *
-              </label>
-              <input
-                id="nombre"
-                v-model="form.nombre"
-                type="text"
-                required
-                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
-                :class="{ 'border-red-500 ring-red-500': form.errors.nombre }"
-                placeholder="Ej: Juan Pérez García"
-                autocomplete="name"
-              >
-              <div v-if="form.errors.nombre" class="mt-1 text-sm text-red-600">
-                {{ form.errors.nombre }}
+              <label for="tipoPersona" class="block text-sm font-medium text-theme-primary mb-2">Tipo de Persona *</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Icon name="users" :size="20" class="text-theme-muted" />
+                </div>
+                <select id="tipoPersona" v-model="form.tipoPersona" required class="block w-full pl-10 pr-3 py-3 border border-theme-primary rounded-lg bg-theme-secondary text-theme-primary focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-green-500">
+                  <option value="">Seleccionar tipo</option>
+                  <option value="Estudiante">👨‍🎓 Estudiante</option>
+                  <option value="Docente">👨‍🏫 Docente</option>
+                  <option value="Administrativo">👨‍💼 Administrativo</option>
+                  <option value="Visitante">👤 Visitante</option>
+                  <option value="Contratista">🔧 Contratista</option>
+                </select>
               </div>
             </div>
 
-            <!-- Tipo de Persona -->
             <div>
-              <label for="tipoPersona" class="block text-sm font-medium text-gray-700 mb-2">
-                Tipo de Persona *
-              </label>
-              <select
-                id="tipoPersona"
-                v-model="form.tipoPersona"
-                required
-                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
-                :class="{ 'border-red-500 ring-red-500': form.errors.tipoPersona }"
-              >
-                <option value="">Seleccionar tipo</option>
-                <option value="Estudiante">Estudiante</option>
-                <option value="Docente">Docente</option>
-                <option value="Administrativo">Administrativo</option>
-                <option value="Visitante">Visitante</option>
-                <option value="Contratista">Contratista</option>
-              </select>
-              <div v-if="form.errors.tipoPersona" class="mt-1 text-sm text-red-600">
-                {{ form.errors.tipoPersona }}
+              <label for="correo" class="block text-sm font-medium text-theme-primary mb-2">Correo Electrónico</label>
+              <div class="relative">
+                <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+                  <Icon name="mail" :size="20" class="text-theme-muted" />
+                </div>
+                <input id="correo" v-model="form.correo" type="email" class="block w-full pl-10 pr-3 py-3 border border-theme-primary rounded-lg bg-theme-secondary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-green-500" placeholder="correo@ejemplo.com" />
               </div>
-            </div>
-
-            <!-- Correo -->
-            <div>
-              <label for="correo" class="block text-sm font-medium text-gray-700 mb-2">
-                Correo Electrónico
-              </label>
-              <input
-                id="correo"
-                v-model="form.correo"
-                type="email"
-                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
-                :class="{ 'border-red-500 ring-red-500': form.errors.correo }"
-                placeholder="correo@ejemplo.com"
-                autocomplete="email"
-              >
-              <div v-if="form.errors.correo" class="mt-1 text-sm text-red-600">
-                {{ form.errors.correo }}
-              </div>
-              <p class="mt-1 text-xs text-gray-500">
-                Se enviará un QR por correo si se proporciona
-              </p>
+              <p class="mt-2 text-xs text-theme-muted">📧 Se enviará un QR por correo si se proporciona</p>
             </div>
           </div>
         </div>
 
-        <!-- Sección 2: Portátiles -->
-        <div class="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-          <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 bg-[#50E5F9] rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h2 class="text-xl font-semibold text-gray-900">Portátiles</h2>
-                <p class="text-sm text-gray-600">Equipos portátiles asociados (opcional)</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              @click="addPortatil"
-              class="inline-flex items-center px-4 py-2 bg-[#50E5F9] text-white rounded-lg hover:bg-[#00B4D8] transition-colors"
-            >
-              <Icon name="plus" :size="16" class="mr-2" />
-              Agregar Portátil
+        <!-- Paso 2: Portátiles -->
+        <div v-if="currentStep === 2" class="space-y-6">
+          <div class="text-center mb-6">
+            <Icon name="laptop" :size="48" class="mx-auto mb-4" style="color: #50E5F9;" />
+            <h3 class="text-xl font-semibold text-theme-primary mb-2">Portátiles</h3>
+            <p class="text-sm text-theme-muted">Agrega equipos portátiles (opcional)</p>
+          </div>
+
+          <div v-if="form.portatiles.length === 0" class="text-center py-8">
+            <Icon name="laptop" :size="64" class="mx-auto text-theme-muted mb-4" />
+            <p class="text-theme-muted mb-4">No hay portátiles agregados</p>
+            <button type="button" @click="addPortatil" class="inline-flex items-center px-4 py-2 rounded-lg text-white font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg" style="background: linear-gradient(135deg, #50E5F9, #00B4D8);">
+              <Icon name="plus" :size="16" class="mr-2" />Agregar Primer Portátil
             </button>
           </div>
 
-          <!-- Lista de portátiles -->
-          <div v-if="form.portatiles.length === 0" class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-            <Icon name="laptop" :size="48" class="mx-auto text-gray-400" />
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No hay portátiles</h3>
-            <p class="mt-1 text-sm text-gray-500">Agregue portátiles haciendo clic en el botón superior</p>
-          </div>
-
-          <div v-else class="space-y-6">
-            <div
-              v-for="(portatil, index) in form.portatiles"
-              :key="`portatil-${index}`"
-              class="border border-gray-200 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors"
-            >
+          <div v-else class="space-y-4">
+            <div v-for="(portatil, index) in form.portatiles" :key="`portatil-${index}`" class="border border-theme-primary rounded-lg p-4 bg-theme-secondary">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                  <span class="inline-flex items-center justify-center w-6 h-6 bg-[#50E5F9] text-white text-xs font-bold rounded-full mr-2">
-                    {{ index + 1 }}
-                  </span>
+                <h4 class="font-medium text-theme-primary flex items-center">
+                  <span class="inline-flex items-center justify-center w-6 h-6 text-white text-xs font-bold rounded-full mr-2" style="background: #50E5F9;">{{ index + 1 }}</span>
                   Portátil {{ index + 1 }}
-                </h3>
-                <button
-                  type="button"
-                  @click="removePortatil(index)"
-                  class="inline-flex items-center px-3 py-1 border border-red-300 text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
-                >
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
-                  Eliminar
+                </h4>
+                <button type="button" @click="removePortatil(index)" class="text-red-500 hover:text-red-700 transition-colors">
+                  <Icon name="trash" :size="16" />
                 </button>
               </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
-                <!-- Serial -->
+              <div class="space-y-3">
                 <div>
-                  <label :for="`portatil-serial-${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                    Serial *
-                  </label>
-                  <input
-                    :id="`portatil-serial-${index}`"
-                    v-model="portatil.serial"
-                    type="text"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#50E5F9] focus:border-transparent transition-all"
-                    :class="{ 'border-red-500 ring-red-500': form.errors[`portatiles.${index}.serial`] }"
-                    placeholder="Ej: ABC123456"
-                  >
-                  <div v-if="form.errors[`portatiles.${index}.serial`]" class="mt-1 text-sm text-red-600">
-                    {{ form.errors[`portatiles.${index}.serial`] }}
-                  </div>
+                  <label class="block text-sm font-medium text-theme-primary mb-1">Serial *</label>
+                  <input v-model="portatil.serial" type="text" required class="w-full px-3 py-2 border border-theme-primary rounded-lg bg-theme-primary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-blue-500" placeholder="Ej: ABC123456" />
                 </div>
-
-                <!-- Marca -->
-                <div>
-                  <label :for="`portatil-marca-${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                    Marca *
-                  </label>
-                  <input
-                    :id="`portatil-marca-${index}`"
-                    v-model="portatil.marca"
-                    type="text"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#50E5F9] focus:border-transparent transition-all"
-                    :class="{ 'border-red-500 ring-red-500': form.errors[`portatiles.${index}.marca`] }"
-                    placeholder="Ej: Dell, HP, Lenovo"
-                  >
-                  <div v-if="form.errors[`portatiles.${index}.marca`]" class="mt-1 text-sm text-red-600">
-                    {{ form.errors[`portatiles.${index}.marca`] }}
-                  </div>
-                </div>
-
-                <!-- Modelo -->
-                <div>
-                  <label :for="`portatil-modelo-${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                    Modelo *
-                  </label>
-                  <input
-                    :id="`portatil-modelo-${index}`"
-                    v-model="portatil.modelo"
-                    type="text"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#50E5F9] focus:border-transparent transition-all"
-                    :class="{ 'border-red-500 ring-red-500': form.errors[`portatiles.${index}.modelo`] }"
-                    placeholder="Ej: Inspiron 15, ThinkPad X1"
-                  >
-                  <div v-if="form.errors[`portatiles.${index}.modelo`]" class="mt-1 text-sm text-red-600">
-                    {{ form.errors[`portatiles.${index}.modelo`] }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Preview del QR si hay serial -->
-              <div v-if="portatil.serial" class="mt-4 p-4 bg-white border border-gray-200 rounded-lg">
-                <div class="flex items-center space-x-4">
-                  <div class="flex-shrink-0">
-                    <img 
-                      :src="`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=PORTATIL_${encodeURIComponent(portatil.serial)}`"
-                      :alt="`QR para ${portatil.serial}`"
-                      class="w-16 h-16 border border-gray-200 rounded"
-                    >
+                <div class="grid grid-cols-2 gap-3">
+                  <div>
+                    <label class="block text-sm font-medium text-theme-primary mb-1">Marca *</label>
+                    <input v-model="portatil.marca" type="text" required class="w-full px-3 py-2 border border-theme-primary rounded-lg bg-theme-primary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-blue-500" placeholder="Dell, HP..." />
                   </div>
                   <div>
-                    <p class="text-sm font-medium text-gray-900">QR generado automáticamente</p>
-                    <p class="text-xs text-gray-500">Serial: {{ portatil.serial }}</p>
+                    <label class="block text-sm font-medium text-theme-primary mb-1">Modelo *</label>
+                    <input v-model="portatil.modelo" type="text" required class="w-full px-3 py-2 border border-theme-primary rounded-lg bg-theme-primary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-blue-500" placeholder="Inspiron..." />
                   </div>
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Errores generales de portátiles -->
-          <div v-if="form.errors.portatiles" class="mt-4 text-sm text-red-600">
-            {{ form.errors.portatiles }}
+            <button type="button" @click="addPortatil" class="w-full py-2 border-2 border-dashed border-theme-secondary rounded-lg text-theme-secondary hover:border-blue-400 hover:text-blue-400 transition-colors">
+              <Icon name="plus" :size="16" class="mr-2" />Agregar Otro Portátil
+            </button>
           </div>
         </div>
 
-        <!-- Sección 3: Vehículos -->
-        <div class="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
-          <div class="flex items-center justify-between mb-6">
-            <div class="flex items-center">
-              <div class="flex-shrink-0">
-                <div class="w-10 h-10 bg-[#FDC300] rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17l4 4 4-4m-4-5v9"/>
-                  </svg>
-                </div>
-              </div>
-              <div class="ml-4">
-                <h2 class="text-xl font-semibold text-gray-900">Vehículos</h2>
-                <p class="text-sm text-gray-600">Vehículos asociados (opcional)</p>
-              </div>
-            </div>
-            <button
-              type="button"
-              @click="addVehiculo"
-              class="inline-flex items-center px-4 py-2 bg-[#FDC300] text-black rounded-lg hover:bg-[#E6B000] transition-colors"
-            >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
-              Agregar Vehículo
+        <!-- Paso 3: Vehículos -->
+        <div v-if="currentStep === 3" class="space-y-6">
+          <div class="text-center mb-6">
+            <Icon name="car" :size="48" class="mx-auto mb-4" style="color: #FDC300;" />
+            <h3 class="text-xl font-semibold text-theme-primary mb-2">Vehículos</h3>
+            <p class="text-sm text-theme-muted">Agrega vehículos asociados (opcional)</p>
+          </div>
+
+          <div v-if="form.vehiculos.length === 0" class="text-center py-8">
+            <Icon name="car" :size="64" class="mx-auto text-theme-muted mb-4" />
+            <p class="text-theme-muted mb-4">No hay vehículos agregados</p>
+            <button type="button" @click="addVehiculo" class="inline-flex items-center px-4 py-2 rounded-lg text-black font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg" style="background: linear-gradient(135deg, #FDC300, #E6B000);">
+              <Icon name="plus" :size="16" class="mr-2" />Agregar Primer Vehículo
             </button>
           </div>
 
-          <!-- Lista de vehículos -->
-          <div v-if="form.vehiculos.length === 0" class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 17l4 4 4-4m-4-5v9"/>
-            </svg>
-            <h3 class="mt-2 text-sm font-medium text-gray-900">No hay vehículos</h3>
-            <p class="mt-1 text-sm text-gray-500">Agregue vehículos haciendo clic en el botón superior</p>
-          </div>
-
-          <div v-else class="space-y-6">
-            <div
-              v-for="(vehiculo, index) in form.vehiculos"
-              :key="`vehiculo-${index}`"
-              class="border border-gray-200 rounded-lg p-6 bg-gray-50 hover:bg-gray-100 transition-colors"
-            >
+          <div v-else class="space-y-4">
+            <div v-for="(vehiculo, index) in form.vehiculos" :key="`vehiculo-${index}`" class="border border-theme-primary rounded-lg p-4 bg-theme-secondary">
               <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900 flex items-center">
-                  <span class="inline-flex items-center justify-center w-6 h-6 bg-[#FDC300] text-black text-xs font-bold rounded-full mr-2">
-                    {{ index + 1 }}
-                  </span>
+                <h4 class="font-medium text-theme-primary flex items-center">
+                  <span class="inline-flex items-center justify-center w-6 h-6 text-black text-xs font-bold rounded-full mr-2" style="background: #FDC300;">{{ index + 1 }}</span>
                   Vehículo {{ index + 1 }}
-                </h3>
-                <button
-                  type="button"
-                  @click="removeVehiculo(index)"
-                  class="inline-flex items-center px-3 py-1 border border-red-300 text-red-700 bg-red-50 rounded-md hover:bg-red-100 transition-colors"
-                >
-                  <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
-                  Eliminar
+                </h4>
+                <button type="button" @click="removeVehiculo(index)" class="text-red-500 hover:text-red-700 transition-colors">
+                  <Icon name="trash" :size="16" />
                 </button>
               </div>
-
-              <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <!-- Tipo -->
+              <div class="space-y-3">
                 <div>
-                  <label :for="`vehiculo-tipo-${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                    Tipo de Vehículo *
-                  </label>
-                  <select
-                    :id="`vehiculo-tipo-${index}`"
-                    v-model="vehiculo.tipo"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FDC300] focus:border-transparent transition-all"
-                    :class="{ 'border-red-500 ring-red-500': form.errors[`vehiculos.${index}.tipo`] }"
-                  >
+                  <label class="block text-sm font-medium text-theme-primary mb-1">Tipo de Vehículo *</label>
+                  <select v-model="vehiculo.tipo" required class="w-full px-3 py-2 border border-theme-primary rounded-lg bg-theme-primary text-theme-primary focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-yellow-500">
                     <option value="">Seleccionar tipo</option>
                     <option value="Automóvil">🚗 Automóvil</option>
                     <option value="Motocicleta">🏍️ Motocicleta</option>
@@ -350,97 +185,87 @@
                     <option value="Camión">🚛 Camión</option>
                     <option value="Otro">🚐 Otro</option>
                   </select>
-                  <div v-if="form.errors[`vehiculos.${index}.tipo`]" class="mt-1 text-sm text-red-600">
-                    {{ form.errors[`vehiculos.${index}.tipo`] }}
-                  </div>
                 </div>
-
-                <!-- Placa -->
                 <div>
-                  <label :for="`vehiculo-placa-${index}`" class="block text-sm font-medium text-gray-700 mb-2">
-                    Placa *
-                  </label>
-                  <input
-                    :id="`vehiculo-placa-${index}`"
-                    v-model="vehiculo.placa"
-                    type="text"
-                    required
-                    class="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#FDC300] focus:border-transparent transition-all uppercase"
-                    :class="{ 'border-red-500 ring-red-500': form.errors[`vehiculos.${index}.placa`] }"
-                    placeholder="Ej: ABC-123"
-                    @input="vehiculo.placa = vehiculo.placa.toUpperCase()"
-                  >
-                  <div v-if="form.errors[`vehiculos.${index}.placa`]" class="mt-1 text-sm text-red-600">
-                    {{ form.errors[`vehiculos.${index}.placa`] }}
-                  </div>
-                </div>
-              </div>
-
-              <!-- Información adicional del vehículo -->
-              <div v-if="vehiculo.tipo && vehiculo.placa" class="mt-4 p-4 bg-white border border-gray-200 rounded-lg">
-                <div class="flex items-center space-x-4">
-                  <div class="flex-shrink-0">
-                    <div class="w-12 h-12 bg-[#FDC300] rounded-full flex items-center justify-center">
-                      <span class="text-lg">
-                        {{ getVehicleEmoji(vehiculo.tipo) }}
-                      </span>
-                    </div>
-                  </div>
-                  <div>
-                    <p class="text-sm font-medium text-gray-900">{{ vehiculo.tipo }}</p>
-                    <p class="text-xs text-gray-500">Placa: {{ vehiculo.placa }}</p>
-                  </div>
+                  <label class="block text-sm font-medium text-theme-primary mb-1">Placa *</label>
+                  <input v-model="vehiculo.placa" type="text" required class="w-full px-3 py-2 border border-theme-primary rounded-lg bg-theme-primary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 uppercase focus:ring-yellow-500" placeholder="ABC-123" @input="vehiculo.placa = vehiculo.placa.toUpperCase()" />
                 </div>
               </div>
             </div>
-          </div>
-
-          <!-- Errores generales de vehículos -->
-          <div v-if="form.errors.vehiculos" class="mt-4 text-sm text-red-600">
-            {{ form.errors.vehiculos }}
-          </div>
-        </div>
-
-        <!-- Mensaje de éxito/error -->
-        <div v-if="$page.props.flash?.success" class="bg-green-50 border border-green-200 rounded-lg p-4">
-          <div class="flex">
-            <Icon name="check-circle" :size="20" class="text-green-400" />
-            <div class="ml-3">
-              <p class="text-sm text-green-800">{{ $page.props.flash.success }}</p>
-            </div>
-          </div>
-        </div>
-
-        <div v-if="form.errors.error" class="bg-red-50 border border-red-200 rounded-lg p-4">
-          <div class="flex">
-            <Icon name="x-circle" :size="20" class="text-red-400" />
-            <div class="ml-3">
-              <p class="text-sm text-red-800">{{ form.errors.error }}</p>
-            </div>
-          </div>
-        </div>
-
-        <!-- PWA Optimized Action Buttons -->
-        <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-3 sm:-mx-4 lg:-mx-8 mt-8">
-          <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
-            <Link
-              :href="route('personas.index')"
-              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-center font-medium order-2 sm:order-1"
-            >
-              Cancelar
-            </Link>
-            <button
-              type="submit"
-              :disabled="form.processing"
-              class="px-6 py-3 bg-[#39A900] text-white rounded-lg hover:bg-[#007832] disabled:opacity-50 transition-colors font-medium flex items-center justify-center order-1 sm:order-2"
-            >
-              <Icon v-if="form.processing" name="loader" :size="20" class="animate-spin -ml-1 mr-3 text-white" />
-              <span v-if="form.processing">Guardando...</span>
-              <span v-else>Crear Persona</span>
+            <button type="button" @click="addVehiculo" class="w-full py-2 border-2 border-dashed border-theme-secondary rounded-lg text-theme-secondary hover:border-yellow-400 hover:text-yellow-400 transition-colors">
+              <Icon name="plus" :size="16" class="mr-2" />Agregar Otro Vehículo
             </button>
           </div>
         </div>
-      </form>
+
+        <!-- Paso 4: Resumen -->
+        <div v-if="currentStep === 4" class="space-y-6">
+          <div class="text-center mb-6">
+            <Icon name="check-circle" :size="48" class="mx-auto mb-4" style="color: #39A900;" />
+            <h3 class="text-xl font-semibold text-theme-primary mb-2">Resumen</h3>
+            <p class="text-sm text-theme-muted">Revisa la información antes de crear</p>
+          </div>
+
+          <div class="space-y-4">
+            <div class="border border-theme-primary rounded-lg p-4 bg-theme-secondary">
+              <h4 class="font-medium text-theme-primary mb-3 flex items-center">
+                <Icon name="user" :size="16" class="mr-2" style="color: #39A900;" />Información Personal
+              </h4>
+              <div class="space-y-2 text-sm">
+                <div class="flex justify-between"><span class="text-theme-muted">Nombre:</span><span class="text-theme-primary font-medium">{{ form.nombre || 'No especificado' }}</span></div>
+                <div class="flex justify-between"><span class="text-theme-muted">Documento:</span><span class="text-theme-primary">{{ form.documento || 'No especificado' }}</span></div>
+                <div class="flex justify-between"><span class="text-theme-muted">Tipo:</span><span class="text-theme-primary">{{ form.tipoPersona || 'No especificado' }}</span></div>
+                <div class="flex justify-between"><span class="text-theme-muted">Correo:</span><span class="text-theme-primary">{{ form.correo || 'No especificado' }}</span></div>
+              </div>
+            </div>
+
+            <div v-if="form.portatiles.length > 0" class="border border-theme-primary rounded-lg p-4 bg-theme-secondary">
+              <h4 class="font-medium text-theme-primary mb-3 flex items-center">
+                <Icon name="laptop" :size="16" class="mr-2" style="color: #50E5F9;" />Portátiles ({{ form.portatiles.length }})
+              </h4>
+              <div class="space-y-2">
+                <div v-for="(portatil, index) in form.portatiles" :key="index" class="text-sm">
+                  <div class="flex justify-between"><span class="text-theme-muted">{{ portatil.marca }} {{ portatil.modelo }}:</span><span class="text-theme-primary">{{ portatil.serial }}</span></div>
+                </div>
+              </div>
+            </div>
+
+            <div v-if="form.vehiculos.length > 0" class="border border-theme-primary rounded-lg p-4 bg-theme-secondary">
+              <h4 class="font-medium text-theme-primary mb-3 flex items-center">
+                <Icon name="car" :size="16" class="mr-2" style="color: #FDC300;" />Vehículos ({{ form.vehiculos.length }})
+              </h4>
+              <div class="space-y-2">
+                <div v-for="(vehiculo, index) in form.vehiculos" :key="index" class="text-sm">
+                  <div class="flex justify-between"><span class="text-theme-muted">{{ vehiculo.tipo }}:</span><span class="text-theme-primary">{{ vehiculo.placa }}</span></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Botones de navegación -->
+        <div class="flex justify-between pt-6">
+          <button v-if="currentStep > 1" type="button" @click="previousStep" class="inline-flex items-center px-4 py-2 border border-theme-primary rounded-lg text-theme-secondary hover:bg-theme-secondary transition-all duration-200">
+            <Icon name="arrow-left" :size="16" class="mr-2" />Anterior
+          </button>
+          <div v-else></div>
+
+          <div class="flex space-x-3">
+            <Link :href="route('personas.index')" class="inline-flex items-center px-4 py-2 border border-theme-primary rounded-lg text-theme-secondary hover:bg-theme-secondary transition-all duration-200">
+              <Icon name="x" :size="16" class="mr-2" />Cancelar
+            </Link>
+
+            <button v-if="currentStep < totalSteps" type="button" @click="nextStep" :disabled="!canProceedToNextStep()" class="inline-flex items-center px-6 py-2 rounded-lg text-white font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+              Siguiente<Icon name="arrow-right" :size="16" class="ml-2" />
+            </button>
+
+            <button v-else type="submit" @click="submit" :disabled="form.processing" class="inline-flex items-center px-6 py-2 rounded-lg text-white font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+              <Icon v-if="form.processing" name="loader" :size="16" class="animate-spin mr-2" />
+              <span v-if="form.processing">Creando...</span><span v-else>Crear Persona</span>
+            </button>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -448,63 +273,67 @@
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
 import Icon from '@/Components/Icon.vue'
+import { useTheme } from '@/composables/useTheme'
+import { ref } from 'vue'
 
-// Definir el título de la página
-defineOptions({
-  layout: null
-})
+defineOptions({ layout: null })
 
-// Inicializar formulario
+const { isDark, toggleTheme } = useTheme()
+const currentStep = ref(1)
+const totalSteps = 4
+
 const form = useForm({
-  documento: '',
-  nombre: '',
-  tipoPersona: '',
-  correo: '',
-  portatiles: [],
-  vehiculos: [],
+  documento: '', nombre: '', tipoPersona: '', correo: '', portatiles: [], vehiculos: []
 })
 
-// Funciones para manejar portátiles
+const getStepDescription = () => {
+  const descriptions = {
+    1: 'Completa la información personal básica',
+    2: 'Agrega portátiles asociados (opcional)',
+    3: 'Registra vehículos (opcional)',
+    4: 'Revisa y confirma la información'
+  }
+  return descriptions[currentStep.value]
+}
+
+const nextStep = () => {
+  if (currentStep.value < totalSteps && canProceedToNextStep()) {
+    currentStep.value++
+  }
+}
+
+const previousStep = () => {
+  if (currentStep.value > 1) {
+    currentStep.value--
+  }
+}
+
+const canProceedToNextStep = () => {
+  switch (currentStep.value) {
+    case 1: return form.nombre.trim() && form.tipoPersona
+    case 2:
+    case 3: return true
+    default: return true
+  }
+}
+
 const addPortatil = () => {
-  form.portatiles.push({
-    serial: '',
-    marca: '',
-    modelo: ''
-  })
+  form.portatiles.push({ serial: '', marca: '', modelo: '' })
 }
 
 const removePortatil = (index) => {
   form.portatiles.splice(index, 1)
 }
 
-// Funciones para manejar vehículos
 const addVehiculo = () => {
-  form.vehiculos.push({
-    tipo: '',
-    placa: ''
-  })
+  form.vehiculos.push({ tipo: '', placa: '' })
 }
 
 const removeVehiculo = (index) => {
   form.vehiculos.splice(index, 1)
 }
 
-// Función para obtener emoji del vehículo
-const getVehicleEmoji = (tipo) => {
-  const emojis = {
-    'Automóvil': '🚗',
-    'Motocicleta': '🏍️',
-    'Bicicleta': '🚲',
-    'Camioneta': '🚙',
-    'Camión': '🚛',
-    'Otro': '🚐'
-  }
-  return emojis[tipo] || '🚐'
-}
-
-// Función para enviar el formulario
 const submit = () => {
-  // Validación básica antes del envío
   if (!form.nombre.trim()) {
     alert('El nombre es obligatorio');
     return;
@@ -515,31 +344,20 @@ const submit = () => {
     return;
   }
 
-  console.log('Enviando formulario:', form.data());
-  
   form.post(route('personas.store'), {
     onSuccess: (response) => {
       console.log('Persona creada exitosamente:', response);
-      // La redirección se maneja automáticamente por el controlador
     },
     onError: (errors) => {
       console.error('Errores de validación:', errors);
-      
-      // Si hay error de token CSRF, recargar la página
       if (errors.message && (errors.message.includes('CSRF') || errors.message.includes('expired'))) {
-        console.warn('Token CSRF expirado, recargando página...');
         window.location.reload();
         return;
       }
-      
-      // Mostrar primer error encontrado
       const firstError = Object.values(errors)[0];
       if (firstError && typeof firstError === 'string') {
         alert(`Error: ${firstError}`);
       }
-    },
-    onFinish: () => {
-      console.log('Proceso de envío completado');
     },
     preserveScroll: true,
     preserveState: false,

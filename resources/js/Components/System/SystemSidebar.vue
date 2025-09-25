@@ -36,23 +36,23 @@ const getIconName = (label) => {
 
 <template>
   <aside :class="[
-    'hidden lg:flex lg:shrink-0 lg:flex-col lg:border-r lg:border-forest-200 dark:lg:border-sage-700 lg:bg-white dark:lg:bg-sage-900 lg:shadow-sm transition-all duration-300',
+    'hidden lg:flex lg:shrink-0 lg:flex-col lg:border-r border-theme-primary bg-theme-sidebar shadow-theme-sm transition-all duration-300',
     collapsed ? 'lg:w-16' : 'lg:w-64'
   ]">
     <!-- Rol Badge -->
-    <div v-if="!collapsed" class="flex items-center gap-3 border-b border-forest-100 dark:border-sage-700 bg-forest-50 dark:bg-sage-800 p-4">
-      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-forest-600">
+    <div v-if="!collapsed" class="flex items-center gap-3 border-b border-theme-primary bg-theme-secondary p-4">
+      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600">
         <Icon name="user" :size="16" class="text-white" />
       </div>
       <div>
-        <div class="text-xs font-medium text-forest-600 dark:text-forest-400 uppercase tracking-wide">Rol Actual</div>
-        <div class="text-sm font-semibold text-forest-800 dark:text-forest-200">{{ role || '—' }}</div>
+        <div class="text-xs font-medium text-theme-secondary uppercase tracking-wide">Rol Actual</div>
+        <div class="text-sm font-semibold text-theme-primary">{{ role || '—' }}</div>
       </div>
     </div>
 
     <!-- Collapsed role indicator -->
-    <div v-if="collapsed" class="flex justify-center border-b border-forest-100 dark:border-sage-700 bg-forest-50 dark:bg-sage-800 p-4">
-      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-forest-600" :title="`Rol: ${role || '—'}`">
+    <div v-if="collapsed" class="flex justify-center border-b border-theme-primary bg-theme-secondary p-4">
+      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600" :title="`Rol: ${role || '—'}`">
         <Icon name="user" :size="16" class="text-white" />
       </div>
     </div>
@@ -66,8 +66,8 @@ const getIconName = (label) => {
           'group flex w-full items-center rounded-lg text-left text-sm font-medium transition-all duration-200',
           collapsed ? 'px-2 py-2.5 justify-center' : 'px-3 py-2.5',
           isActiveRoute(item.route)
-            ? 'bg-forest-100 dark:bg-forest-800 text-forest-800 dark:text-forest-200 shadow-sm' + (collapsed ? '' : ' border-l-4 border-forest-600')
-            : 'text-sage-700 dark:text-sage-300 hover:bg-forest-50 dark:hover:bg-sage-800 hover:text-forest-700 dark:hover:text-forest-400'
+            ? 'bg-theme-tertiary text-theme-primary shadow-theme-sm' + (collapsed ? '' : ' border-l-4 border-green-600')
+            : 'text-theme-secondary hover:bg-theme-secondary hover:text-theme-primary'
         ]"
         @click="go(item.route)"
         :title="collapsed ? item.label : undefined"
@@ -76,8 +76,8 @@ const getIconName = (label) => {
           <div :class="[
             'flex h-8 w-8 items-center justify-center rounded-md transition-colors',
             isActiveRoute(item.route)
-              ? 'bg-forest-600 text-white'
-              : 'bg-sage-100 dark:bg-sage-700 text-sage-600 dark:text-sage-400 group-hover:bg-forest-200 dark:group-hover:bg-forest-700 group-hover:text-forest-700 dark:group-hover:text-forest-300'
+              ? 'bg-green-600 text-white'
+              : 'bg-theme-tertiary text-theme-muted group-hover:bg-green-200 group-hover:text-green-700'
           ]">
             <!-- Dashboard Icon -->
             <svg v-if="item.label === 'Dashboard'" class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -118,12 +118,12 @@ const getIconName = (label) => {
     </nav>
 
     <!-- Footer -->
-    <div class="border-t border-forest-100 dark:border-sage-700 p-3">
-      <div v-if="!collapsed" class="text-xs text-sage-500 dark:text-sage-400 text-center">
+    <div class="border-t border-theme-primary p-3">
+      <div v-if="!collapsed" class="text-xs text-theme-muted text-center">
         CTAccess v2.0
       </div>
       <div v-else class="flex justify-center">
-        <div class="text-xs text-sage-500 dark:text-sage-400" title="CTAccess v2.0">
+        <div class="text-xs text-theme-muted" title="CTAccess v2.0">
           CT
         </div>
       </div>

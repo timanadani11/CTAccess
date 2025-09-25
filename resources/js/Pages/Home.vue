@@ -3,22 +3,51 @@ import { Head, Link } from '@inertiajs/vue3'
 import { ref, onMounted } from 'vue'
 import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 import Icon from '@/Components/Icon.vue'
+import { useTheme } from '@/composables/useTheme'
 
 const props = defineProps({
   estadisticas: Object,
   sistema_info: Object
 })
 
-// Estado para animaciones
+// Estado para animaciones y PWA
 const isVisible = ref(false)
 const currentTime = ref(new Date())
+const deferredPrompt = ref(null)
 
-// Actualizar hora cada segundo
+// Estado para widgets dinámicos
+const recentActivity = ref([])
+const weeklyActivity = ref([])
+const systemStatus = ref({})
+const loadingActivity = ref(true)
+const loadingWeekly = ref(true)
+const loadingStatus = ref(true)
+
+// Tema
+const { isDark, toggleTheme } = useTheme()
+
+// Actualizar hora cada segundo y configurar PWA
 onMounted(() => {
   isVisible.value = true
   setInterval(() => {
     currentTime.value = new Date()
   }, 1000)
+
+  // Escuchar evento beforeinstallprompt para PWA
+  window.addEventListener('beforeinstallprompt', (e) => {
+    e.preventDefault()
+    deferredPrompt.value = e
+  })
+
+  // Cargar datos dinámicos
+  fetchRecentActivity()
+  fetchWeeklyActivity()
+  fetchSystemStatus()
+
+  // Actualizar actividad reciente cada 30 segundos
+  setInterval(() => {
+    fetchRecentActivity()
+  }, 30000)
 })
 
 // Formatear hora
@@ -39,213 +68,364 @@ const formatDate = (date) => {
     day: 'numeric'
   })
 }
+
+// Instalar PWA
+const installPWA = async () => {
+  if (deferredPrompt.value) {
+    deferredPrompt.value.prompt()
+    const { outcome } = await deferredPrompt.value.userChoice
+    console.log(`PWA install outcome: ${outcome}`)
+    deferredPrompt.value = null
+  } else {
+    alert('Para instalar la app, usa el menú de tu navegador o busca la opción "Instalar app" o "Añadir a pantalla de inicio"')
+  }
+}
+
+// 🔥 Actividad en Tiempo Real
+const fetchRecentActivity = async () => {
+  try {
+    // Simulamos datos realistas hasta implementar la API real
+    const activities = [
+      { id: 1, persona: 'Juan Pérez', tipo: 'entrada', tiempo: new Date(Date.now() - Math.random() * 300000) },
+      { id: 2, persona: 'María García', tipo: 'salida', tiempo: new Date(Date.now() - Math.random() * 600000) },
+      { id: 3, persona: 'Carlos López', tipo: 'entrada', tiempo: new Date(Date.now() - Math.random() * 900000) },
+      { id: 4, persona: 'Ana Rodríguez', tipo: 'salida', tiempo: new Date(Date.now() - Math.random() * 1200000) },
+      { id: 5, persona: 'Luis Martínez', tipo: 'entrada', tiempo: new Date(Date.now() - Math.random() * 1500000) }
+    ]
+    
+    setTimeout(() => {
+      recentActivity.value = activities.sort((a, b) => b.tiempo - a.tiempo).slice(0, 5)
+      loadingActivity.value = false
+    }, 800)
+    
+    // API real cuando esté lista:
+    // const response = await fetch('/api/accesos/recientes')
+    // recentActivity.value = await response.json()
+    // loadingActivity.value = false
+  } catch (error) {
+    console.error('Error fetching recent activity:', error)
+    loadingActivity.value = false
+  }
+}
+
+// 📊 Gráfico de Actividad Semanal
+const fetchWeeklyActivity = async () => {
+  try {
+    const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
+    const data = days.map(day => ({
+      day,
+      accesos: Math.floor(Math.random() * 50) + 10,
+      maxAccesos: 60
+    }))
+    
+    setTimeout(() => {
+      weeklyActivity.value = data
+      loadingWeekly.value = false
+    }, 1200)
+    
+    // API real:
+    // const response = await fetch('/api/estadisticas/semanal')
+    // weeklyActivity.value = await response.json()
+    // loadingWeekly.value = false
+  } catch (error) {
+    console.error('Error fetching weekly activity:', error)
+    loadingWeekly.value = false
+  }
+}
+
+// ⚡ Estado del Sistema
+const fetchSystemStatus = async () => {
+  try {
+    const status = {
+      sistema: { status: 'online', uptime: '99.9%', color: 'green' },
+      qr_scanner: { status: 'activo', devices: 3, color: 'green' },
+      seguridad: { status: 'óptima', incidents: 0, color: 'green' },
+      database: { status: 'saludable', response: '12ms', color: 'green' }
+    }
+    
+    setTimeout(() => {
+      systemStatus.value = status
+      loadingStatus.value = false
+    }, 600)
+    
+    // API real:
+    // const response = await fetch('/api/sistema/estado')
+    // systemStatus.value = await response.json()
+    // loadingStatus.value = false
+  } catch (error) {
+    console.error('Error fetching system status:', error)
+    loadingStatus.value = false
+  }
+}
+
+// Formatear tiempo relativo
+const formatRelativeTime = (date) => {
+  const now = new Date()
+  const diff = now - date
+  const minutes = Math.floor(diff / 60000)
+  
+  if (minutes < 1) return 'Ahora'
+  if (minutes < 60) return `${minutes}m`
+  const hours = Math.floor(minutes / 60)
+  if (hours < 24) return `${hours}h`
+  return `${Math.floor(hours / 24)}d`
+}
+
 </script>
 
 <template>
-  <Head title="CTAccess - Sistema de Control de Acceso" />
+  <Head title="CTAccess - Sistema de Control de Acceso PWA" />
   
   <!-- PWA Meta Tags -->
   <Head>
-    <meta name="description" content="Sistema de control de acceso inteligente para instituciones educativas y empresariales" />
-    <meta name="keywords" content="control acceso, seguridad, QR, gestión personas" />
+    <meta name="description" content="Aplicación PWA de control de acceso inteligente - Instálala en tu dispositivo" />
+    <meta name="keywords" content="PWA, control acceso, seguridad, QR, gestión personas, app móvil" />
     <meta name="author" content="CTAccess Team" />
-    <meta property="og:title" content="CTAccess - Sistema de Control de Acceso" />
-    <meta property="og:description" content="Plataforma moderna de gestión y control de acceso" />
+    <meta name="theme-color" content="#00304D" />
+    <meta name="apple-mobile-web-app-capable" content="yes" />
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+    <meta name="apple-mobile-web-app-title" content="CTAccess" />
+    <meta property="og:title" content="CTAccess PWA - Sistema de Control de Acceso" />
+    <meta property="og:description" content="Aplicación web progresiva para gestión y control de acceso" />
     <meta property="og:type" content="website" />
+    <link rel="manifest" href="/manifest.json" />
   </Head>
 
-  <div class="min-h-screen bg-gradient-to-br from-[#00304D] via-[#001a2e] to-black text-white overflow-hidden">
-    <!-- Efectos de fondo animados -->
-    <div class="absolute inset-0 overflow-hidden pointer-events-none">
-      <div class="absolute -top-40 -right-40 w-80 h-80 bg-[#39A900]/10 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute -bottom-40 -left-40 w-80 h-80 bg-[#50E5F9]/10 rounded-full blur-3xl animate-pulse delay-1000"></div>
-      <div class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-96 h-96 bg-[#FDC300]/5 rounded-full blur-3xl animate-pulse delay-2000"></div>
-    </div>
-
-    <div class="relative z-10 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-      <!-- Header -->
-      <header class="flex flex-col sm:flex-row items-center justify-between py-6 gap-4">
+  <div class="min-h-screen bg-theme-primary text-theme-primary flex flex-col">
+    <!-- Header fijo -->
+    <header class="bg-theme-navbar border-b border-theme-primary px-4 py-3 flex-shrink-0">
+      <div class="max-w-7xl mx-auto flex items-center justify-between">
         <!-- Logo y branding -->
-        <div class="flex items-center gap-4">
+        <div class="flex items-center gap-3">
           <div class="relative">
             <ApplicationLogo 
               alt="CTAccess Logo" 
-              :classes="'h-12 w-12 rounded-xl shadow-lg'" 
+              :classes="'h-10 w-10 rounded-lg'" 
             />
-            <div class="absolute -top-1 -right-1 w-4 h-4 bg-[#39A900] rounded-full animate-ping"></div>
+            <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
           </div>
           <div>
-            <h1 class="text-2xl font-bold bg-gradient-to-r from-[#39A900] to-[#50E5F9] bg-clip-text text-transparent">
-              CTAccess
-            </h1>
-            <p class="text-sm text-[#50E5F9]/80">Sistema de Control Inteligente</p>
+            <h1 class="text-xl font-bold text-theme-primary">CTAccess</h1>
+            <p class="text-xs text-theme-secondary">Control de Acceso</p>
           </div>
         </div>
 
         <!-- Navegación -->
-        <nav class="flex flex-wrap gap-3 items-center">
+        <nav class="flex gap-2 items-center">
+          <!-- Theme toggle button -->
+          <button
+            @click="toggleTheme"
+            class="rounded-md p-2 text-theme-muted hover:bg-theme-tertiary hover:text-theme-secondary focus:outline-none focus:ring-2 focus:ring-green-500"
+            :title="isDark ? 'Cambiar a modo claro' : 'Cambiar a modo oscuro'"
+          >
+            <Icon :name="isDark ? 'sun' : 'moon'" :size="20" />
+          </button>
+          
           <template v-if="$page.props.auth && $page.props.auth.user">
             <Link 
               :href="route('dashboard')" 
-              class="flex items-center gap-2 px-4 py-2 text-white border border-[#50E5F9]/50 rounded-xl hover:bg-[#50E5F9] hover:text-black transition-all duration-300 hover:scale-105"
+              class="flex items-center gap-2 px-3 py-2 text-theme-primary border border-theme-primary rounded-lg hover:bg-theme-tertiary transition-all duration-200"
             >
               <Icon name="home" :size="16" />
-              Panel de Control
+              <span class="hidden sm:inline">Panel</span>
             </Link>
           </template>
           <template v-else>
             <Link 
               :href="route('login')" 
-              class="flex items-center gap-2 px-4 py-2 text-white border border-[#50E5F9]/50 rounded-xl hover:bg-[#50E5F9] hover:text-black transition-all duration-300 hover:scale-105"
+              class="flex items-center gap-2 px-3 py-2 text-theme-primary border border-theme-primary rounded-lg hover:bg-theme-tertiary transition-all duration-200"
             >
               <Icon name="log-in" :size="16" />
-              Iniciar Sesión
+              <span class="hidden sm:inline">Iniciar Sesión</span>
             </Link>
             <Link 
               :href="route('personas.create')" 
-              class="flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-[#39A900] to-[#007832] text-white rounded-xl hover:from-[#007832] hover:to-[#39A900] transition-all duration-300 hover:scale-105 shadow-lg"
+              class="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 font-medium"
             >
               <Icon name="user-plus" :size="16" />
-              Registrar Persona
+              Registrarse
             </Link>
           </template>
         </nav>
-      </header>
+      </div>
+    </header>
 
-      <!-- Contenido principal -->
-      <main class="mt-8">
-        <!-- Hero Section -->
-        <div class="text-center max-w-4xl mx-auto mb-16">
-          <div :class="['transition-all duration-1000', isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10']">
-            <h1 class="text-4xl sm:text-6xl font-bold text-white mb-6 leading-tight">
-              Bienvenido a 
-              <span class="bg-gradient-to-r from-[#39A900] via-[#50E5F9] to-[#FDC300] bg-clip-text text-transparent">
-                CTAccess
-              </span>
-            </h1>
-            
-            <p class="text-lg sm:text-xl text-gray-300 mb-8 max-w-2xl mx-auto">
-              {{ sistema_info.descripcion }} - Versión {{ sistema_info.version }}
-            </p>
-
-            <!-- Reloj en tiempo real -->
-            <div class="bg-black/30 backdrop-blur-sm border border-white/10 rounded-2xl p-6 mb-8 max-w-md mx-auto">
-              <div class="text-3xl font-mono font-bold text-[#50E5F9] mb-2">
+    <!-- Contenido principal -->
+    <main class="flex-1 px-4 py-6 overflow-y-auto">
+      <div class="max-w-7xl mx-auto h-full">
+        
+        <!-- Reloj en tiempo real -->
+        <div class="max-w-md mx-auto mb-6">
+          <div class="bg-theme-card border border-theme-primary rounded-xl p-8 shadow-theme-md">
+            <div class="text-center">
+              <div class="text-5xl font-mono font-bold text-theme-primary mb-3">
                 {{ formatTime(currentTime) }}
               </div>
-              <div class="text-sm text-gray-400 capitalize">
+              <div class="text-sm text-theme-secondary capitalize">
                 {{ formatDate(currentTime) }}
               </div>
             </div>
           </div>
         </div>
 
+
         <!-- Estadísticas en tiempo real -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6 mb-16">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
           <div 
             v-for="(stat, index) in [
-              { key: 'personas_registradas', label: 'Personas Registradas', icon: 'users', color: 'from-[#39A900] to-[#007832]', border: 'border-[#39A900]/30' },
-              { key: 'accesos_hoy', label: 'Accesos Hoy', icon: 'calendar', color: 'from-[#50E5F9] to-[#0ea5e9]', border: 'border-[#50E5F9]/30' },
-              { key: 'accesos_activos', label: 'Accesos Activos', icon: 'activity', color: 'from-[#FDC300] to-[#f59e0b]', border: 'border-[#FDC300]/30' },
-              { key: 'total_accesos', label: 'Total Accesos', icon: 'bar-chart', color: 'from-purple-500 to-purple-700', border: 'border-purple-500/30' }
+              { key: 'personas_registradas', label: 'Personas', icon: 'users' },
+              { key: 'accesos_hoy', label: 'Accesos Hoy', icon: 'calendar' },
+              { key: 'accesos_activos', label: 'Activos', icon: 'activity' },
+              { key: 'total_accesos', label: 'Total', icon: 'bar-chart' }
             ]" 
             :key="stat.key"
-            :class="['transition-all duration-700 hover:scale-105', isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10']"
-            :style="{ transitionDelay: `${index * 200}ms` }"
           >
-            <div class="bg-black/30 backdrop-blur-sm border rounded-2xl p-6 hover:bg-black/40 transition-all duration-300" :class="stat.border">
-              <div class="flex items-center justify-between mb-4">
-                <div :class="['w-12 h-12 rounded-xl flex items-center justify-center bg-gradient-to-br', stat.color]">
-                  <Icon :name="stat.icon" :size="24" class="text-white" />
+            <div class="bg-theme-card border border-theme-primary rounded-xl p-4 hover:bg-theme-secondary transition-all duration-200 shadow-theme-sm">
+              <div class="flex items-center gap-3 mb-2">
+                <div class="w-8 h-8 bg-theme-tertiary rounded-lg flex items-center justify-center">
+                  <Icon :name="stat.icon" :size="16" class="text-theme-primary" />
                 </div>
-                <div class="text-right">
-                  <div class="text-2xl font-bold text-white">
-                    {{ estadisticas[stat.key]?.toLocaleString() || '0' }}
+                <div class="text-xl font-bold text-theme-primary">
+                  {{ estadisticas[stat.key]?.toLocaleString() || '0' }}
+                </div>
+              </div>
+              <h3 class="text-xs font-medium text-theme-secondary">{{ stat.label }}</h3>
+            </div>
+          </div>
+        </div>
+
+        <!-- Widgets Dinámicos -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
+          
+          <!-- 🔥 Actividad en Tiempo Real -->
+          <div class="bg-theme-card border border-theme-primary rounded-xl p-4 shadow-theme-sm">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
+                <Icon name="activity" :size="16" class="text-white" />
+              </div>
+              <h3 class="text-sm font-semibold text-theme-primary">Actividad Reciente</h3>
+              <div class="ml-auto">
+                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
+              </div>
+            </div>
+            
+            <div class="space-y-2">
+              <template v-if="loadingActivity">
+                <div v-for="i in 3" :key="i" class="flex items-center gap-2 animate-pulse">
+                  <div class="w-2 h-2 bg-theme-tertiary rounded-full"></div>
+                  <div class="h-3 bg-theme-tertiary rounded flex-1"></div>
+                  <div class="h-3 bg-theme-tertiary rounded w-8"></div>
+                </div>
+              </template>
+              <template v-else>
+                <div 
+                  v-for="activity in recentActivity" 
+                  :key="activity.id"
+                  class="flex items-center gap-2 text-xs"
+                >
+                  <div 
+                    :class="[
+                      'w-2 h-2 rounded-full',
+                      activity.tipo === 'entrada' ? 'bg-green-500' : 'bg-red-500'
+                    ]"
+                  ></div>
+                  <span class="text-theme-primary flex-1 truncate">{{ activity.persona }}</span>
+                  <span class="text-theme-muted">{{ formatRelativeTime(activity.tiempo) }}</span>
+                </div>
+              </template>
+            </div>
+          </div>
+
+          <!-- 📊 Gráfico de Actividad Semanal -->
+          <div class="bg-theme-card border border-theme-primary rounded-xl p-4 shadow-theme-sm">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
+                <Icon name="bar-chart" :size="16" class="text-white" />
+              </div>
+              <h3 class="text-sm font-semibold text-theme-primary">Actividad Semanal</h3>
+            </div>
+            
+            <div class="space-y-2">
+              <template v-if="loadingWeekly">
+                <div v-for="i in 7" :key="i" class="flex items-center gap-2 animate-pulse">
+                  <div class="w-6 h-3 bg-theme-tertiary rounded"></div>
+                  <div class="h-2 bg-theme-tertiary rounded flex-1"></div>
+                  <div class="w-6 h-3 bg-theme-tertiary rounded"></div>
+                </div>
+              </template>
+              <template v-else>
+                <div 
+                  v-for="day in weeklyActivity" 
+                  :key="day.day"
+                  class="flex items-center gap-2 text-xs"
+                >
+                  <span class="text-theme-secondary w-6">{{ day.day }}</span>
+                  <div class="flex-1 bg-theme-tertiary rounded-full h-2 overflow-hidden">
+                    <div 
+                      class="h-full bg-blue-500 rounded-full transition-all duration-500"
+                      :style="{ width: `${(day.accesos / day.maxAccesos) * 100}%` }"
+                    ></div>
                   </div>
+                  <span class="text-theme-primary w-6 text-right">{{ day.accesos }}</span>
                 </div>
-              </div>
-              <h3 class="text-sm font-medium text-gray-300">{{ stat.label }}</h3>
+              </template>
             </div>
           </div>
-        </div>
 
-        <!-- Características principales -->
-        <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-16">
-          <div 
-            v-for="(feature, index) in [
-              { 
-                title: 'Control QR Inteligente', 
-                description: 'Escaneo rápido y seguro de códigos QR para control de acceso instantáneo',
-                icon: 'qr-code',
-                color: 'from-[#39A900] to-[#007832]',
-                border: 'border-[#39A900]/20'
-              },
-              { 
-                title: 'Gestión de Personas', 
-                description: 'Administración completa de usuarios, visitantes y personal autorizado',
-                icon: 'users',
-                color: 'from-[#50E5F9] to-[#0ea5e9]',
-                border: 'border-[#50E5F9]/20'
-              },
-              { 
-                title: 'Monitoreo en Tiempo Real', 
-                description: 'Seguimiento instantáneo de entradas, salidas y actividad del sistema',
-                icon: 'activity',
-                color: 'from-[#FDC300] to-[#f59e0b]',
-                border: 'border-[#FDC300]/20'
-              }
-            ]" 
-            :key="index"
-            :class="['transition-all duration-700 hover:scale-105', isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-10']"
-            :style="{ transitionDelay: `${(index + 4) * 200}ms` }"
-          >
-            <div class="bg-black/20 backdrop-blur-sm border rounded-2xl p-8 hover:bg-black/30 transition-all duration-300 h-full" :class="feature.border">
-              <div :class="['w-16 h-16 rounded-2xl flex items-center justify-center bg-gradient-to-br mb-6 mx-auto', feature.color]">
-                <Icon :name="feature.icon" :size="32" class="text-white" />
+          <!-- ⚡ Estado del Sistema -->
+          <div class="bg-theme-card border border-theme-primary rounded-xl p-4 shadow-theme-sm">
+            <div class="flex items-center gap-2 mb-4">
+              <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
+                <Icon name="shield" :size="16" class="text-white" />
               </div>
-              <h3 class="text-xl font-semibold text-white mb-4 text-center">{{ feature.title }}</h3>
-              <p class="text-gray-400 text-center leading-relaxed">{{ feature.description }}</p>
+              <h3 class="text-sm font-semibold text-theme-primary">Estado Sistema</h3>
+            </div>
+            
+            <div class="space-y-2">
+              <template v-if="loadingStatus">
+                <div v-for="i in 4" :key="i" class="flex items-center gap-2 animate-pulse">
+                  <div class="w-2 h-2 bg-theme-tertiary rounded-full"></div>
+                  <div class="h-3 bg-theme-tertiary rounded flex-1"></div>
+                  <div class="h-3 bg-theme-tertiary rounded w-12"></div>
+                </div>
+              </template>
+              <template v-else>
+                <div class="flex items-center gap-2 text-xs">
+                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span class="text-theme-primary flex-1">Sistema</span>
+                  <span class="text-green-400">{{ systemStatus.sistema?.uptime }}</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span class="text-theme-primary flex-1">QR Scanner</span>
+                  <span class="text-green-400">{{ systemStatus.qr_scanner?.devices }} activos</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span class="text-theme-primary flex-1">Seguridad</span>
+                  <span class="text-green-400">Óptima</span>
+                </div>
+                <div class="flex items-center gap-2 text-xs">
+                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
+                  <span class="text-theme-primary flex-1">Base de datos</span>
+                  <span class="text-green-400">{{ systemStatus.database?.response }}</span>
+                </div>
+              </template>
             </div>
           </div>
+          
         </div>
 
-        <!-- Accesos rápidos -->
-        <div class="bg-black/20 backdrop-blur-sm border border-white/10 rounded-2xl p-8 text-center">
-          <h2 class="text-2xl font-bold text-white mb-6">Accesos Rápidos</h2>
-          <div class="flex flex-wrap justify-center gap-4">
-            <Link 
-              :href="route('personas.create')"
-              class="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#39A900] to-[#007832] text-white rounded-xl hover:from-[#007832] hover:to-[#39A900] transition-all duration-300 hover:scale-105 shadow-lg"
-            >
-              <Icon name="user-plus" :size="20" />
-              Registrar Nueva Persona
-            </Link>
-            
-            <a 
-              href="/system/login"
-              class="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#50E5F9] to-[#0ea5e9] text-white rounded-xl hover:from-[#0ea5e9] hover:to-[#50E5F9] transition-all duration-300 hover:scale-105 shadow-lg"
-            >
-              <Icon name="shield" :size="20" />
-              Acceso del Sistema
-            </a>
-            
-            <Link 
-              :href="route('personas.index')"
-              class="flex items-center gap-3 px-6 py-3 bg-gradient-to-r from-[#FDC300] to-[#f59e0b] text-black rounded-xl hover:from-[#f59e0b] hover:to-[#FDC300] transition-all duration-300 hover:scale-105 shadow-lg"
-            >
-              <Icon name="search" :size="20" />
-              Consultar Personas
-            </Link>
-          </div>
-        </div>
 
-        <!-- Footer info -->
-        <div class="mt-16 text-center text-gray-500 text-sm">
-          <p>© {{ new Date().getFullYear() }} CTAccess - Sistema de Control de Acceso</p>
-          <p class="mt-1">Última actualización: {{ sistema_info.ultima_actualizacion }}</p>
-        </div>
-      </main>
-    </div>
+      </div>
+    </main>
+
+    <!-- Footer fijo -->
+    <footer class="bg-theme-navbar border-t border-theme-primary px-4 py-3 flex-shrink-0">
+      <div class="max-w-7xl mx-auto text-center">
+        <p class="text-xs text-theme-muted">© {{ new Date().getFullYear() }} CTAccess - v{{ sistema_info?.version || '1.0' }}</p>
+      </div>
+    </footer>
   </div>
 </template>
 

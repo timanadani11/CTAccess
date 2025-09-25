@@ -39,6 +39,21 @@
     <body class="font-sans antialiased">
         @inertia
         
+        <!-- Inicialización del tema -->
+        <script>
+            // Inicializar tema antes de que Vue se monte para evitar flash
+            (function() {
+                const savedTheme = localStorage.getItem('theme');
+                const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                
+                if (savedTheme === 'dark' || (!savedTheme && prefersDark)) {
+                    document.documentElement.classList.add('dark');
+                } else {
+                    document.documentElement.classList.remove('dark');
+                }
+            })();
+        </script>
+        
         <!-- PWA Service Worker -->
         <script>
             if ('serviceWorker' in navigator) {
