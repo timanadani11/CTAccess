@@ -41,7 +41,7 @@ return [
             [
                 'label' => 'Verificación QR',
                 'icon'  => 'heroicon-m-qr-code',
-                'route' => 'system.celador.qr',
+                'route' => 'system.celador.qr.index',
             ],
             [
                 'label' => 'Incidencias',

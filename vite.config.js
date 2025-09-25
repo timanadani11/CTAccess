@@ -87,6 +87,35 @@ export default defineConfig({
                                 maxAgeSeconds: 60 * 60 * 24 * 30 // 30 days
                             }
                         }
+                    },
+                    {
+                        urlPattern: /^.*\/system\/celador\/qr\/.*$/,
+                        handler: 'NetworkFirst',
+                        options: {
+                            cacheName: 'qr-api-cache',
+                            networkTimeoutSeconds: 3,
+                            expiration: {
+                                maxEntries: 50,
+                                maxAgeSeconds: 60 * 5 // 5 minutes
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
+                    },
+                    {
+                        urlPattern: /^.*\/system\/celador\/personas\/.*$/,
+                        handler: 'CacheFirst',
+                        options: {
+                            cacheName: 'personas-cache',
+                            expiration: {
+                                maxEntries: 100,
+                                maxAgeSeconds: 60 * 60 * 2 // 2 hours
+                            },
+                            cacheableResponse: {
+                                statuses: [0, 200]
+                            }
+                        }
                     }
                 ]
             },

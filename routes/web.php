@@ -75,7 +75,12 @@ Route::prefix('system')->name('system.')->group(function () {
             Route::get('/accesos', [CeladorAccesoController::class, 'index'])->name('accesos.index');
 
             // Verificación QR
-            Route::get('/qr', [CeladorQrController::class, 'index'])->name('qr');
+            Route::get('/qr', [CeladorQrController::class, 'index'])->name('qr.index');
+            Route::post('/qr/registrar', [CeladorQrController::class, 'registrarAcceso'])->name('qr.registrar');
+            Route::get('/qr/accesos-activos', [CeladorQrController::class, 'accesosActivos'])->name('qr.accesos-activos');
+            Route::get('/qr/historial', [CeladorQrController::class, 'historialDelDia'])->name('qr.historial');
+            Route::get('/qr/estadisticas', [CeladorQrController::class, 'estadisticas'])->name('qr.estadisticas');
+            Route::post('/qr/buscar-persona', [CeladorQrController::class, 'buscarPersona'])->name('qr.buscar-persona');
 
             // Incidencias
             Route::get('/incidencias', [CeladorIncidenciaController::class, 'index'])->name('incidencias.index');

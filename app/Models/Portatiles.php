@@ -21,4 +21,24 @@ class Portatiles extends Model
     {
         return $this->hasMany(Acceso::class, 'portatil_id', 'portatil_id');
     }
+
+    // Métodos para QR
+    public static function buscarPorQr($qrCode)
+    {
+        return self::where('qrCode', $qrCode)->first();
+    }
+
+    public function perteneceAPersona($personaId)
+    {
+        return $this->persona_id == $personaId;
+    }
+
+    public function getInfoCompleta()
+    {
+        return [
+            'portatil' => $this,
+            'persona' => $this->persona,
+            'accesos_recientes' => $this->accesos()->latest()->take(5)->get()
+        ];
+    }
 }
