@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\HomeController;
 use App\Http\Controllers\System\Auth\LoginController as SystemLoginController;
 use App\Http\Controllers\System\DashboardController as SystemDashboardController;
 use App\Http\Controllers\System\AdminDashboardController;
@@ -15,9 +16,7 @@ use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 use App\Models\Persona;
 
-Route::get('/', function () {
-    return Inertia::render('Home');
-});
+Route::get('/', [HomeController::class, 'index'])->name('home');
 
 Route::get('/debug/personas/{persona}', function (Persona $persona) {
     $persona->load(['portatiles', 'vehiculos']);

@@ -7,12 +7,12 @@
         <title inertia>{{ config('app.name', 'Laravel') }}</title>
 
         <!-- PWA Meta Tags -->
-        <meta name="theme-color" content="#16a34a" media="(prefers-color-scheme: light)">
-        <meta name="theme-color" content="#166534" media="(prefers-color-scheme: dark)">
+        <meta name="theme-color" content="#39A900" media="(prefers-color-scheme: light)">
+        <meta name="theme-color" content="#007832" media="(prefers-color-scheme: dark)">
         <meta name="apple-mobile-web-app-capable" content="yes">
-        <meta name="apple-mobile-web-app-status-bar-style" content="default">
+        <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="CTAccess">
-        <meta name="msapplication-TileColor" content="#16a34a">
+        <meta name="msapplication-TileColor" content="#39A900">
         <meta name="msapplication-config" content="{{ asset('browserconfig.xml') }}">
 
         <!-- Apple Touch Icons -->
@@ -38,5 +38,20 @@
     </head>
     <body class="font-sans antialiased">
         @inertia
+        
+        <!-- PWA Service Worker -->
+        <script>
+            if ('serviceWorker' in navigator) {
+                window.addEventListener('load', () => {
+                    navigator.serviceWorker.register('/sw.js')
+                        .then((registration) => {
+                            console.log('SW registrado con éxito:', registration);
+                        })
+                        .catch((registrationError) => {
+                            console.log('SW falló al registrarse:', registrationError);
+                        });
+                });
+            }
+        </script>
     </body>
 </html>

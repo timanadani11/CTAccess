@@ -1,37 +1,34 @@
 <template>
   <Head title="Nueva Persona" />
   
-  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100 py-8">
-    <div class="max-w-4xl mx-auto px-4 sm:px-6 lg:px-8">
-      <!-- Header -->
-      <div class="mb-8">
-        <div class="flex items-center justify-between">
-          <div>
-            <h1 class="text-3xl font-bold text-gray-900">Nueva Persona</h1>
-            <p class="mt-2 text-gray-600">Complete la información para registrar una nueva persona</p>
+  <!-- PWA Optimized Layout -->
+  <div class="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
+    <div class="max-w-4xl mx-auto px-3 sm:px-4 lg:px-8 py-4 sm:py-6 lg:py-8">
+      <!-- Mobile-optimized Header -->
+      <div class="mb-4 sm:mb-6 lg:mb-8">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div class="flex-1">
+            <h1 class="text-2xl sm:text-3xl font-bold text-gray-900">Nueva Persona</h1>
+            <p class="mt-1 sm:mt-2 text-sm sm:text-base text-gray-600">Complete la información para registrar una nueva persona</p>
           </div>
           <Link 
             :href="route('personas.index')"
-            class="inline-flex items-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors"
+            class="inline-flex items-center justify-center px-4 py-2 border border-gray-300 rounded-lg text-sm font-medium text-gray-700 bg-white hover:bg-gray-50 transition-colors w-full sm:w-auto"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 19l-7-7m0 0l7-7m-7 7h18"/>
-            </svg>
+            <Icon name="arrow-left" :size="16" class="mr-2" />
             Volver al Listado
           </Link>
         </div>
       </div>
 
-      <!-- Formulario Principal -->
-      <form @submit.prevent="submit" class="space-y-8">
+      <!-- PWA Optimized Form -->
+      <form @submit.prevent="submit" class="space-y-4 sm:space-y-6 lg:space-y-8">
         <!-- Sección 1: Datos Personales -->
-        <div class="bg-white shadow-lg rounded-xl p-6 border border-gray-200">
+        <div class="bg-white shadow-lg rounded-xl p-4 sm:p-6 border border-gray-200">
           <div class="flex items-center mb-6">
             <div class="flex-shrink-0">
               <div class="w-10 h-10 bg-[#39A900] rounded-lg flex items-center justify-center">
-                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/>
-                </svg>
+                <Icon name="user" :size="20" class="text-white" />
               </div>
             </div>
             <div class="ml-4">
@@ -40,7 +37,7 @@
             </div>
           </div>
 
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 sm:gap-6">
             <!-- Documento -->
             <div>
               <label for="documento" class="block text-sm font-medium text-gray-700 mb-2">
@@ -50,9 +47,10 @@
                 id="documento"
                 v-model="form.documento"
                 type="text"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all"
+                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
                 :class="{ 'border-red-500 ring-red-500': form.errors.documento }"
                 placeholder="Ej: 12345678"
+                autocomplete="off"
               >
               <div v-if="form.errors.documento" class="mt-1 text-sm text-red-600">
                 {{ form.errors.documento }}
@@ -69,9 +67,10 @@
                 v-model="form.nombre"
                 type="text"
                 required
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all"
+                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
                 :class="{ 'border-red-500 ring-red-500': form.errors.nombre }"
                 placeholder="Ej: Juan Pérez García"
+                autocomplete="name"
               >
               <div v-if="form.errors.nombre" class="mt-1 text-sm text-red-600">
                 {{ form.errors.nombre }}
@@ -87,7 +86,7 @@
                 id="tipoPersona"
                 v-model="form.tipoPersona"
                 required
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all"
+                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
                 :class="{ 'border-red-500 ring-red-500': form.errors.tipoPersona }"
               >
                 <option value="">Seleccionar tipo</option>
@@ -111,9 +110,10 @@
                 id="correo"
                 v-model="form.correo"
                 type="email"
-                class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all"
+                class="w-full px-3 sm:px-4 py-2 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent transition-all text-base"
                 :class="{ 'border-red-500 ring-red-500': form.errors.correo }"
                 placeholder="correo@ejemplo.com"
+                autocomplete="email"
               >
               <div v-if="form.errors.correo" class="mt-1 text-sm text-red-600">
                 {{ form.errors.correo }}
@@ -146,18 +146,14 @@
               @click="addPortatil"
               class="inline-flex items-center px-4 py-2 bg-[#50E5F9] text-white rounded-lg hover:bg-[#00B4D8] transition-colors"
             >
-              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
-              </svg>
+              <Icon name="plus" :size="16" class="mr-2" />
               Agregar Portátil
             </button>
           </div>
 
           <!-- Lista de portátiles -->
           <div v-if="form.portatiles.length === 0" class="text-center py-12 border-2 border-dashed border-gray-300 rounded-lg">
-            <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-            </svg>
+            <Icon name="laptop" :size="48" class="mx-auto text-gray-400" />
             <h3 class="mt-2 text-sm font-medium text-gray-900">No hay portátiles</h3>
             <p class="mt-1 text-sm text-gray-500">Agregue portátiles haciendo clic en el botón superior</p>
           </div>
@@ -251,7 +247,7 @@
                 <div class="flex items-center space-x-4">
                   <div class="flex-shrink-0">
                     <img 
-                      :src="`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=${encodeURIComponent(portatil.serial)}`"
+                      :src="`https://api.qrserver.com/v1/create-qr-code/?size=80x80&data=PORTATIL_${encodeURIComponent(portatil.serial)}`"
                       :alt="`QR para ${portatil.serial}`"
                       class="w-16 h-16 border border-gray-200 rounded"
                     >
@@ -408,9 +404,7 @@
         <!-- Mensaje de éxito/error -->
         <div v-if="$page.props.flash?.success" class="bg-green-50 border border-green-200 rounded-lg p-4">
           <div class="flex">
-            <svg class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
-            </svg>
+            <Icon name="check-circle" :size="20" class="text-green-400" />
             <div class="ml-3">
               <p class="text-sm text-green-800">{{ $page.props.flash.success }}</p>
             </div>
@@ -419,31 +413,32 @@
 
         <div v-if="form.errors.error" class="bg-red-50 border border-red-200 rounded-lg p-4">
           <div class="flex">
-            <svg class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-              <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-            </svg>
+            <Icon name="x-circle" :size="20" class="text-red-400" />
             <div class="ml-3">
               <p class="text-sm text-red-800">{{ form.errors.error }}</p>
             </div>
           </div>
         </div>
 
-        <!-- Botones de acción temporales -->
-        <div class="flex justify-end gap-3">
-          <Link
-            :href="route('personas.index')"
-            class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors"
-          >
-            Cancelar
-          </Link>
-          <button
-            type="submit"
-            :disabled="form.processing"
-            class="px-6 py-3 bg-[#39A900] text-white rounded-lg hover:bg-[#007832] disabled:opacity-50 transition-colors"
-          >
-            <span v-if="form.processing">Guardando...</span>
-            <span v-else>Crear Persona</span>
-          </button>
+        <!-- PWA Optimized Action Buttons -->
+        <div class="sticky bottom-0 bg-white border-t border-gray-200 p-4 -mx-3 sm:-mx-4 lg:-mx-8 mt-8">
+          <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
+            <Link
+              :href="route('personas.index')"
+              class="px-6 py-3 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors text-center font-medium order-2 sm:order-1"
+            >
+              Cancelar
+            </Link>
+            <button
+              type="submit"
+              :disabled="form.processing"
+              class="px-6 py-3 bg-[#39A900] text-white rounded-lg hover:bg-[#007832] disabled:opacity-50 transition-colors font-medium flex items-center justify-center order-1 sm:order-2"
+            >
+              <Icon v-if="form.processing" name="loader" :size="20" class="animate-spin -ml-1 mr-3 text-white" />
+              <span v-if="form.processing">Guardando...</span>
+              <span v-else>Crear Persona</span>
+            </button>
+          </div>
         </div>
       </form>
     </div>
@@ -452,6 +447,7 @@
 
 <script setup>
 import { Head, Link, useForm } from '@inertiajs/vue3'
+import Icon from '@/Components/Icon.vue'
 
 // Definir el título de la página
 defineOptions({
@@ -508,16 +504,42 @@ const getVehicleEmoji = (tipo) => {
 
 // Función para enviar el formulario
 const submit = () => {
+  // Validación básica antes del envío
+  if (!form.nombre.trim()) {
+    alert('El nombre es obligatorio');
+    return;
+  }
+  
+  if (!form.tipoPersona) {
+    alert('Debe seleccionar un tipo de persona');
+    return;
+  }
+
+  console.log('Enviando formulario:', form.data());
+  
   form.post(route('personas.store'), {
-    onSuccess: () => {
-      // Redirigir al índice después del éxito
+    onSuccess: (response) => {
+      console.log('Persona creada exitosamente:', response);
+      // La redirección se maneja automáticamente por el controlador
     },
     onError: (errors) => {
+      console.error('Errores de validación:', errors);
+      
       // Si hay error de token CSRF, recargar la página
       if (errors.message && (errors.message.includes('CSRF') || errors.message.includes('expired'))) {
+        console.warn('Token CSRF expirado, recargando página...');
         window.location.reload();
+        return;
       }
-      console.log('Errores de validación:', errors)
+      
+      // Mostrar primer error encontrado
+      const firstError = Object.values(errors)[0];
+      if (firstError && typeof firstError === 'string') {
+        alert(`Error: ${firstError}`);
+      }
+    },
+    onFinish: () => {
+      console.log('Proceso de envío completado');
     },
     preserveScroll: true,
     preserveState: false,

@@ -37,7 +37,9 @@ class PersonaService
             // Generar QR para la persona a partir del documento (si viene)
             $personaQrPath = null;
             if (!empty($data['documento'])) {
-                $personaQrPath = $this->storeQrPng($data['documento'], 'persona');
+                // Formato correcto para el sistema QR: PERSONA_documento
+                $qrContent = 'PERSONA_' . $data['documento'];
+                $personaQrPath = $this->storeQrPng($qrContent, 'persona');
             }
 
             $persona = Persona::create([
@@ -53,7 +55,12 @@ class PersonaService
                 foreach ($data['portatiles'] as $p) {
                     // Generar QR para el portátil usando su serial
                     $serial = $p['serial'] ?? '';
-                    $qrPath = $serial ? $this->storeQrPng($serial, 'portatil') : null;
+                    $qrPath = null;
+                    if ($serial) {
+                        // Formato correcto para el sistema QR: PORTATIL_serial
+                        $qrContent = 'PORTATIL_' . $serial;
+                        $qrPath = $this->storeQrPng($qrContent, 'portatil');
+                    }
                     $persona->portatiles()->create([
                         // Guardamos la RUTA de la imagen QR del portátil
                         'qrCode' => $qrPath,

@@ -3,6 +3,7 @@ import { ref, computed, watch } from 'vue'
 import { router, usePage } from '@inertiajs/vue3'
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { debounce } from 'lodash'
+import Icon from '@/Components/Icon.vue'
 
 const props = defineProps({
   personas: Object,
@@ -77,9 +78,7 @@ const viewPersona = (persona) => {
           </p>
         </div>
         <div class="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+          <Icon name="users" :size="16" />
           Total: {{ personas.total }} personas
         </div>
       </div>
@@ -96,9 +95,7 @@ const viewPersona = (persona) => {
             </label>
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                </svg>
+                <Icon name="search" :size="16" class="text-gray-400" />
               </div>
               <input
                 id="search"
@@ -151,9 +148,7 @@ const viewPersona = (persona) => {
             @click="clearFilters"
             class="inline-flex items-center px-3 py-2 border border-gray-300 dark:border-gray-600 shadow-sm text-sm leading-4 font-medium rounded-md text-gray-700 dark:text-gray-300 bg-white dark:bg-gray-700 hover:bg-gray-50 dark:hover:bg-gray-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-forest-500"
           >
-            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
+            <Icon name="refresh" :size="16" class="mr-2" />
             Limpiar filtros
           </button>
         </div>
@@ -162,9 +157,7 @@ const viewPersona = (persona) => {
       <!-- Lista de Personas -->
       <div class="bg-white dark:bg-gray-800 rounded-lg shadow-sm border border-gray-200 dark:border-gray-700 overflow-hidden">
         <div v-if="personas.data.length === 0" class="p-8 text-center">
-          <svg class="mx-auto h-12 w-12 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-          </svg>
+          <Icon name="users" :size="48" class="mx-auto text-gray-400" />
           <h3 class="mt-2 text-sm font-medium text-gray-900 dark:text-white">No hay personas</h3>
           <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
             No se encontraron personas con los filtros aplicados.
@@ -237,15 +230,11 @@ const viewPersona = (persona) => {
                 <td class="px-6 py-4 whitespace-nowrap">
                   <div class="flex items-center space-x-2">
                     <div v-if="persona.portatiles && persona.portatiles.length > 0" class="flex items-center text-xs text-blue-600 dark:text-blue-400">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" />
-                      </svg>
+                      <Icon name="laptop" :size="16" class="mr-1" />
                       {{ persona.portatiles.length }}
                     </div>
                     <div v-if="persona.vehiculos && persona.vehiculos.length > 0" class="flex items-center text-xs text-green-600 dark:text-green-400">
-                      <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" />
-                      </svg>
+                      <Icon name="car" :size="16" class="mr-1" />
                       {{ persona.vehiculos.length }}
                     </div>
                   </div>

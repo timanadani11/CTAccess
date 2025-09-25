@@ -61,11 +61,9 @@
               :class="{ 'border-red-500': form.errors.tipoPersona }"
             >
               <option value="">Seleccionar tipo</option>
-              <option value="Estudiante">Estudiante</option>
-              <option value="Docente">Docente</option>
-              <option value="Administrativo">Administrativo</option>
+              <option value="Aprendiz">Aprendiz</option>
               <option value="Visitante">Visitante</option>
-              <option value="Contratista">Contratista</option>
+              <option value="Instructor">Instructor</option>
             </select>
             <div v-if="form.errors.tipoPersona" class="text-red-600 text-sm mt-1">
               {{ form.errors.tipoPersona }}

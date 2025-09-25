@@ -4,9 +4,9 @@
   "description": "Sistema de gestión y control de acceso para centros educativos",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#f0fdf4",
-  "theme_color": "#16a34a",
-  "theme_color_dark": "#166534",
+  "background_color": "#00304D",
+  "theme_color": "#39A900",
+  "theme_color_dark": "#007832",
   "orientation": "portrait-primary",
   "categories": ["business", "education", "security"],
   "icons": [

@@ -266,22 +266,42 @@ class QrController extends Controller
     public function buscarPersona(Request $request)
     {
         $request->validate([
-            'qr' => 'required|string'
+            'qr_persona' => 'required|string'
         ]);
 
         try {
-            $persona = $this->buscarPersonaPorQr($request->qr);
-            $info = $persona->getInfoCompleta();
+            $persona = $this->buscarPersonaPorQr($request->qr_persona);
+            
+            // Verificar si tiene acceso activo
+            $accesoActivo = $persona->getAccesoActivo();
             
             return response()->json([
-                'success' => true,
-                'data' => $info
+                'persona' => [
+                    'Nombre' => $persona->Nombre,
+                    'documento' => $persona->documento,
+                    'TipoPersona' => $persona->TipoPersona,
+                    'correo' => $persona->correo
+                ],
+                'tiene_acceso_activo' => $accesoActivo ? true : false,
+                'acceso_activo' => $accesoActivo ? [
+                    'fecha_entrada' => $accesoActivo->fecha_entrada,
+                    'portatil_id' => $accesoActivo->portatil_id,
+                    'vehiculo_id' => $accesoActivo->vehiculo_id
+                ] : null
             ]);
         } catch (ValidationException $e) {
             return response()->json([
-                'success' => false,
-                'message' => $e->getMessage()
+                'message' => $e->validator->errors()->first()
             ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al buscar persona', [
+                'error' => $e->getMessage(),
+                'qr_persona' => $request->qr_persona
+            ]);
+            
+            return response()->json([
+                'message' => 'Error interno del sistema'
+            ], 500);
         }
     }
 }

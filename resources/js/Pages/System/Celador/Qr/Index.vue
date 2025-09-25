@@ -1,10 +1,9 @@
 <script setup>
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import QrScanner from '@/Components/QrScanner.vue'
-import OfflineStatus from '@/Components/OfflineStatus.vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
-import { useQrOffline } from '@/composables/useQrOffline'
+import Icon from '@/Components/Icon.vue'
 
 const props = defineProps({
   estadisticas: Object,
@@ -13,24 +12,6 @@ const props = defineProps({
 })
 
 const page = usePage()
-
-// Composable offline
-const {
-  isOnline,
-  connectionStatus,
-  storageInfo,
-  syncStatus,
-  hasCachedData,
-  hasPendingSync,
-  buscarPersonaPorQr,
-  buscarPortatilPorQr,
-  buscarVehiculoPorQr,
-  registrarAcceso: registrarAccesoOffline,
-  syncPendingData,
-  clearCache,
-  updateStorageInfo,
-  getOfflineStatus
-} = useQrOffline()
 
 // Estado del componente
 const scannedCodes = ref({
@@ -42,6 +23,8 @@ const scannedCodes = ref({
 const personaInfo = ref(null)
 const isProcessing = ref(false)
 const showPersonaInfo = ref(false)
+const showConfirmModal = ref(false)
+const registroInstantaneo = ref(false)
 const refreshInterval = ref(null)
 const notification = ref(null)
 
@@ -74,14 +57,29 @@ const handleQrScanned = async (qrEvent) => {
 
 const buscarPersona = async (qrPersona) => {
   try {
-    const result = await buscarPersonaPorQr(qrPersona)
+    const response = await fetch(route('system.celador.qr.buscar-persona'), {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRF-TOKEN': page.props.csrf_token
+      },
+      body: JSON.stringify({ qr_persona: qrPersona })
+    })
     
-    personaInfo.value = result
-    showPersonaInfo.value = true
+    const result = await response.json()
     
-    // Mostrar indicador si es resultado offline
-    if (result.offline) {
-      showNotification('warning', 'Información obtenida desde cache offline')
+    if (response.ok) {
+      personaInfo.value = result
+      showPersonaInfo.value = true
+      
+      // Si está activado el registro instantáneo, procesar directamente
+      if (registroInstantaneo.value) {
+        await procesarAcceso()
+      } else {
+        showConfirmModal.value = true
+      }
+    } else {
+      throw new Error(result.message || 'Persona no encontrada')
     }
   } catch (error) {
     console.error('Error al buscar persona:', error)
@@ -95,33 +93,28 @@ const procesarAcceso = async () => {
   isProcessing.value = true
 
   try {
-    const accesoData = {
+    router.post(route('system.celador.qr.registrar'), {
       qr_persona: scannedCodes.value.persona,
       qr_portatil: scannedCodes.value.portatil,
-      qr_vehiculo: scannedCodes.value.vehiculo,
-      persona_nombre: personaInfo.value?.persona?.Nombre,
-      persona_documento: personaInfo.value?.persona?.documento
-    }
-
-    const result = await registrarAccesoOffline(accesoData)
-    
-    if (result.success) {
-      limpiarCodigos()
-      
-      // Solo actualizar datos si estamos online
-      if (result.online) {
+      qr_vehiculo: scannedCodes.value.vehiculo
+    }, {
+      onSuccess: (page) => {
+        limpiarCodigos()
+        showNotification('success', 'Acceso registrado correctamente')
         refreshData()
+      },
+      onError: (errors) => {
+        console.error('Error al registrar acceso:', errors)
+        const errorMessage = Object.values(errors)[0] || 'Error al procesar el acceso'
+        showNotification('error', errorMessage)
+      },
+      onFinish: () => {
+        isProcessing.value = false
       }
-      
-      const notificationType = result.online ? 'success' : 'warning'
-      showNotification(notificationType, result.data.mensaje, result.data)
-    } else {
-      throw new Error('Error al registrar acceso')
-    }
+    })
   } catch (error) {
     console.error('Error al procesar acceso:', error)
     showNotification('error', error.message || 'Error al procesar el acceso')
-  } finally {
     isProcessing.value = false
   }
 }
@@ -134,6 +127,22 @@ const limpiarCodigos = () => {
   }
   personaInfo.value = null
   showPersonaInfo.value = false
+  showConfirmModal.value = false
+}
+
+const cerrarModal = () => {
+  showConfirmModal.value = false
+}
+
+const confirmarAcceso = async () => {
+  showConfirmModal.value = false
+  await procesarAcceso()
+}
+
+// Función para registro directo sin modal (opcional)
+const registrarDirecto = async () => {
+  if (!canProcess.value) return
+  await procesarAcceso()
 }
 
 const refreshData = async () => {
@@ -176,38 +185,7 @@ const closeNotification = () => {
   notification.value = null
 }
 
-// Métodos para manejar el cache offline
-const handleClearCache = async () => {
-  try {
-    await clearCache()
-    showNotification('success', 'Cache limpiado exitosamente')
-  } catch (error) {
-    showNotification('error', 'Error al limpiar cache')
-  }
-}
-
-const handleRefreshCache = async () => {
-  try {
-    // Actualizar cache con datos del servidor
-    await updateStorageInfo()
-    showNotification('success', 'Cache actualizado')
-  } catch (error) {
-    showNotification('error', 'Error al actualizar cache')
-  }
-}
-
-const handleSyncData = async () => {
-  try {
-    const success = await syncPendingData()
-    if (success) {
-      showNotification('success', 'Sincronización completada exitosamente')
-    } else {
-      showNotification('warning', 'Algunos elementos no pudieron sincronizarse')
-    }
-  } catch (error) {
-    showNotification('error', 'Error durante la sincronización')
-  }
-}
+// Funciones de utilidad
 
 const formatTime = (dateString) => {
   return new Date(dateString).toLocaleTimeString('es-ES', {
@@ -318,15 +296,9 @@ onUnmounted(() => {
           >
             <div class="flex items-start">
               <div class="flex-shrink-0">
-                <svg v-if="notification.type === 'success'" class="w-5 h-5 text-green-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                </svg>
-                <svg v-else-if="notification.type === 'warning'" class="w-5 h-5 text-yellow-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"/>
-                </svg>
-                <svg v-else class="w-5 h-5 text-red-400" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/>
-                </svg>
+                <Icon v-if="notification.type === 'success'" name="check-circle" :size="20" class="text-green-400" />
+                <Icon v-else-if="notification.type === 'warning'" name="alert-triangle" :size="20" class="text-yellow-400" />
+                <Icon v-else name="x-circle" :size="20" class="text-red-400" />
               </div>
               <div class="ml-3 flex-1">
                 <p class="text-sm font-medium">{{ notification.message }}</p>
@@ -343,9 +315,7 @@ onUnmounted(() => {
                 </div>
               </div>
               <button @click="closeNotification" class="ml-3 flex-shrink-0">
-                <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20">
-                  <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"/>
-                </svg>
+                <Icon name="x" :size="16" />
               </button>
             </div>
           </div>
@@ -357,9 +327,7 @@ onUnmounted(() => {
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <div class="w-8 h-8 bg-green-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16l-4-4m0 0l4-4m-4 4h18"/>
-                  </svg>
+                  <Icon name="log-in" :size="20" class="text-green-600" />
                 </div>
               </div>
               <div class="ml-3">
@@ -373,9 +341,7 @@ onUnmounted(() => {
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <div class="w-8 h-8 bg-red-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H3"/>
-                  </svg>
+                  <Icon name="log-out" :size="20" class="text-red-600" />
                 </div>
               </div>
               <div class="ml-3">
@@ -389,9 +355,7 @@ onUnmounted(() => {
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <div class="w-8 h-8 bg-blue-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z"/>
-                  </svg>
+                  <Icon name="users" :size="20" class="text-blue-600" />
                 </div>
               </div>
               <div class="ml-3">
@@ -405,9 +369,7 @@ onUnmounted(() => {
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <div class="w-8 h-8 bg-purple-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/>
-                  </svg>
+                  <Icon name="laptop" :size="20" class="text-purple-600" />
                 </div>
               </div>
               <div class="ml-3">
@@ -421,9 +383,7 @@ onUnmounted(() => {
             <div class="flex items-center">
               <div class="flex-shrink-0">
                 <div class="w-8 h-8 bg-orange-100 rounded-lg flex items-center justify-center">
-                  <svg class="w-5 h-5 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/>
-                  </svg>
+                  <Icon name="car" :size="20" class="text-orange-600" />
                 </div>
               </div>
               <div class="ml-3">
@@ -441,12 +401,24 @@ onUnmounted(() => {
             <div class="bg-white rounded-lg shadow-lg p-6">
               <div class="flex items-center justify-between mb-4">
                 <h3 class="text-lg font-medium text-gray-900">Escáner QR</h3>
-                <button 
-                  @click="limpiarCodigos"
-                  class="text-sm text-gray-500 hover:text-gray-700"
-                >
-                  Limpiar
-                </button>
+                <div class="flex items-center space-x-4">
+                  <!-- Toggle registro instantáneo -->
+                  <label class="flex items-center space-x-2 text-sm">
+                    <input 
+                      type="checkbox" 
+                      v-model="registroInstantaneo"
+                      class="rounded border-gray-300 text-emerald-600 focus:ring-emerald-500"
+                    >
+                    <span class="text-gray-700">Registro instantáneo</span>
+                  </label>
+                  
+                  <button 
+                    @click="limpiarCodigos"
+                    class="text-sm text-gray-500 hover:text-gray-700"
+                  >
+                    Limpiar
+                  </button>
+                </div>
               </div>
 
               <QrScanner 
@@ -461,42 +433,29 @@ onUnmounted(() => {
                 
                 <div v-if="scannedCodes.persona" class="flex items-center justify-between p-3 bg-green-50 rounded-lg">
                   <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clip-rule="evenodd"/>
-                    </svg>
+                    <Icon name="user" :size="20" class="text-green-600" />
                     <span class="text-sm font-medium text-green-800">Persona</span>
                     <code class="text-xs text-green-600">{{ scannedCodes.persona }}</code>
                   </div>
-                  <svg class="w-5 h-5 text-green-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                  </svg>
+                  <Icon name="check" :size="20" class="text-green-600" />
                 </div>
 
                 <div v-if="scannedCodes.portatil" class="flex items-center justify-between p-3 bg-blue-50 rounded-lg">
                   <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path fill-rule="evenodd" d="M3 5a2 2 0 012-2h10a2 2 0 012 2v8a2 2 0 01-2 2h-2.22l.123.489.804.804A1 1 0 0113 18H7a1 1 0 01-.707-1.707l.804-.804L7.22 15H5a2 2 0 01-2-2V5zm5.771 7H5V5h10v7H8.771z" clip-rule="evenodd"/>
-                    </svg>
+                    <Icon name="laptop" :size="20" class="text-blue-600" />
                     <span class="text-sm font-medium text-blue-800">Portátil</span>
                     <code class="text-xs text-blue-600">{{ scannedCodes.portatil }}</code>
                   </div>
-                  <svg class="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                  </svg>
+                  <Icon name="check" :size="20" class="text-blue-600" />
                 </div>
 
                 <div v-if="scannedCodes.vehiculo" class="flex items-center justify-between p-3 bg-orange-50 rounded-lg">
                   <div class="flex items-center space-x-3">
-                    <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M8 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0zM15 16.5a1.5 1.5 0 11-3 0 1.5 1.5 0 013 0z"/>
-                      <path d="M3 4a1 1 0 00-1 1v10a1 1 0 001 1h1.05a2.5 2.5 0 014.9 0H10a1 1 0 001-1V5a1 1 0 00-1-1H3zM14 7a1 1 0 00-1 1v6.05A2.5 2.5 0 0115.95 16H17a1 1 0 001-1V8a1 1 0 00-.293-.707L15 4.586A1 1 0 0014.414 4H14v3z"/>
-                    </svg>
+                    <Icon name="car" :size="20" class="text-orange-600" />
                     <span class="text-sm font-medium text-orange-800">Vehículo</span>
                     <code class="text-xs text-orange-600">{{ scannedCodes.vehiculo }}</code>
                   </div>
-                  <svg class="w-5 h-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"/>
-                  </svg>
+                  <Icon name="check" :size="20" class="text-orange-600" />
                 </div>
 
                 <!-- Botón procesar -->
@@ -505,13 +464,8 @@ onUnmounted(() => {
                   :disabled="!canProcess"
                   class="w-full mt-4 flex items-center justify-center space-x-2 px-4 py-3 bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50 disabled:cursor-not-allowed"
                 >
-                  <svg v-if="isProcessing" class="animate-spin w-5 h-5" fill="none" viewBox="0 0 24 24">
-                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                  </svg>
-                  <svg v-else class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
-                  </svg>
+                  <Icon v-if="isProcessing" name="loader" :size="20" class="animate-spin" />
+                  <Icon v-else name="check-circle" :size="20" />
                   <span>{{ isProcessing ? 'Procesando...' : 'Registrar Acceso' }}</span>
                 </button>
               </div>
@@ -565,15 +519,6 @@ onUnmounted(() => {
               </div>
             </div>
 
-            <!-- Estado offline -->
-            <OfflineStatus
-              :is-online="isOnline"
-              :storage-info="storageInfo"
-              :sync-status="syncStatus"
-              @sync="handleSyncData"
-              @clear-cache="handleClearCache"
-              @refresh-cache="handleRefreshCache"
-            />
 
             <!-- Accesos activos -->
             <div class="bg-white rounded-lg shadow p-6">
@@ -667,6 +612,85 @@ onUnmounted(() => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
             </svg>
             <p class="text-sm">No hay registros del día</p>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal de Confirmación -->
+    <div v-if="showConfirmModal" class="fixed inset-0 z-50 overflow-y-auto" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      <div class="flex items-end justify-center min-h-screen pt-4 px-4 pb-20 text-center sm:block sm:p-0">
+        <div class="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" aria-hidden="true" @click="cerrarModal"></div>
+
+        <!-- Contenido del modal -->
+        <div class="inline-block align-bottom bg-white rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full">
+          <div class="bg-white px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
+            <div class="sm:flex sm:items-start">
+              <div class="mx-auto flex-shrink-0 flex items-center justify-center h-12 w-12 rounded-full bg-blue-100 sm:mx-0 sm:h-10 sm:w-10">
+                <Icon name="user" :size="24" class="text-blue-600" />
+              </div>
+              <div class="mt-3 text-center sm:mt-0 sm:ml-4 sm:text-left flex-1">
+                <h3 class="text-lg leading-6 font-medium text-gray-900" id="modal-title">
+                  Confirmar Acceso
+                </h3>
+                <div class="mt-4">
+                  <div v-if="personaInfo" class="space-y-4">
+                    <!-- Información de la persona -->
+                    <div class="bg-gray-50 rounded-lg p-4">
+                      <div class="text-center">
+                        <h4 class="text-lg font-bold text-gray-900">{{ personaInfo.persona?.Nombre }}</h4>
+                        <p class="text-sm text-gray-600">{{ personaInfo.persona?.TipoPersona }} • {{ personaInfo.persona?.documento }}</p>
+                      </div>
+                    </div>
+
+                    <!-- Estado del acceso -->
+                    <div class="text-center p-4 rounded-lg" :class="personaInfo.tiene_acceso_activo ? 'bg-red-50 text-red-800' : 'bg-green-50 text-green-800'">
+                      <div class="text-2xl mb-2">
+                        {{ personaInfo.tiene_acceso_activo ? '🚪➡️' : '🚪⬅️' }}
+                      </div>
+                      <p class="font-bold text-lg">
+                        {{ personaInfo.tiene_acceso_activo ? 'REGISTRAR SALIDA' : 'REGISTRAR ENTRADA' }}
+                      </p>
+                    </div>
+
+                    <!-- Recursos adicionales -->
+                    <div v-if="scannedCodes.portatil || scannedCodes.vehiculo" class="bg-blue-50 rounded-lg p-3">
+                      <h5 class="text-sm font-medium text-blue-900 mb-2">Recursos adicionales:</h5>
+                      <div class="space-y-1 text-xs">
+                        <div v-if="scannedCodes.portatil" class="flex items-center text-blue-700">
+                          <Icon name="laptop" :size="16" class="mr-1" />
+                          Portátil: {{ scannedCodes.portatil }}
+                        </div>
+                        <div v-if="scannedCodes.vehiculo" class="flex items-center text-blue-700">
+                          <Icon name="car" :size="16" class="mr-1" />
+                          Vehículo: {{ scannedCodes.vehiculo }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="bg-gray-50 px-4 py-3 sm:px-6 flex gap-3">
+            <button
+              @click="cerrarModal"
+              :disabled="isProcessing"
+              type="button"
+              class="flex-1 inline-flex justify-center rounded-md border border-gray-300 shadow-sm px-4 py-3 bg-white text-base font-medium text-gray-700 hover:bg-gray-50 disabled:opacity-50"
+            >
+              Cancelar
+            </button>
+            <button
+              @click="confirmarAcceso"
+              :disabled="isProcessing"
+              type="button"
+              class="flex-1 inline-flex justify-center rounded-md border border-transparent shadow-sm px-4 py-3 text-base font-medium text-white disabled:opacity-50 disabled:cursor-not-allowed"
+              :class="personaInfo?.tiene_acceso_activo ? 'bg-red-600 hover:bg-red-700' : 'bg-green-600 hover:bg-green-700'"
+            >
+              <Icon v-if="isProcessing" name="loader" :size="16" class="animate-spin -ml-1 mr-2 text-white" />
+              {{ isProcessing ? 'Procesando...' : (personaInfo?.tiene_acceso_activo ? 'REGISTRAR SALIDA' : 'REGISTRAR ENTRADA') }}
+            </button>
           </div>
         </div>
       </div>

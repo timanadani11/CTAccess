@@ -2,6 +2,7 @@
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
+import Icon from '@/Components/Icon.vue'
 
 const quickLinks = computed(() => ([
   {
@@ -9,35 +10,35 @@ const quickLinks = computed(() => ([
     description: 'Consulta información de personas registradas.',
     href: route('system.celador.personas.index'),
     color: 'from-blue-500 to-indigo-500',
-    icon: '👥',
+    icon: 'users',
   },
   {
     title: 'Accesos',
     description: 'Gestiona entradas y salidas de personas y elementos.',
     href: route('system.celador.accesos.index'),
     color: 'from-emerald-500 to-teal-500',
-    icon: '🔐',
+    icon: 'key',
   },
   {
     title: 'Verificación QR',
     description: 'Escanea y valida códigos QR al instante.',
     href: route('system.celador.qr.index'),
     color: 'from-indigo-500 to-sky-500',
-    icon: '📱',
+    icon: 'qr-code',
   },
   {
     title: 'Incidencias',
     description: 'Registra y consulta incidencias reportadas.',
     href: route('system.celador.incidencias.index'),
     color: 'from-amber-500 to-orange-500',
-    icon: '⚠️',
+    icon: 'alert-triangle',
   },
   {
     title: 'Historial',
     description: 'Revisa el historial completo de accesos.',
     href: route('system.celador.historial.index'),
     color: 'from-slate-500 to-gray-600',
-    icon: '📜',
+    icon: 'file-text',
   },
 ]))
 </script>
@@ -61,9 +62,7 @@ const quickLinks = computed(() => ([
         <div class="relative">
           <div class="flex items-center gap-4 mb-4">
             <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-              <svg class="h-6 w-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
+              <Icon name="shield" :size="24" class="text-white" />
             </div>
             <div>
               <h3 class="text-xl font-bold text-white">¡Bienvenido, Celador!</h3>
@@ -79,14 +78,14 @@ const quickLinks = computed(() => ([
         <Link v-for="item in quickLinks" :key="item.title" :href="item.href" class="group relative overflow-hidden rounded-2xl bg-white p-6 shadow-md ring-1 ring-gray-200 transition-all duration-300 hover:shadow-xl hover:ring-gray-300 hover:-translate-y-1">
           <div :class="['absolute inset-0 opacity-5 bg-gradient-to-br transition-opacity group-hover:opacity-10', item.color]" />
           <div class="relative">
-            <div class="mb-4 text-3xl">{{ item.icon }}</div>
+            <div class="mb-4 flex h-12 w-12 items-center justify-center rounded-xl bg-gradient-to-br" :class="item.color">
+              <Icon :name="item.icon" :size="24" class="text-white" />
+            </div>
             <div class="text-xl font-bold text-gray-800 mb-2">{{ item.title }}</div>
             <p class="text-sm text-gray-600 mb-4 leading-relaxed">{{ item.description }}</p>
             <div class="flex items-center text-sm font-semibold text-gray-600 group-hover:text-gray-700">
               <span class="mr-2">Acceder</span>
-              <svg class="h-4 w-4 transition-transform group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 8l4 4m0 0l-4 4m4-4H3" />
-              </svg>
+              <Icon name="arrow-right" :size="16" class="transition-transform group-hover:translate-x-1" />
             </div>
           </div>
         </Link>
