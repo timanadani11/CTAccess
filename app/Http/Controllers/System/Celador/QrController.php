@@ -272,23 +272,7 @@ class QrController extends Controller
         try {
             $persona = $this->buscarPersonaPorQr($request->qr_persona);
             
-            // Verificar si tiene acceso activo
-            $accesoActivo = $persona->getAccesoActivo();
-            
-            return response()->json([
-                'persona' => [
-                    'Nombre' => $persona->Nombre,
-                    'documento' => $persona->documento,
-                    'TipoPersona' => $persona->TipoPersona,
-                    'correo' => $persona->correo
-                ],
-                'tiene_acceso_activo' => $accesoActivo ? true : false,
-                'acceso_activo' => $accesoActivo ? [
-                    'fecha_entrada' => $accesoActivo->fecha_entrada,
-                    'portatil_id' => $accesoActivo->portatil_id,
-                    'vehiculo_id' => $accesoActivo->vehiculo_id
-                ] : null
-            ]);
+            return $this->formatearRespuestaPersona($persona);
         } catch (ValidationException $e) {
             return response()->json([
                 'message' => $e->validator->errors()->first()
@@ -303,5 +287,89 @@ class QrController extends Controller
                 'message' => 'Error interno del sistema'
             ], 500);
         }
+    }
+
+    /**
+     * Buscar persona por número de cédula directamente
+     */
+    public function buscarPersonaPorCedula(Request $request)
+    {
+        $request->validate([
+            'cedula' => 'required|string|min:5|max:20'
+        ], [
+            'cedula.required' => 'El número de cédula es obligatorio',
+            'cedula.min' => 'El número de cédula debe tener al menos 5 caracteres',
+            'cedula.max' => 'El número de cédula no puede tener más de 20 caracteres'
+        ]);
+
+        try {
+            $cedula = trim($request->cedula);
+            
+            // Buscar persona directamente por documento
+            $persona = Persona::buscarPorDocumento($cedula);
+            
+            if (!$persona) {
+                throw ValidationException::withMessages([
+                    'cedula' => 'No se encontró ninguna persona con el documento: ' . $cedula
+                ]);
+            }
+
+            return $this->formatearRespuestaPersona($persona);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'message' => $e->validator->errors()->first()
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Error al buscar persona por cédula', [
+                'error' => $e->getMessage(),
+                'cedula' => $request->cedula
+            ]);
+            
+            return response()->json([
+                'message' => 'Error interno del sistema'
+            ], 500);
+        }
+    }
+
+    /**
+     * Formatear respuesta de persona con información completa
+     */
+    private function formatearRespuestaPersona($persona)
+    {
+        // Verificar si tiene acceso activo
+        $accesoActivo = $persona->getAccesoActivo();
+        
+        // Cargar relaciones necesarias
+        $persona->load(['portatiles', 'vehiculos']);
+        
+        return response()->json([
+            'persona' => [
+                'Nombre' => $persona->Nombre,
+                'documento' => $persona->documento,
+                'TipoPersona' => $persona->TipoPersona,
+                'correo' => $persona->correo
+            ],
+            'tiene_acceso_activo' => $accesoActivo ? true : false,
+            'acceso_activo' => $accesoActivo ? [
+                'fecha_entrada' => $accesoActivo->fecha_entrada,
+                'portatil_id' => $accesoActivo->portatil_id,
+                'vehiculo_id' => $accesoActivo->vehiculo_id
+            ] : null,
+            'portatiles' => $persona->portatiles->map(function($p) {
+                return [
+                    'portatil_id' => $p->portatil_id,
+                    'marca' => $p->marca,
+                    'modelo' => $p->modelo,
+                    'serial' => $p->serial
+                ];
+            }),
+            'vehiculos' => $persona->vehiculos->map(function($v) {
+                return [
+                    'id' => $v->id,
+                    'tipo' => $v->tipo,
+                    'placa' => $v->placa
+                ];
+            })
+        ]);
     }
 }

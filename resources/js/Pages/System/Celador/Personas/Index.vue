@@ -4,6 +4,8 @@ import { router, usePage } from '@inertiajs/vue3'
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { debounce } from 'lodash'
 import Icon from '@/Components/Icon.vue'
+import PersonaDetalleModal from '@/Components/PersonaDetalleModal.vue'
+import axios from 'axios'
 
 const props = defineProps({
   personas: Object,
@@ -59,9 +61,38 @@ const getTipoBadgeColor = (tipo) => {
   return colors[tipo] || 'bg-gray-100 text-gray-800 dark:bg-gray-900 dark:text-gray-300'
 }
 
+// Modal de detalles
+const showModal = ref(false)
+const selectedPersona = ref(null)
+const loadingPersona = ref(false)
+
 // Función para ver detalles de persona
-const viewPersona = (persona) => {
-  router.visit(route('system.celador.personas.show', persona.idPersona))
+const viewPersona = async (persona) => {
+  loadingPersona.value = true
+  try {
+    // Cargar datos completos de la persona con relaciones
+    const response = await axios.get(route('system.celador.personas.show', persona.idPersona || persona.id), {
+      headers: {
+        'X-Requested-With': 'XMLHttpRequest',
+        'Accept': 'application/json'
+      }
+    })
+    
+    selectedPersona.value = response.data.persona || persona
+    showModal.value = true
+  } catch (error) {
+    console.error('Error al cargar persona:', error)
+    // Si falla, usar los datos que ya tenemos
+    selectedPersona.value = persona
+    showModal.value = true
+  } finally {
+    loadingPersona.value = false
+  }
+}
+
+const closeModal = () => {
+  showModal.value = false
+  selectedPersona.value = null
 }
 </script>
 
@@ -241,10 +272,12 @@ const viewPersona = (persona) => {
                 </td>
                 <td class="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                   <button
-                    @click.stop="viewPersona(persona)"
-                    class="text-green-600 hover:text-green-800"
+                    @click="viewPersona(persona)"
+                    :disabled="loadingPersona"
+                    class="inline-flex items-center px-3 py-1.5 bg-[#00304D] text-white text-sm font-medium rounded-lg hover:bg-[#002033] transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                   >
-                    Ver detalles
+                    <Icon :name="loadingPersona ? 'loader' : 'eye'" :size="16" :class="{ 'mr-1': true, 'animate-spin': loadingPersona }" />
+                    {{ loadingPersona ? 'Cargando...' : 'Ver detalles' }}
                   </button>
                 </td>
               </tr>
@@ -252,7 +285,6 @@ const viewPersona = (persona) => {
           </table>
         </div>
 
-        <!-- Paginación -->
         <div v-if="personas.links && personas.links.length > 3" class="bg-theme-card px-4 py-3 border-t border-theme-primary sm:px-6">
           <div class="flex items-center justify-between">
             <div class="flex-1 flex justify-between sm:hidden">
@@ -316,5 +348,12 @@ const viewPersona = (persona) => {
         </div>
       </div>
     </div>
+
+    <!-- Modal de Detalles de Persona -->
+    <PersonaDetalleModal 
+      :persona="selectedPersona" 
+      :show="showModal" 
+      @close="closeModal" 
+    />
   </SystemLayout>
 </template>

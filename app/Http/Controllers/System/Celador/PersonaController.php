@@ -61,12 +61,20 @@ class PersonaController extends Controller
     /**
      * Display the specified persona
      */
-    public function show(Persona $persona): Response
+    public function show(Request $request, Persona $persona)
     {
         $persona->load(['portatiles', 'vehiculos', 'accesos' => function($query) {
             $query->orderByDesc('created_at')->limit(10);
         }]);
         
+        // Si es una petición AJAX, devolver JSON
+        if ($request->wantsJson() || $request->ajax()) {
+            return response()->json([
+                'persona' => new PersonaResource($persona)
+            ]);
+        }
+        
+        // Si no, devolver la vista Inertia
         return Inertia::render('System/Celador/Personas/Show', [
             'persona' => new PersonaResource($persona),
         ]);

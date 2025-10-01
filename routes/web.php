@@ -80,6 +80,7 @@ Route::prefix('system')->name('system.')->group(function () {
             Route::get('/qr/historial', [CeladorQrController::class, 'historialDelDia'])->name('qr.historial');
             Route::get('/qr/estadisticas', [CeladorQrController::class, 'estadisticas'])->name('qr.estadisticas');
             Route::post('/qr/buscar-persona', [CeladorQrController::class, 'buscarPersona'])->name('qr.buscar-persona');
+            Route::post('/qr/buscar-cedula', [CeladorQrController::class, 'buscarPersonaPorCedula'])->name('qr.buscar-cedula');
 
             // Incidencias
             Route::get('/incidencias', [CeladorIncidenciaController::class, 'index'])->name('incidencias.index');

@@ -1,6 +1,7 @@
 <script setup>
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
-import QrScanner from '@/Components/QrScanner.vue'
+import QrScannerModal from '@/Components/QrScannerModal.vue'
+import CedulaModal from '@/Components/CedulaModal.vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Icon from '@/Components/Icon.vue'
@@ -28,6 +29,12 @@ const registroInstantaneo = ref(false)
 const refreshInterval = ref(null)
 const notification = ref(null)
 
+// Modales
+const showQrScannerModal = ref(false)
+const showCedulaModal = ref(false)
+const qrScannerModalRef = ref(null)
+const cedulaModalRef = ref(null)
+
 // Computadas
 const canProcess = computed(() => {
   return scannedCodes.value.persona && !isProcessing.value
@@ -37,21 +44,51 @@ const estadisticasActuales = ref(props.estadisticas)
 const accesosActivosActuales = ref(props.accesosActivos)
 const historialRecienteActual = ref(props.historialReciente)
 
-// Métodos
+// Métodos de modales
+const openQrScanner = () => {
+  showQrScannerModal.value = true
+}
+
+const closeQrScanner = () => {
+  showQrScannerModal.value = false
+}
+
+const openCedulaModal = () => {
+  showCedulaModal.value = true
+}
+
+const closeCedulaModal = () => {
+  showCedulaModal.value = false
+}
+
+const handleCedulaSubmit = async (cedula) => {
+  // Crear QR virtual igual que en el modal del escáner
+  const qrVirtual = `PERSONA_${cedula}`
+  
+  await handleQrScanned({
+    type: 'persona',
+    data: qrVirtual,
+    manual: true
+  })
+  
+  // Cerrar modal después de procesar
+  setTimeout(() => {
+    closeCedulaModal()
+  }, 500)
+}
+
+// Métodos de escaneo
 const handleQrScanned = async (qrEvent) => {
   const { type, data } = qrEvent
 
   if (type === 'persona') {
+    // 🔥 MISMO FLUJO para QR escaneado Y entrada manual
     scannedCodes.value.persona = data
     await buscarPersona(data)
   } else if (type === 'portatil') {
     scannedCodes.value.portatil = data
   } else if (type === 'vehiculo') {
     scannedCodes.value.vehiculo = data
-  }
-
-  if (qrEvent.manual && canProcess.value) {
-    await procesarAcceso()
   }
 }
 
@@ -72,6 +109,9 @@ const buscarPersona = async (qrPersona) => {
       personaInfo.value = result
       showPersonaInfo.value = true
       
+      // Establecer el QR de persona para procesamiento
+      scannedCodes.value.persona = qrPersona
+      
       // Si está activado el registro instantáneo, procesar directamente
       if (registroInstantaneo.value) {
         await procesarAcceso()
@@ -86,6 +126,8 @@ const buscarPersona = async (qrPersona) => {
     showNotification('error', error.message || 'Persona no encontrada')
   }
 }
+
+// buscarPersonaPorCedula eliminada - ahora todo usa buscarPersona con QR virtual
 
 const procesarAcceso = async () => {
   if (!canProcess.value) return
@@ -396,11 +438,11 @@ onUnmounted(() => {
 
         <!-- Área principal de escaneo -->
         <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          <!-- Escáner QR -->
+          <!-- Botones de Acción PWA -->
           <div class="lg:col-span-2">
             <div class="bg-white rounded-lg shadow-lg p-6">
-              <div class="flex items-center justify-between mb-4">
-                <h3 class="text-lg font-medium text-gray-900">Escáner QR</h3>
+              <div class="flex items-center justify-between mb-6">
+                <h3 class="text-lg font-medium text-gray-900">Control de Accesos</h3>
                 <div class="flex items-center space-x-4">
                   <!-- Toggle registro instantáneo -->
                   <label class="flex items-center space-x-2 text-sm">
@@ -421,11 +463,42 @@ onUnmounted(() => {
                 </div>
               </div>
 
-              <QrScanner 
-                @qr-scanned="handleQrScanned"
-                @error="(error) => showNotification('error', error)"
-                :auto-start="true"
-              />
+              <!-- Botones grandes PWA -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 mb-6">
+                <!-- Botón Escanear QR -->
+                <button
+                  @click="openQrScanner"
+                  class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-blue-600 to-blue-500 p-6 text-left shadow-lg transition-all hover:shadow-xl active:scale-98"
+                >
+                  <div class="relative z-10">
+                    <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
+                      <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"></path>
+                      </svg>
+                    </div>
+                    <h4 class="mb-1 text-xl font-bold text-white">Escanear QR</h4>
+                    <p class="text-sm text-blue-100">Usa la cámara para escanear</p>
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-br from-white/0 to-white/10 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                </button>
+
+                <!-- Botón Entrada Manual -->
+                <button
+                  @click="openCedulaModal"
+                  class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-emerald-600 to-emerald-500 p-6 text-left shadow-lg transition-all hover:shadow-xl active:scale-98"
+                >
+                  <div class="relative z-10">
+                    <div class="mb-3 flex h-14 w-14 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
+                      <svg class="h-8 w-8 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                      </svg>
+                    </div>
+                    <h4 class="mb-1 text-xl font-bold text-white">Entrada Manual</h4>
+                    <p class="text-sm text-emerald-100">Digita el número de cédula</p>
+                  </div>
+                  <div class="absolute inset-0 bg-gradient-to-br from-white/0 to-white/10 opacity-0 transition-opacity group-hover:opacity-100"></div>
+                </button>
+              </div>
 
               <!-- Códigos escaneados -->
               <div v-if="scannedCodes.persona || scannedCodes.portatil || scannedCodes.vehiculo" class="mt-6 space-y-3">
@@ -695,5 +768,20 @@ onUnmounted(() => {
         </div>
       </div>
     </div>
+
+    <!-- Modales -->
+    <QrScannerModal
+      :show="showQrScannerModal"
+      @close="closeQrScanner"
+      @qr-scanned="handleQrScanned"
+      ref="qrScannerModalRef"
+    />
+
+    <CedulaModal
+      :show="showCedulaModal"
+      @close="closeCedulaModal"
+      @submit="handleCedulaSubmit"
+      ref="cedulaModalRef"
+    />
   </SystemLayout>
 </template>
