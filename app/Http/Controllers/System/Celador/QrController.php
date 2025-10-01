@@ -136,7 +136,7 @@ class QrController extends Controller
             $persona->idPersona,
             $portatilId,
             $vehiculoId,
-            $usuario->idUsuariio
+            $usuario->idUsuario
         );
 
         return back()->with('success', [
@@ -183,7 +183,7 @@ class QrController extends Controller
         // Si hay errores, registrar incidencia
         if (!empty($errores)) {
             $descripcion = 'Inconsistencias en salida: ' . implode(' ', $errores);
-            $incidencia = $accesoActivo->marcarIncidencia($descripcion, $usuario->idUsuariio);
+            $incidencia = $accesoActivo->marcarIncidencia($descripcion, $usuario->idUsuario);
             
             return back()->with('warning', [
                 'tipo' => 'incidencia',
@@ -195,7 +195,7 @@ class QrController extends Controller
         }
 
         // Registrar salida exitosa
-        $accesoActivo->marcarSalida($usuario->idUsuariio);
+        $accesoActivo->marcarSalida($usuario->idUsuario);
 
         return back()->with('success', [
             'tipo' => 'salida',

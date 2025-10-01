@@ -19,8 +19,8 @@ return new class extends Migration
             $table->timestamp('fecha_entrada');
             $table->timestamp('fecha_salida')->nullable();
             $table->string('estado');
-            $table->foreignId('usuario_entrada_id')->constrained('usuarios_sistema', 'idUsuariio')->onDelete('no action')->onUpdate('no action');
-            $table->foreignId('usuario_salida_id')->nullable()->constrained('usuarios_sistema', 'idUsuariio')->onDelete('no action')->onUpdate('no action');
+            $table->foreignId('usuario_entrada_id')->constrained('usuarios_sistema', 'idUsuario')->onDelete('no action')->onUpdate('no action');
+            $table->foreignId('usuario_salida_id')->nullable()->constrained('usuarios_sistema', 'idUsuario')->onDelete('no action')->onUpdate('no action');
             $table->timestamps();
         });
     }

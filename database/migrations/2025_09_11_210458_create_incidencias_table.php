@@ -14,7 +14,7 @@ return new class extends Migration
         Schema::create('incidencias', function (Blueprint $table) {
             $table->id('incidenciaId');
             $table->foreignId('accesoId_id_fk')->constrained('accesos', 'id')->onDelete('no action')->onUpdate('no action');
-            $table->foreignId('usuario_id_fk')->constrained('usuarios_sistema', 'idUsuariio')->onDelete('no action')->onUpdate('no action');
+            $table->foreignId('usuario_id_fk')->constrained('usuarios_sistema', 'idUsuario')->onDelete('no action')->onUpdate('no action');
             $table->string('tipo');
             $table->string('descripcion');
             $table->timestamps();

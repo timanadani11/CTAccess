@@ -19,6 +19,6 @@ class Incidencia extends Model
 
     public function usuario()
     {
-        return $this->belongsTo(UsuarioSistema::class, 'usuario_id_fk', 'idUsuariio');
+        return $this->belongsTo(UsuarioSistema::class, 'usuario_id_fk', 'idUsuario');
     }
 }

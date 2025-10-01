@@ -28,14 +28,14 @@ class UsersController extends Controller
                         ->orWhere('nombre', 'like', "%{$search}%");
                 });
             })
-            ->orderByDesc('idUsuariio');
+            ->orderByDesc('idUsuario');
 
         $users = $query->paginate(10)->withQueryString();
 
         // Minimal transformation for the table
         $usersData = $users->through(function (UsuarioSistema $u) {
             return [
-                'id' => $u->idUsuariio,
+                'id' => $u->idUsuario,
                 'UserName' => $u->UserName,
                 'nombre' => $u->nombre,
                 'activo' => (bool) $u->activo,
@@ -95,7 +95,7 @@ class UsersController extends Controller
         $user->load(['roles', 'principalRole']);
         return Inertia::render('System/Admin/Users/Edit', [
             'user' => [
-                'id' => $user->idUsuariio,
+                'id' => $user->idUsuario,
                 'UserName' => $user->UserName,
                 'nombre' => $user->nombre,
                 'activo' => (bool) $user->activo,
@@ -109,7 +109,7 @@ class UsersController extends Controller
     public function update(Request $request, UsuarioSistema $user)
     {
         $validated = $request->validate([
-            'UserName' => ['required', 'string', 'max:255', Rule::unique('usuarios_sistema', 'UserName')->ignore($user->idUsuariio, 'idUsuariio')],
+            'UserName' => ['required', 'string', 'max:255', Rule::unique('usuarios_sistema', 'UserName')->ignore($user->idUsuario, 'idUsuario')],
             'password' => ['nullable', 'string', 'min:8'],
             'nombre'   => ['required', 'string', 'max:255'],
             'activo'   => ['boolean'],

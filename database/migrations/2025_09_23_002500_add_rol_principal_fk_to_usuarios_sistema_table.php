@@ -51,7 +51,7 @@ return new class extends Migration
 
             $roles = DB::table('roles')->whereIn('nombre', array_values($map))->pluck('id', 'nombre');
 
-            $usuarios = DB::table('usuarios_sistema')->select('idUsuariio as id', 'rol', 'rol_principal_id')->get();
+            $usuarios = DB::table('usuarios_sistema')->select('idUsuario as id', 'rol', 'rol_principal_id')->get();
             foreach ($usuarios as $u) {
                 if ($u->rol_principal_id) continue; // don't override existing
                 if (empty($u->rol)) continue;
@@ -61,7 +61,7 @@ return new class extends Migration
                 if (!$roleId) continue;
 
                 DB::table('usuarios_sistema')
-                    ->where('idUsuariio', $u->id)
+                    ->where('idUsuario', $u->id)
                     ->update(['rol_principal_id' => $roleId]);
             }
         }

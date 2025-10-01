@@ -36,7 +36,7 @@ return new class extends Migration
         $roles = DB::table('roles')->whereIn('nombre', array_values($map))->pluck('id', 'nombre');
 
         // Backfill usuario_rol from usuarios_sistema.rol
-        $usuarios = DB::table('usuarios_sistema')->select('idUsuariio as id', 'rol')->get();
+        $usuarios = DB::table('usuarios_sistema')->select('idUsuario as id', 'rol')->get();
         foreach ($usuarios as $u) {
             if (empty($u->rol)) continue;
             if (!isset($map[$u->rol])) continue;

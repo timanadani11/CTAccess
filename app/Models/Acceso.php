@@ -53,12 +53,12 @@ class Acceso extends Model
 
     public function usuarioEntrada()
     {
-        return $this->belongsTo(UsuarioSistema::class, 'usuario_entrada_id', 'idUsuariio');
+        return $this->belongsTo(UsuarioSistema::class, 'usuario_entrada_id', 'idUsuario');
     }
 
     public function usuarioSalida()
     {
-        return $this->belongsTo(UsuarioSistema::class, 'usuario_salida_id', 'idUsuariio');
+        return $this->belongsTo(UsuarioSistema::class, 'usuario_salida_id', 'idUsuario');
     }
 
     public function incidencias()

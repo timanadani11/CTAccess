@@ -12,7 +12,7 @@ class UsuarioSistema extends Authenticatable
     use HasFactory, Notifiable;
 
     protected $table = 'usuarios_sistema';
-    protected $primaryKey = 'idUsuariio';
+    protected $primaryKey = 'idUsuario';
     protected $fillable = ['UserName', 'password', 'nombre', 'rol', 'activo'];
 
     protected $hidden = [

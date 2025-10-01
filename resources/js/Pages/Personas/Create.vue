@@ -1,48 +1,74 @@
 <template>
   <Head title="Nueva Persona - CTAccess" />
   
-  <div class="min-h-screen bg-theme-primary text-theme-primary flex items-center justify-center px-4 sm:px-6 lg:px-8">
-    <div class="max-w-md w-full space-y-8">
-      <!-- Toggle de tema -->
-      <div class="flex justify-end">
-        <button @click="toggleTheme" class="p-2 rounded-lg bg-theme-card border border-theme-primary hover:bg-theme-secondary transition-all duration-200 shadow-theme-sm">
-          <Icon :name="isDark ? 'sun' : 'moon'" :size="20" class="text-theme-secondary" />
-        </button>
-      </div>
+  <div class="min-h-screen bg-theme-primary text-theme-primary">
+    <!-- Toggle de tema fijo -->
+    <div class="absolute top-4 right-4 z-10">
+      <button @click="toggleTheme" class="p-2 rounded-lg bg-theme-card border border-theme-primary hover:bg-theme-secondary transition-all duration-200 shadow-theme-sm">
+        <Icon :name="isDark ? 'sun' : 'moon'" :size="20" class="text-theme-secondary" />
+      </button>
+    </div>
 
-      <!-- Logo y progreso -->
-      <div class="text-center">
-        <div class="mx-auto h-16 w-16 rounded-xl flex items-center justify-center mb-4 shadow-theme-lg" style="background: linear-gradient(135deg, #39A900, #50E5F9);">
-          <Icon name="user-plus" :size="32" class="text-white" />
+    <!-- Layout responsive: horizontal en desktop, vertical en móvil -->
+    <div class="flex flex-col lg:flex-row min-h-screen">
+      
+      <!-- Panel izquierdo: Logo y progreso (desktop) / Header (móvil) -->
+      <div class="lg:w-1/3 lg:min-h-screen flex flex-col justify-center items-center p-6 lg:p-8">
+        <!-- Logo -->
+        <div class="text-center mb-6 lg:mb-8">
+          <div class="mx-auto h-20 w-20 lg:h-24 lg:w-24 rounded-2xl flex items-center justify-center mb-4 shadow-theme-lg" style="background: linear-gradient(135deg, #39A900, #50E5F9);">
+            <Icon name="user-plus" :size="40" class="text-white lg:hidden" />
+            <Icon name="user-plus" :size="48" class="text-white hidden lg:block" />
+          </div>
+          <h1 class="text-2xl lg:text-3xl font-bold text-theme-primary mb-2">Nueva Persona</h1>
+          <p class="text-theme-secondary text-sm lg:text-base">{{ getStepDescription() }}</p>
         </div>
-        <h2 class="text-3xl font-bold text-theme-primary mb-2">Nueva Persona</h2>
-        <p class="text-theme-secondary text-sm">{{ getStepDescription() }}</p>
         
         <!-- Indicador de progreso -->
-        <div class="mt-6 mb-8">
-          <div class="flex items-center justify-center space-x-2">
-            <div v-for="step in totalSteps" :key="step" class="flex items-center">
-              <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
-                <Icon v-if="step < currentStep" name="check" :size="16" />
-                <span v-else>{{ step }}</span>
+        <div class="w-full max-w-sm">
+          <!-- Progreso horizontal en móvil -->
+          <div class="lg:hidden">
+            <div class="flex items-center justify-center space-x-2 mb-4">
+              <div v-for="step in totalSteps" :key="step" class="flex items-center">
+                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
+                  <Icon v-if="step < currentStep" name="check" :size="16" />
+                  <span v-else>{{ step }}</span>
+                </div>
+                <div v-if="step < totalSteps" class="w-6 h-0.5 mx-1 transition-all duration-200" :class="step < currentStep ? 'bg-green-500' : 'bg-theme-secondary'"></div>
               </div>
-              <div v-if="step < totalSteps" class="w-8 h-0.5 mx-2 transition-all duration-200" :class="step < currentStep ? 'bg-green-500' : 'bg-theme-secondary'"></div>
+            </div>
+            <div class="text-center text-xs text-theme-muted">Paso {{ currentStep }} de {{ totalSteps }}</div>
+          </div>
+
+          <!-- Progreso vertical en desktop -->
+          <div class="hidden lg:block">
+            <div class="space-y-4">
+              <div v-for="step in totalSteps" :key="step" class="flex items-center space-x-4">
+                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
+                  <Icon v-if="step < currentStep" name="check" :size="18" />
+                  <span v-else>{{ step }}</span>
+                </div>
+                <div class="flex-1">
+                  <div class="text-sm font-medium text-theme-primary" :class="step === currentStep ? 'text-green-600' : ''">
+                    {{ getStepTitle(step) }}
+                  </div>
+                  <div class="text-xs text-theme-muted">{{ getStepSubtitle(step) }}</div>
+                </div>
+              </div>
             </div>
           </div>
-          <div class="mt-2 text-xs text-theme-muted">Paso {{ currentStep }} de {{ totalSteps }}</div>
         </div>
       </div>
+
+      <!-- Panel derecho: Formulario -->
+      <div class="lg:w-2/3 flex items-center justify-center p-4 lg:p-8">
+        <div class="w-full max-w-lg">
 
       <!-- Formulario paso a paso -->
       <div class="bg-theme-card backdrop-blur-lg rounded-2xl shadow-theme-lg p-8 border border-theme-primary">
         
         <!-- Paso 1: Información Personal -->
-        <div v-if="currentStep === 1" class="space-y-6">
-          <div class="text-center mb-6">
-            <Icon name="user" :size="48" class="mx-auto mb-4" style="color: #39A900;" />
-            <h3 class="text-xl font-semibold text-theme-primary mb-2">Información Personal</h3>
-            <p class="text-sm text-theme-muted">Ingresa los datos básicos de identificación</p>
-          </div>
+        <div v-if="currentStep === 1" class="space-y-4">
 
           <div class="space-y-4">
             <div>
@@ -97,12 +123,7 @@
         </div>
 
         <!-- Paso 2: Portátiles -->
-        <div v-if="currentStep === 2" class="space-y-6">
-          <div class="text-center mb-6">
-            <Icon name="laptop" :size="48" class="mx-auto mb-4" style="color: #50E5F9;" />
-            <h3 class="text-xl font-semibold text-theme-primary mb-2">Portátiles</h3>
-            <p class="text-sm text-theme-muted">Agrega equipos portátiles (opcional)</p>
-          </div>
+        <div v-if="currentStep === 2" class="space-y-4">
 
           <div v-if="form.portatiles.length === 0" class="text-center py-8">
             <Icon name="laptop" :size="64" class="mx-auto text-theme-muted mb-4" />
@@ -147,12 +168,7 @@
         </div>
 
         <!-- Paso 3: Vehículos -->
-        <div v-if="currentStep === 3" class="space-y-6">
-          <div class="text-center mb-6">
-            <Icon name="car" :size="48" class="mx-auto mb-4" style="color: #FDC300;" />
-            <h3 class="text-xl font-semibold text-theme-primary mb-2">Vehículos</h3>
-            <p class="text-sm text-theme-muted">Agrega vehículos asociados (opcional)</p>
-          </div>
+        <div v-if="currentStep === 3" class="space-y-4">
 
           <div v-if="form.vehiculos.length === 0" class="text-center py-8">
             <Icon name="car" :size="64" class="mx-auto text-theme-muted mb-4" />
@@ -199,12 +215,7 @@
         </div>
 
         <!-- Paso 4: Resumen -->
-        <div v-if="currentStep === 4" class="space-y-6">
-          <div class="text-center mb-6">
-            <Icon name="check-circle" :size="48" class="mx-auto mb-4" style="color: #39A900;" />
-            <h3 class="text-xl font-semibold text-theme-primary mb-2">Resumen</h3>
-            <p class="text-sm text-theme-muted">Revisa la información antes de crear</p>
-          </div>
+        <div v-if="currentStep === 4" class="space-y-4">
 
           <div class="space-y-4">
             <div class="border border-theme-primary rounded-lg p-4 bg-theme-secondary">
@@ -265,8 +276,10 @@
             </button>
           </div>
         </div>
+        </div>
       </div>
     </div>
+  </div>
   </div>
 </template>
 
@@ -294,6 +307,26 @@ const getStepDescription = () => {
     4: 'Revisa y confirma la información'
   }
   return descriptions[currentStep.value]
+}
+
+const getStepTitle = (step) => {
+  const titles = {
+    1: 'Información Personal',
+    2: 'Portátiles',
+    3: 'Vehículos', 
+    4: 'Resumen'
+  }
+  return titles[step]
+}
+
+const getStepSubtitle = (step) => {
+  const subtitles = {
+    1: 'Datos básicos',
+    2: 'Equipos (opcional)',
+    3: 'Transporte (opcional)',
+    4: 'Confirmar datos'
+  }
+  return subtitles[step]
 }
 
 const nextStep = () => {

@@ -43,13 +43,13 @@ return new class extends Migration
         }
 
         // usuario_rol pivot (for usuarios_sistema)
-        // Nota: la PK de usuarios_sistema es 'idUsuariio'
+        // Nota: la PK de usuarios_sistema es 'idUsuario'
         if (!Schema::hasTable('usuario_rol')) {
             Schema::create('usuario_rol', function (Blueprint $table) {
                 $table->unsignedBigInteger('usuario_id');
                 $table->unsignedBigInteger('rol_id');
 
-                $table->foreign('usuario_id')->references('idUsuariio')->on('usuarios_sistema')->onDelete('cascade');
+                $table->foreign('usuario_id')->references('idUsuario')->on('usuarios_sistema')->onDelete('cascade');
                 $table->foreign('rol_id')->references('id')->on('roles')->onDelete('cascade');
 
                 $table->primary(['usuario_id', 'rol_id']);
