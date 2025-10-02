@@ -3,6 +3,7 @@ import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import Icon from '@/Components/Icon.vue'
+import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 
 const quickLinks = computed(() => ([
   {
@@ -61,9 +62,7 @@ const quickLinks = computed(() => ([
         <div class="absolute bottom-0 left-0 h-24 w-24 translate-x-[-50%] translate-y-[50%] rounded-full bg-white/5"></div>
         <div class="relative">
           <div class="flex items-center gap-4 mb-4">
-            <div class="flex h-12 w-12 items-center justify-center rounded-xl bg-white/20 backdrop-blur-sm">
-              <Icon name="shield" :size="24" class="text-white" />
-            </div>
+            <ApplicationLogo classes="h-12 w-auto object-contain" alt="CTAccess Logo" />
             <div>
               <h3 class="text-xl font-bold text-white">¡Bienvenido, Celador!</h3>
               <p class="text-emerald-100">Gestiona el acceso y seguridad del CTA</p>

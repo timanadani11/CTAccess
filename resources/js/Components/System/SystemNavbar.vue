@@ -2,6 +2,7 @@
 import { usePage, router } from '@inertiajs/vue3'
 import { ref, onMounted } from 'vue'
 import Icon from '@/Components/Icon.vue'
+import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 import { useTheme } from '@/composables/useTheme'
 
 const props = defineProps({
@@ -39,14 +40,10 @@ const toggleSidebarCollapse = () => emit('toggle-sidebar-collapse')
           <Icon :name="sidebarCollapsed ? 'chevron-right' : 'chevron-left'" :size="20" />
         </button>
 
-        <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-forest-600 to-forest-700 shadow-md">
-          <Icon name="shield" :size="24" class="text-white" />
-        </div>
+        <ApplicationLogo classes="h-10 w-auto object-contain" alt="CTAccess Logo" />
         <div class="hidden sm:block">
-          <div class="text-lg font-bold text-theme-primary">CTAccess</div>
-          <div class="text-xs text-theme-secondary -mt-1">Sistema • {{ role || '—' }}</div>
+          <div class="text-xs text-theme-secondary">Sistema • {{ role || '—' }}</div>
         </div>
-        <div class="sm:hidden text-sm font-semibold text-theme-primary">CTAccess</div>
       </div>
       <div class="flex items-center gap-3">
         <!-- Theme toggle button -->

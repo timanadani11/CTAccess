@@ -41,6 +41,9 @@ import {
   Car,
   Smartphone,
   Camera,
+  Briefcase,
+  Inbox,
+  Badge,
   
   // People & Access
   User,
@@ -80,7 +83,13 @@ import {
   Tag,
   Star,
   Heart,
-  Zap
+  Zap,
+  
+  // Weather
+  Droplet,
+  Wind,
+  Activity,
+  BarChart2
 } from 'lucide-vue-next'
 
 const props = defineProps({
@@ -159,6 +168,12 @@ const iconMap = {
   'smartphone': Smartphone,
   'phone': Smartphone,
   'camera': Camera,
+  'briefcase': Briefcase,
+  'maletin': Briefcase,
+  'inbox': Inbox,
+  'bandeja': Inbox,
+  'badge': Badge,
+  'documento': Badge,
   
   // People & Access
   'user': User,
@@ -210,6 +225,13 @@ const iconMap = {
   'favorito': Star,
   'heart': Heart,
   'zap': Zap,
+  
+  // Weather
+  'droplet': Droplet,
+  'humidity': Droplet,
+  'wind': Wind,
+  'activity': Activity,
+  'bar-chart': BarChart2,
   'energia': Zap,
   'sun': Sun,
   'sol': Sun,

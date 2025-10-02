@@ -85,8 +85,9 @@ Route::prefix('system')->name('system.')->group(function () {
             // Incidencias
             Route::get('/incidencias', [CeladorIncidenciaController::class, 'index'])->name('incidencias.index');
 
-            // Historial
+            // Historial / Reportes
             Route::get('/historial', [CeladorHistorialController::class, 'index'])->name('historial.index');
+            Route::get('/historial/export-pdf', [CeladorHistorialController::class, 'exportPDF'])->name('historial.export-pdf');
         });
     });
 });

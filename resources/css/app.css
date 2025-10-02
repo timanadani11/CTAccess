@@ -31,26 +31,30 @@
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
 }
 
-/* Tema oscuro */
+/* Tema oscuro - Colores mate y profesionales */
 .dark {
-  --bg-primary: #0f172a;
-  --bg-secondary: #1e293b;
-  --bg-tertiary: #334155;
-  --bg-card: #1e293b;
-  --bg-sidebar: #0f172a;
-  --bg-navbar: #1e293b;
+  /* Fondos oscuros mate (menos azulados, más neutros) */
+  --bg-primary: #18181b;      /* Casi negro mate */
+  --bg-secondary: #27272a;    /* Gris oscuro mate */
+  --bg-tertiary: #3f3f46;     /* Gris medio mate */
+  --bg-card: #27272a;         /* Cards gris oscuro mate */
+  --bg-sidebar: #18181b;      /* Sidebar casi negro */
+  --bg-navbar: #1f1f23;       /* Navbar negro suave */
   
-  --text-primary: #f8fafc;
-  --text-secondary: #cbd5e1;
-  --text-muted: #94a3b8;
-  --text-inverse: #1e293b;
+  /* Textos con buen contraste */
+  --text-primary: #fafafa;    /* Blanco suave */
+  --text-secondary: #d4d4d8;  /* Gris claro */
+  --text-muted: #a1a1aa;      /* Gris medio */
+  --text-inverse: #18181b;    /* Negro para fondos claros */
   
-  --border-primary: #334155;
-  --border-secondary: #475569;
+  /* Bordes sutiles */
+  --border-primary: #3f3f46;  /* Gris medio sutil */
+  --border-secondary: #52525b; /* Gris medio-claro */
   
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.3);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.3), 0 2px 4px -2px rgb(0 0 0 / 0.3);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.3), 0 4px 6px -4px rgb(0 0 0 / 0.3);
+  /* Sombras más profundas para modo oscuro */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
 }
 
 /* Clases utilitarias para temas */

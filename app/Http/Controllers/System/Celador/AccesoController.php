@@ -19,18 +19,37 @@ class AccesoController extends Controller
         $query = Acceso::with(['persona', 'portatil', 'vehiculo'])
             ->latest('fecha_entrada');
 
+        // Filtro de búsqueda por persona
         if ($search = $request->get('q')) {
             $query->whereHas('persona', function ($q) use ($search) {
                 $q->where('Nombre', 'like', "%{$search}%")
-                  ->orWhere('correo', 'like', "%{$search}%");
+                  ->orWhere('correo', 'like', "%{$search}%")
+                  ->orWhere('numero_documento', 'like', "%{$search}%");
             });
         }
 
-        $accesos = $query->paginate(10)->withQueryString();
+        // Filtro por estado
+        if ($estado = $request->get('estado')) {
+            $query->where('estado', $estado);
+        }
+
+        $accesos = $query->paginate(15)->withQueryString();
+
+        // Estadísticas
+        $estadisticas = [
+            'total' => Acceso::count(),
+            'activos' => Acceso::where('estado', 'activo')->count(),
+            'finalizados' => Acceso::where('estado', 'finalizado')->count(),
+            'hoy' => Acceso::whereDate('fecha_entrada', today())->count(),
+        ];
 
         return Inertia::render('System/Celador/Accesos/Index', [
-            'filters' => ['q' => $request->get('q')],
+            'filters' => [
+                'q' => $request->get('q'),
+                'estado' => $request->get('estado'),
+            ],
             'accesos' => $accesos,
+            'estadisticas' => $estadisticas,
         ]);
     }
 }

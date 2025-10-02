@@ -23,6 +23,11 @@ const loadingActivity = ref(true)
 const loadingWeekly = ref(true)
 const loadingStatus = ref(true)
 
+// Estado para el clima
+const weather = ref(null)
+const loadingWeather = ref(true)
+const weatherError = ref(false)
+
 // Tema
 const { isDark, toggleTheme } = useTheme()
 
@@ -43,11 +48,17 @@ onMounted(() => {
   fetchRecentActivity()
   fetchWeeklyActivity()
   fetchSystemStatus()
+  fetchWeather()
 
   // Actualizar actividad reciente cada 30 segundos
   setInterval(() => {
     fetchRecentActivity()
   }, 30000)
+
+  // Actualizar clima cada 10 minutos
+  setInterval(() => {
+    fetchWeather()
+  }, 600000)
 })
 
 // Formatear hora
@@ -171,6 +182,95 @@ const formatRelativeTime = (date) => {
   return `${Math.floor(hours / 24)}d`
 }
 
+// 🌤️ Obtener datos del clima
+const fetchWeather = async () => {
+  try {
+    // Primero obtener geolocalización
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          const { latitude, longitude } = position.coords
+          
+          // API Key de OpenWeatherMap desde variables de entorno
+          const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
+          
+          // Si no hay API key configurada, usar datos simulados
+          if (!API_KEY) {
+            useFallbackWeather()
+            return
+          }
+          
+          const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=es&appid=${API_KEY}`
+          
+          try {
+            const response = await fetch(url)
+            if (response.ok) {
+              const data = await response.json()
+              weather.value = {
+                temp: Math.round(data.main.temp),
+                feels_like: Math.round(data.main.feels_like),
+                description: data.weather[0].description,
+                icon: data.weather[0].icon,
+                humidity: data.main.humidity,
+                wind: Math.round(data.wind.speed * 3.6), // m/s a km/h
+                city: data.name
+              }
+              loadingWeather.value = false
+              weatherError.value = false
+            } else {
+              // Si falla la API, usar datos simulados
+              useFallbackWeather()
+            }
+          } catch (error) {
+            console.error('Error fetching weather:', error)
+            useFallbackWeather()
+          }
+        },
+        (error) => {
+          console.error('Geolocation error:', error)
+          useFallbackWeather()
+        }
+      )
+    } else {
+      useFallbackWeather()
+    }
+  } catch (error) {
+    console.error('Error in fetchWeather:', error)
+    useFallbackWeather()
+  }
+}
+
+// Datos de clima simulados si falla la API
+const useFallbackWeather = () => {
+  weather.value = {
+    temp: 22,
+    feels_like: 24,
+    description: 'parcialmente nublado',
+    icon: '02d',
+    humidity: 65,
+    wind: 15,
+    city: 'Tu Ciudad'
+  }
+  loadingWeather.value = false
+  weatherError.value = false
+}
+
+// Obtener emoji según el código del clima
+const getWeatherEmoji = (icon) => {
+  const emojiMap = {
+    '01d': '☀️', '01n': '🌙',
+    '02d': '⛅', '02n': '☁️',
+    '03d': '☁️', '03n': '☁️',
+    '04d': '☁️', '04n': '☁️',
+    '09d': '🌧️', '09n': '🌧️',
+    '10d': '🌦️', '10n': '🌧️',
+    '11d': '⛈️', '11n': '⛈️',
+    '13d': '❄️', '13n': '❄️',
+    '50d': '🌫️', '50n': '🌫️'
+  }
+  return emojiMap[icon] || '🌤️'
+}
+
 </script>
 
 <template>
@@ -195,18 +295,14 @@ const formatRelativeTime = (date) => {
     <!-- Header fijo -->
     <header class="bg-theme-navbar border-b border-theme-primary px-4 py-3 flex-shrink-0">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
-        <!-- Logo y branding -->
+        <!-- Logo -->
         <div class="flex items-center gap-3">
           <div class="relative">
             <ApplicationLogo 
               alt="CTAccess Logo" 
-              :classes="'h-10 w-10 rounded-lg'" 
+              classes="h-12 w-auto object-contain"
             />
             <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
-          </div>
-          <div>
-            <h1 class="text-xl font-bold text-theme-primary">CTAccess</h1>
-            <p class="text-xs text-theme-secondary">Control de Acceso</p>
           </div>
         </div>
 
@@ -254,18 +350,52 @@ const formatRelativeTime = (date) => {
     <main class="flex-1 px-4 py-6 overflow-y-auto">
       <div class="max-w-7xl mx-auto h-full">
         
-        <!-- Reloj en tiempo real -->
-        <div class="max-w-md mx-auto mb-6">
-          <div class="bg-theme-card border border-theme-primary rounded-xl p-8 shadow-theme-md">
+        <!-- Reloj y Clima Compactos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 max-w-4xl mx-auto">
+          
+          <!-- Reloj Digital -->
+          <div class="bg-theme-card border border-theme-primary rounded-xl p-6 shadow-theme-md">
             <div class="text-center">
-              <div class="text-5xl font-mono font-bold text-theme-primary mb-3">
+              <div class="text-4xl font-mono font-bold text-theme-primary mb-2">
                 {{ formatTime(currentTime) }}
               </div>
-              <div class="text-sm text-theme-secondary capitalize">
+              <div class="text-xs text-theme-secondary capitalize">
                 {{ formatDate(currentTime) }}
               </div>
             </div>
           </div>
+
+          <!-- Widget del Clima -->
+          <div class="bg-theme-card border border-theme-primary rounded-xl p-6 shadow-theme-md">
+            <template v-if="loadingWeather">
+              <div class="flex items-center justify-center h-full">
+                <Icon name="loader" :size="24" class="text-theme-muted animate-spin" />
+              </div>
+            </template>
+            <template v-else-if="weather">
+              <div class="flex items-center gap-4">
+                <div class="text-5xl">{{ getWeatherEmoji(weather.icon) }}</div>
+                <div class="flex-1">
+                  <div class="flex items-baseline gap-2">
+                    <span class="text-3xl font-bold text-theme-primary">{{ weather.temp }}°</span>
+                    <span class="text-sm text-theme-muted">Sensación {{ weather.feels_like }}°</span>
+                  </div>
+                  <p class="text-xs text-theme-secondary capitalize mb-1">{{ weather.description }}</p>
+                  <div class="flex gap-3 text-xs text-theme-muted">
+                    <span class="flex items-center gap-1">
+                      <Icon name="droplet" :size="12" />
+                      {{ weather.humidity }}%
+                    </span>
+                    <span class="flex items-center gap-1">
+                      <Icon name="wind" :size="12" />
+                      {{ weather.wind }} km/h
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </template>
+          </div>
+
         </div>
 
 

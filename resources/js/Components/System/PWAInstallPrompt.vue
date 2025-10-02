@@ -1,4 +1,6 @@
 <script setup>
+import { ref, onMounted } from 'vue'
+import Icon from '@/Components/Icon.vue'
 import { usePWA } from '@/composables/usePWA'
 
 const { isInstallable, showInstallPrompt, installApp, dismissInstallPrompt } = usePWA()
@@ -12,9 +14,7 @@ const { isInstallable, showInstallPrompt, installApp, dismissInstallPrompt } = u
     <div class="overflow-hidden rounded-2xl border border-forest-200 dark:border-sage-700 bg-white dark:bg-sage-800 p-4 shadow-xl">
       <div class="flex items-start gap-3">
         <div class="flex h-10 w-10 flex-shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-forest-600 to-forest-700">
-          <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z" />
-          </svg>
+          <Icon name="smartphone" :size="20" class="text-white" />
         </div>
         <div class="flex-1 min-w-0">
           <h3 class="text-sm font-semibold text-forest-800 dark:text-forest-200">Instalar CTAccess</h3>
@@ -26,9 +26,7 @@ const { isInstallable, showInstallPrompt, installApp, dismissInstallPrompt } = u
           @click="dismissInstallPrompt"
           class="flex-shrink-0 rounded-lg p-1.5 text-sage-400 dark:text-sage-500 hover:bg-sage-100 dark:hover:bg-sage-700 hover:text-sage-600 dark:hover:text-sage-400"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-          </svg>
+          <Icon name="x" :size="16" />
         </button>
       </div>
 

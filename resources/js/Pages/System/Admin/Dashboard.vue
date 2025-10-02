@@ -1,6 +1,7 @@
 <script setup>
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { Head, usePage } from '@inertiajs/vue3'
+import Icon from '@/Components/Icon.vue'
 
 const page = usePage()
 const stats = page.props.stats || { personas: 0, usuarios: 0, accesos_hoy: 0, incidencias_7d: 0 }
@@ -28,9 +29,7 @@ const meta = page.props.meta || {}
             <div class="relative">
               <div class="flex items-center gap-3 mb-2">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-forest-100 dark:bg-forest-800">
-                  <svg class="h-5 w-5 text-forest-600 dark:text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 515.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
-                  </svg>
+                  <Icon name="users" :size="20" class="text-forest-600 dark:text-forest-400" />
                 </div>
                 <div class="text-sm font-medium text-sage-600 dark:text-sage-400">Personas registradas</div>
               </div>
@@ -42,9 +41,7 @@ const meta = page.props.meta || {}
             <div class="relative">
               <div class="flex items-center gap-3 mb-2">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-forest-100 dark:bg-forest-800">
-                  <svg class="h-5 w-5 text-forest-600 dark:text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197m13.5-9a2.5 2.5 0 11-5 0 2.5 2.5 0 015 0z" />
-                  </svg>
+                  <Icon name="user-cog" :size="20" class="text-forest-600 dark:text-forest-400" />
                 </div>
                 <div class="text-sm font-medium text-sage-600 dark:text-sage-400">Usuarios del sistema</div>
               </div>
@@ -56,9 +53,7 @@ const meta = page.props.meta || {}
             <div class="relative">
               <div class="flex items-center gap-3 mb-2">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-forest-100 dark:bg-forest-800">
-                  <svg class="h-5 w-5 text-forest-600 dark:text-forest-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 16l-4-4m0 0l4-4m-4 4h14m-5 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h7a3 3 0 013 3v1" />
-                  </svg>
+                  <Icon name="log-in" :size="20" class="text-forest-600 dark:text-forest-400" />
                 </div>
                 <div class="text-sm font-medium text-sage-600 dark:text-sage-400">Accesos hoy</div>
               </div>
@@ -70,9 +65,7 @@ const meta = page.props.meta || {}
             <div class="relative">
               <div class="flex items-center gap-3 mb-2">
                 <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900">
-                  <svg class="h-5 w-5 text-red-600 dark:text-red-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.872-.833-2.64 0L4.174 16.5c-.77.833.192 2.5 1.732 2.5z" />
-                  </svg>
+                  <Icon name="alert-triangle" :size="20" class="text-red-600 dark:text-red-400" />
                 </div>
                 <div class="text-sm font-medium text-sage-600 dark:text-sage-400">Incidencias (7 días)</div>
               </div>
@@ -87,9 +80,7 @@ const meta = page.props.meta || {}
         <div class="overflow-hidden rounded-xl border border-forest-200 dark:border-sage-700 bg-white dark:bg-sage-800 shadow-sm">
           <div class="flex items-center gap-3 border-b border-forest-100 dark:border-sage-700 bg-forest-50 dark:bg-sage-800 p-6">
             <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-forest-600">
-              <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
-              </svg>
+              <Icon name="clock" :size="16" class="text-white" />
             </div>
             <h3 class="text-lg font-semibold text-forest-800 dark:text-forest-200">Últimos accesos</h3>
           </div>
@@ -135,9 +126,7 @@ const meta = page.props.meta || {}
         <div class="overflow-hidden rounded-xl border border-forest-200 dark:border-sage-700 bg-white dark:bg-sage-800 shadow-sm">
           <div class="flex items-center gap-3 border-b border-forest-100 dark:border-sage-700 bg-red-50 dark:bg-red-900/20 p-6">
             <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600">
-              <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.872-.833-2.64 0L4.174 16.5c-.77.833.192 2.5 1.732 2.5z" />
-              </svg>
+              <Icon name="alert-triangle" :size="16" class="text-white" />
             </div>
             <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">Últimas incidencias</h3>
           </div>

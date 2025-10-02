@@ -4,6 +4,8 @@ import { ref, onMounted } from 'vue'
 import SystemSidebar from '@/Components/System/SystemSidebar.vue'
 import SystemNavbar from '@/Components/System/SystemNavbar.vue'
 import PWAInstallPrompt from '@/Components/System/PWAInstallPrompt.vue'
+import ApplicationLogo from '@/Components/ApplicationLogo.vue'
+import Icon from '@/Components/Icon.vue'
 
 const page = usePage()
 const role = page.props.auth?.role
@@ -30,6 +32,19 @@ const loadSidebarState = () => {
   if (saved !== null) {
     sidebarCollapsed.value = saved === 'true'
   }
+}
+
+const getMenuIcon = (label) => {
+  const iconMap = {
+    'Dashboard': 'layout-dashboard',
+    'Personas': 'users',
+    'Accesos': 'key',
+    'Verificación QR': 'qr-code',
+    'Incidencias': 'alert-triangle',
+    'Historial': 'file-text',
+    'Gestión de Usuarios': 'user-cog'
+  }
+  return iconMap[label] || 'circle'
 }
 
 // Initialize sidebar state on mount
@@ -65,17 +80,10 @@ onMounted(() => {
       ]">
         <div class="flex h-16 items-center justify-between border-b border-theme-primary px-4">
           <div class="flex items-center gap-3">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-green-600 to-green-700">
-              <svg class="h-4 w-4 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-              </svg>
-            </div>
-            <div class="text-sm font-bold text-theme-primary">CTAccess</div>
+            <ApplicationLogo classes="h-8 w-auto object-contain" alt="CTAccess Logo" />
           </div>
           <button @click="closeSidebar" class="rounded-md p-2 text-theme-muted hover:bg-theme-tertiary hover:text-theme-secondary">
-            <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-            </svg>
+            <Icon name="x" :size="24" />
           </button>
         </div>
 
@@ -89,9 +97,7 @@ onMounted(() => {
           >
             <div class="flex items-center gap-3">
               <div class="flex h-8 w-8 items-center justify-center rounded-md bg-theme-tertiary text-theme-muted transition-colors group-hover:bg-green-200 group-hover:text-green-700">
-                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+                <Icon :name="getMenuIcon(item.label)" :size="16" />
               </div>
               <span class="font-medium">{{ item.label }}</span>
             </div>
