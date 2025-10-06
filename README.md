@@ -1,250 +1,212 @@
-# CTAccess - Sistema de Control de Acceso QR 🏢🔐
+# CTAccess - Backend de Personas (Guía en Español)
 
-**CTAccess** es un sistema completo de control de acceso basado en códigos QR desarrollado con tecnologías modernas de vanguardia. Combina Laravel 12, Inertia.js y Vue 3 para ofrecer una experiencia de usuario fluida y una arquitectura robusta.
+Esta guía resume los cambios realizados en el backend (Laravel) para el módulo de control de acceso con `Personas`, `Portátiles` y `Vehículos`, e incluye ejemplos de cómo integrarlo fácilmente con un frontend en Vue 3 + Tailwind.
 
-## 🚀 Características Principales
+## ¿Qué se implementó?
 
-### ✅ Funcionalidades Core
-- **Control de Acceso QR**: Sistema completo de registro de entradas/salidas mediante códigos QR
-- **Gestión de Personas**: CRUD completo con relaciones a portátiles y vehículos
-- **Sistema de Roles**: Doble autenticación (usuarios web + usuarios del sistema)
-- **Dashboard Interactivo**: Panel de control para celadores con estadísticas en tiempo real
-- **Sistema de Temas**: Modo claro/oscuro con colores corporativos
-- **PWA Completo**: Aplicación web progresiva instalable como app nativa
+- Endpoints RESTful para `personas` con CRUD completo.
+- Asociación opcional de `portátiles` y `vehículos` al crear/actualizar una persona.
+- Validaciones de campos (documento/placa/QR únicos) a nivel de request y base de datos.
+- Respuestas JSON claras y estables usando API Resources.
+- Organización por capas: Controladores, Form Requests (validación) y Servicios (lógica de negocio transaccional).
 
-### ✅ Características Avanzadas
-- **Registro Instantáneo**: Opción de registro automático sin confirmación
-- **Historial y Reportes**: Seguimiento completo de accesos con filtros y exportación PDF
-- **Gestión de Incidencias**: Sistema para reportar y gestionar problemas de acceso
-- **Búsqueda Avanzada**: Búsqueda en tiempo real con filtros por tipo de persona
-- **Modal de Detalles**: Vista rápida de información de personas sin navegación
-- **Iconografía Moderna**: Sistema de iconos Lucide Vue optimizado
+### Archivos relevantes
 
-## 🛠️ Tecnologías Utilizadas
+- Rutas API: `routes/api.php`
+- Controlador: `app/Http/Controllers/PersonaController.php`
+- Servicio: `app/Services/PersonaService.php`
+- Validaciones: `app/Http/Requests/StorePersonaRequest.php`, `app/Http/Requests/UpdatePersonaRequest.php`
+- Resources (JSON): `app/Http/Resources/PersonaResource.php`, `PortatilResource.php`, `VehiculoResource.php`
+- Modelos: `app/Models/Persona.php`, `Portatil.php`, `Vehiculo.php`
+- Migración de unicidad: `database/migrations/2025_09_15_201000_add_unique_indexes_to_core_tables.php`
 
-### Backend
-- **Laravel 12** - Framework PHP moderno
-- **PHP 8.2+** - Lenguaje de programación
-- **Inertia.js** - Puente entre Laravel y Vue.js (sin APIs REST)
-- **Laravel Sanctum** - Autenticación segura
-- **MySQL** - Base de datos relacional
+## Endpoints
 
-### Frontend
-- **Vue 3** - Framework JavaScript progresivo
-- **Inertia.js** - Integración SPA sin APIs tradicionales
-- **Tailwind CSS** - Framework CSS utilitario
-- **Lucide Vue** - Iconografía moderna y consistente
-- **Vite** - Herramienta de construcción rápida
+Base: `/api/v1/personas` (Laravel agrega prefijo `/api` automáticamente a `routes/api.php`)
 
-### Características Técnicas
-- **PWA** - Aplicación web progresiva instalable
-- **Sistema de Temas** - Modo claro/oscuro automático
-- **Responsive Design** - Compatible con móviles y tablets
-- **Composición API** - Vue 3 Composition API
-- **TypeScript Ready** - Configurado para TypeScript
+- GET `/api/v1/personas?with_relations=1&per_page=15` — Lista paginada, con relaciones opcionales.
+- GET `/api/v1/personas/{idPersona}` — Detalle incluyendo `portatiles` y `vehiculos`.
+- POST `/api/v1/personas` — Crear persona (con relaciones opcionales).
+- PUT/PATCH `/api/v1/personas/{idPersona}` — Actualizar persona (parcial/total, con relaciones).
+- DELETE `/api/v1/personas/{idPersona}` — Eliminar persona y sus relaciones.
 
-## 📋 Requisitos del Sistema
+## Validaciones clave
 
-- **PHP 8.2** o superior
-- **Composer** - Gestor de dependencias PHP
-- **Node.js 18+** - Entorno JavaScript
-- **MySQL 8.0+** - Base de datos
-- **Git** - Control de versiones
+- `personas.documento`: único (puede ser null).
+- `portatiles.qrCode`: único.
+- `vehiculos.placa`: único.
 
-## 🚀 Instalación y Configuración
+Además:
+- `nombre` y `tipoPersona` son requeridos al crear.
+- En update, los campos son opcionales (parciales), se mantienen los valores existentes si no se envían.
 
-### 1. Clonar el Repositorio
-```bash
-git clone https://github.com/tu-usuario/ctaccess.git
-cd ctaccess
+## Formato de respuesta JSON
+
+Las respuestas usan API Resources para un contrato estable:
+
+- Persona:
+```json
+{
+  "id": 1,
+  "documento": "12345678",
+  "nombre": "Juan Pérez",
+  "tipoPersona": "Empleado",
+  "foto": "https://.../juan.jpg",
+  "createdAt": "2025-09-15T01:23:45.000000Z",
+  "updatedAt": "2025-09-15T01:23:45.000000Z",
+  "portatiles": [ { "id": 5, "qrCode": "QR-ABC-001", "marca": "Dell", "modelo": "Latitude 7420" } ],
+  "vehiculos": [ { "id": 10, "tipo": "Auto", "placa": "ABC-123" } ]
+}
 ```
 
-### 2. Instalar Dependencias PHP
-```bash
-composer install
+Las colecciones (index) incluyen paginación estándar de Laravel y `status: "success"` en `additional`.
+
+## Ejemplos de payloads para el frontend
+
+- Crear persona con relaciones:
+```json
+{
+  "documento": "12345678",
+  "nombre": "Juan Pérez",
+  "tipoPersona": "Empleado",
+  "foto": "https://mi-cdn/fotos/juan.jpg",
+  "portatiles": [
+    { "qrCode": "QR-ABC-001", "marca": "Dell", "modelo": "Latitude 7420" },
+    { "qrCode": "QR-XYZ-002", "marca": "HP", "modelo": "ProBook 450" }
+  ],
+  "vehiculos": [
+    { "tipo": "Auto", "placa": "ABC-123" },
+    { "tipo": "Moto", "placa": "XYZ-987" }
+  ]
+}
 ```
 
-### 3. Instalar Dependencias JavaScript
-```bash
-npm install
+- Actualizar persona (parcial) con alta/edición de relaciones:
+```json
+{
+  "nombre": "Juan P. Actualizado",
+  "portatiles": [
+    { "id": 5, "marca": "Lenovo", "modelo": "T14 Gen 3" },
+    { "qrCode": "QR-NEW-003", "marca": "Apple", "modelo": "MacBook Air M2" }
+  ],
+  "vehiculos": [
+    { "id": 10, "placa": "DEF-456" },
+    { "tipo": "Camioneta", "placa": "GHI-789" }
+  ]
+}
 ```
 
-### 4. Configurar Variables de Entorno
-```bash
-cp .env.example .env
-php artisan key:generate
-```
+## Integración rápida con Vue 3 + Tailwind
 
-### 5. Configurar Base de Datos
-```bash
-# Crear base de datos MySQL
-# Configurar credenciales en .env
+A continuación ejemplos simples usando Axios.
 
-DB_CONNECTION=mysql
-DB_HOST=127.0.0.1
-DB_PORT=3306
-DB_DATABASE=ctaccess
-DB_USERNAME=tu_usuario
-DB_PASSWORD=tu_contraseña
-```
-
-### 6. Ejecutar Migraciones y Seeders
-```bash
-php artisan migrate
-php artisan db:seed
-```
-
-### 7. Compilar Assets
-```bash
-npm run dev
-```
-
-### 8. Servir la Aplicación
-```bash
-php artisan serve
-```
-
-La aplicación estará disponible en `http://localhost:8000`
-
-## 👥 Usuarios de Prueba
-
-### Sistema de Personas (Autenticación Web)
-- **juan@empresa.com** / `password123` (Empleado)
-- **maria@visitante.com** / `password123` (Visitante)
-- **carlos@contratista.com** / `password123` (Contratista)
-- **ana@empresa.com** / `password123` (Empleado)
-
-### Sistema Interno (Celador/Admin)
-- **admin** / `admin12345` (Administrador General)
-- **celador** / `celador12345` (Celador Principal)
-
-## 🎯 Uso del Sistema
-
-### Como Visitante/Empleado
-1. **Registro**: Crear cuenta en la página principal
-2. **Inicio de Sesión**: Acceder con credenciales
-3. **Panel Personal**: Ver información personal y accesos
-
-### Como Celador
-1. **Inicio de Sesión**: `/system/login`
-2. **Dashboard**: Panel principal con estadísticas
-3. **Gestión de Personas**: Buscar y ver detalles de personas
-4. **Control QR**: Escanear códigos QR para registrar accesos
-5. **Historial**: Ver accesos del día y generar reportes
-
-### Como Administrador
-1. **Inicio de Sesión**: `/system/login`
-2. **Panel Admin**: Gestión completa del sistema
-3. **Usuarios del Sistema**: Crear y gestionar celadores
-4. **Reportes**: Vista general de todas las operaciones
-
-## 📱 Características PWA
-
-- **Instalación**: Se puede instalar como aplicación nativa
-- **Offline**: Funciona sin conexión (limitado)
-- **Responsive**: Diseño adaptativo para móviles
-- **Notificaciones**: Sistema de notificaciones push
-- **Tema Corporativo**: Colores consistentes con la marca
-
-## 🎨 Sistema de Temas
-
-El sistema incluye un completo sistema de temas con:
-
-- **Tema Claro**: Diseño limpio y profesional
-- **Tema Oscuro**: Reducción de fatiga visual
-- **Colores Corporativos**: Verde (#39A900), Azul (#50E5F9), Amarillo (#FDC300)
-- **Persistencia**: Recordar preferencias del usuario
-- **Transiciones Suaves**: Animaciones fluidas entre temas
-
-## 🔧 Desarrollo
-
-### Comandos Útiles
+### Instalar Axios (si no lo tienes)
 
 ```bash
-# Desarrollo
-npm run dev              # Servidor de desarrollo
-php artisan serve        # Servidor PHP
-
-# Producción
-npm run build           # Construir para producción
-php artisan optimize    # Optimizar aplicación
-
-# Base de Datos
-php artisan migrate     # Ejecutar migraciones
-php artisan db:seed     # Cargar datos de prueba
-php artisan tinker      # Consola interactiva
-
-# Utilidades
-php artisan test:email  # Probar envío de emails
-php artisan pail        # Monitor de logs
+npm i axios
 ```
 
-### Estructura del Proyecto
+### Listar personas en una vista (tabla Tailwind)
 
+```vue
+<template>
+  <div class="p-4">
+    <h1 class="text-2xl font-bold mb-4">Personas</h1>
+    <table class="min-w-full bg-white shadow rounded">
+      <thead>
+        <tr class="bg-gray-100 text-left">
+          <th class="p-3">ID</th>
+          <th class="p-3">Documento</th>
+          <th class="p-3">Nombre</th>
+          <th class="p-3">Tipo</th>
+          <th class="p-3">Portátiles</th>
+          <th class="p-3">Vehículos</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr v-for="p in personas" :key="p.id" class="border-t">
+          <td class="p-3">{{ p.id }}</td>
+          <td class="p-3">{{ p.documento ?? '—' }}</td>
+          <td class="p-3">{{ p.nombre }}</td>
+          <td class="p-3">{{ p.tipoPersona }}</td>
+          <td class="p-3">{{ p.portatiles?.length ?? 0 }}</td>
+          <td class="p-3">{{ p.vehiculos?.length ?? 0 }}</td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</template>
+
+<script setup>
+import axios from 'axios'
+import { onMounted, ref } from 'vue'
+
+const personas = ref([])
+
+onMounted(async () => {
+  const { data } = await axios.get('/api/v1/personas', {
+    params: { with_relations: 1, per_page: 20 }
+  })
+  // data.data contiene el array paginado
+  personas.value = data.data
+})
+</script>
 ```
-ctaccess/
-├── app/                    # Código de la aplicación
-│   ├── Http/Controllers/   # Controladores
-│   ├── Models/             # Modelos Eloquent
-│   ├── Services/           # Lógica de negocio
-│   └── ...
-├── database/               # Migraciones y seeders
-├── public/                 # Archivos públicos
-├── resources/              # Vistas y assets
-│   ├── css/               # Estilos
-│   ├── js/                # Código JavaScript
-│   │   ├── Components/    # Componentes Vue
-│   │   ├── Pages/         # Páginas Vue
-│   │   └── Layouts/       # Layouts Vue
-│   └── views/             # Vistas Blade
-├── routes/                 # Definición de rutas
-├── storage/                # Archivos temporales
-└── tests/                  # Tests automatizados
+
+### Crear persona desde un formulario simple
+
+```vue
+<script setup>
+import axios from 'axios'
+import { reactive } from 'vue'
+
+const form = reactive({
+  documento: '',
+  nombre: '',
+  tipoPersona: '',
+  foto: '',
+  portatiles: [],
+  vehiculos: []
+})
+
+async function crearPersona() {
+  try {
+    const { data } = await axios.post('/api/v1/personas', form)
+    // Manejar éxito (toasts, redirección, etc.)
+    console.log('Creado', data)
+  } catch (e) {
+    // Manejar errores de validación (422)
+    console.error(e?.response?.data)
+  }
+}
+</script>
 ```
 
-## 🔒 Seguridad
+### Ver detalle de persona
 
-- **Autenticación Robusta**: Doble sistema de autenticación
-- **Autorización**: Control de acceso basado en roles
-- **Validación**: Validación estricta de datos
-- **CSRF Protection**: Protección contra ataques CSRF
-- **Rate Limiting**: Límites de intentos de login
-- **Logging**: Registro completo de operaciones
+```js
+import axios from 'axios'
 
-## 📊 Funcionalidades Específicas
+async function obtenerPersona(idPersona) {
+  const { data } = await axios.get(`/api/v1/personas/${idPersona}`)
+  return data
+}
+```
 
-### Sistema QR
-- **Escáner Integrado**: Cámara del dispositivo
-- **Entrada Manual**: Ingreso manual de códigos
-- **Validación Automática**: Detección de formato correcto
-- **Registro Dual**: Persona + portátil opcional
-- **Estados de Acceso**: Activo, Finalizado, Incidencia
+## Puesta en marcha
 
-### Gestión de Personas
-- **Información Completa**: Datos personales y recursos asignados
-- **Relaciones**: Portátiles y vehículos asociados
-- **Búsqueda Avanzada**: Por nombre, documento, QR
-- **Filtros**: Por tipo de persona
-- **Vista Detallada**: Modal con información completa
+1. Ejecutar migraciones (aplican índices únicos):
+   ```bash
+   php artisan migrate
+   ```
+2. Servir la aplicación:
+   ```bash
+   php artisan serve
+   ```
+3. Consumir endpoints desde el frontend en `http://localhost:8000/api/v1/...`
 
-### Dashboard Celador
-- **Estadísticas Tiempo Real**: Accesos activos, historial del día
-- **Módulos Especializados**: Personas, QR, Incidencias, Historial
-- **Navegación Intuitiva**: Sidebar organizado por funciones
-- **Responsive**: Funciona perfectamente en móviles
+## Notas
 
-## 🌐 Internacionalización
-
-- **Español**: Idioma principal del sistema
-- **Laravel Localization**: Soporte para múltiples idiomas
-- **UTF-8**: Soporte completo para caracteres especiales
-
-## 📞 Soporte
-
-Para soporte técnico o consultas sobre el sistema CTAccess, contactar al equipo de desarrollo.
-
----
-
-**Desarrollado con ❤️ usando Laravel 12 + Vue 3 + Inertia.js**
-
-*Este sistema representa una solución completa y moderna para el control de acceso empresarial, integrando las mejores prácticas de desarrollo web actual.*
+- Las relaciones se gestionan desde `PersonaService` con transacciones para mantener consistencia.
+- El modelo `Persona` usa `idPersona` como clave primaria y para el route model binding.
+- Si necesitas CRUD separado para `portátiles` o `vehículos`, se puede añadir fácilmente siguiendo el mismo patrón (Controller + Requests + Resources).
