@@ -102,7 +102,16 @@ class AdminDashboardController extends Controller
         $personas = $query->paginate($perPage)->withQueryString();
 
         return response()->json([
-            'personas' => PersonaResource::collection($personas),
+            'personas' => [
+                'data' => PersonaResource::collection($personas->items()),
+                'links' => $personas->linkCollection()->toArray(),
+                'total' => $personas->total(),
+                'from' => $personas->firstItem(),
+                'to' => $personas->lastItem(),
+                'current_page' => $personas->currentPage(),
+                'last_page' => $personas->lastPage(),
+                'per_page' => $personas->perPage(),
+            ],
             'filters' => [
                 'search' => $search,
                 'per_page' => $perPage,

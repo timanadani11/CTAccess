@@ -50,15 +50,34 @@ Route::prefix('system')->name('system.')->group(function () {
         Route::get('/panel', [SystemDashboardController::class, 'index'])->name('panel');
 
         // Sección Admin (solo rol administrador)
-        Route::middleware('check.system.role:administrador')->group(function () {
-            Route::get('/admin/dashboard', [AdminDashboardController::class, 'index'])->name('admin.dashboard');
+        Route::middleware('check.system.role:administrador')->prefix('admin')->name('admin.')->group(function () {
+            Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
             // Gestión de usuarios del sistema
-            Route::prefix('admin')->name('admin.')->group(function () {
-                Route::resource('users', App\Http\Controllers\System\Admin\UsersController::class);
-                Route::get('personas', [AdminDashboardController::class, 'personasView'])->name('personas');
-                Route::get('personas/data', [AdminDashboardController::class, 'personas'])->name('personas.data');
-            });
+            Route::resource('users', App\Http\Controllers\System\Admin\UsersController::class);
+            
+            // Gestión de personas
+            Route::get('personas', [AdminDashboardController::class, 'personasView'])->name('personas');
+            Route::get('personas/data', [AdminDashboardController::class, 'personas'])->name('personas.data');
+
+            // Accesos (reutilizando controlador del celador)
+            Route::get('/accesos', [CeladorAccesoController::class, 'index'])->name('accesos.index');
+
+            // Verificación QR (reutilizando controlador del celador)
+            Route::get('/qr', [CeladorQrController::class, 'index'])->name('qr.index');
+            Route::post('/qr/registrar', [CeladorQrController::class, 'registrarAcceso'])->name('qr.registrar');
+            Route::get('/qr/accesos-activos', [CeladorQrController::class, 'accesosActivos'])->name('qr.accesos-activos');
+            Route::get('/qr/historial', [CeladorQrController::class, 'historialDelDia'])->name('qr.historial');
+            Route::get('/qr/estadisticas', [CeladorQrController::class, 'estadisticas'])->name('qr.estadisticas');
+            Route::post('/qr/buscar-persona', [CeladorQrController::class, 'buscarPersona'])->name('qr.buscar-persona');
+            Route::post('/qr/buscar-cedula', [CeladorQrController::class, 'buscarPersonaPorCedula'])->name('qr.buscar-cedula');
+
+            // Incidencias (reutilizando controlador del celador)
+            Route::get('/incidencias', [CeladorIncidenciaController::class, 'index'])->name('incidencias.index');
+
+            // Historial / Reportes (reutilizando controlador del celador)
+            Route::get('/historial', [CeladorHistorialController::class, 'index'])->name('historial.index');
+            Route::get('/historial/export-pdf', [CeladorHistorialController::class, 'exportPDF'])->name('historial.export-pdf');
         });
 
         // Sección Celador (solo rol celador)

@@ -117,7 +117,7 @@ onMounted(() => {
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
-          <h2 class="text-2xl font-bold text-forest-800 dark:text-forest-200">Gestión de Personas</h2>
+          <h2 class="text-2xl font-bold text-theme-primary">Gestión de Personas</h2>
         </div>
         <a
           href="/personas/create"
@@ -133,8 +133,8 @@ onMounted(() => {
 
     <div class="space-y-6">
       <!-- Filtros -->
-      <div class="bg-white dark:bg-sage-800 rounded-xl border border-forest-200 dark:border-sage-700 p-6 shadow-sm">
-        <h3 class="text-lg font-semibold text-forest-800 dark:text-forest-200 mb-4">Filtros de búsqueda</h3>
+      <div class="bg-theme-card rounded-xl border border-theme-primary p-6 shadow-theme-sm">
+        <h3 class="text-lg font-semibold text-theme-primary mb-4">Filtros de búsqueda</h3>
         <div class="flex flex-col sm:flex-row gap-4">
           <div class="flex-1">
             <input
@@ -142,13 +142,13 @@ onMounted(() => {
               @input="search"
               type="text"
               placeholder="Buscar por nombre, documento o tipo..."
-              class="w-full px-4 py-2 border border-forest-200 dark:border-sage-600 rounded-lg bg-white dark:bg-sage-700 text-forest-900 dark:text-forest-100 placeholder-sage-500 dark:placeholder-sage-400 focus:ring-2 focus:ring-forest-500 dark:focus:ring-forest-400 focus:border-transparent"
+              class="w-full px-4 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-forest-500 focus:border-transparent"
             >
           </div>
           <select
             v-model="searchForm.per_page"
             @change="search"
-            class="px-3 py-2 border border-forest-200 dark:border-sage-600 rounded-lg bg-white dark:bg-sage-700 text-forest-900 dark:text-forest-100 focus:ring-2 focus:ring-forest-500 dark:focus:ring-forest-400"
+            class="px-3 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary focus:ring-2 focus:ring-forest-500"
           >
             <option value="10">10 por página</option>
             <option value="15">15 por página</option>
@@ -159,11 +159,11 @@ onMounted(() => {
       </div>
 
       <!-- Tabla de personas -->
-      <div class="bg-white dark:bg-sage-800 rounded-xl border border-forest-200 dark:border-sage-700 shadow-sm overflow-hidden">
-        <div class="border-b border-forest-100 dark:border-sage-700 bg-forest-50 dark:bg-sage-800 p-6">
-          <h3 class="text-lg font-semibold text-forest-800 dark:text-forest-200">
+      <div class="bg-theme-card rounded-xl border border-theme-primary shadow-theme-sm overflow-hidden">
+        <div class="border-b border-theme-primary bg-theme-secondary p-6">
+          <h3 class="text-lg font-semibold text-theme-primary">
             Lista de personas registradas
-            <span v-if="personas.total" class="text-sm font-normal text-sage-600 dark:text-sage-400 ml-2">
+            <span v-if="personas.total" class="text-sm font-normal text-theme-secondary ml-2">
               ({{ personas.total }} {{ personas.total === 1 ? 'persona' : 'personas' }})
             </span>
           </h3>
@@ -171,7 +171,7 @@ onMounted(() => {
 
         <!-- Loading indicator -->
         <div v-if="loading" class="text-center py-12">
-          <div class="inline-flex items-center gap-2 text-sage-600 dark:text-sage-400">
+          <div class="inline-flex items-center gap-2 text-theme-secondary">
             <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
               <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
               <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
@@ -182,23 +182,23 @@ onMounted(() => {
 
         <!-- Tabla -->
         <div v-else class="overflow-x-auto">
-          <table class="min-w-full divide-y divide-forest-100 dark:divide-sage-700 text-sm">
-            <thead class="bg-sage-50 dark:bg-sage-800">
+          <table class="min-w-full divide-y divide-theme-primary text-sm">
+            <thead class="bg-theme-secondary">
               <tr>
-                <th class="px-6 py-3 text-left font-semibold text-sage-700 dark:text-sage-300">ID</th>
-                <th class="px-6 py-3 text-left font-semibold text-sage-700 dark:text-sage-300">Documento</th>
-                <th class="px-6 py-3 text-left font-semibold text-sage-700 dark:text-sage-300">Nombre</th>
-                <th class="px-6 py-3 text-left font-semibold text-sage-700 dark:text-sage-300">Tipo</th>
-                <th class="px-6 py-3 text-left font-semibold text-sage-700 dark:text-sage-300">Portátiles</th>
-                <th class="px-6 py-3 text-left font-semibold text-sage-700 dark:text-sage-300">Vehículos</th>
-                <th class="px-6 py-3 text-left font-semibold text-sage-700 dark:text-sage-300">Acciones</th>
+                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">ID</th>
+                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Documento</th>
+                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Nombre</th>
+                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Tipo</th>
+                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Portátiles</th>
+                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Vehículos</th>
+                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Acciones</th>
               </tr>
             </thead>
-            <tbody class="divide-y divide-forest-100 dark:divide-sage-700 bg-white dark:bg-sage-800">
-              <tr v-for="persona in personas.data" :key="persona.id" class="transition-colors hover:bg-forest-50 dark:hover:bg-sage-700">
-                <td class="px-6 py-4 text-forest-800 dark:text-forest-200">{{ persona.id }}</td>
-                <td class="px-6 py-4 text-sage-700 dark:text-sage-300">{{ persona.documento || '—' }}</td>
-                <td class="px-6 py-4 font-medium text-forest-800 dark:text-forest-200">{{ persona.nombre }}</td>
+            <tbody class="divide-y divide-theme-primary bg-theme-card">
+              <tr v-for="persona in personas.data" :key="persona.id" class="transition-colors hover:bg-theme-secondary">
+                <td class="px-6 py-4 text-theme-primary">{{ persona.id }}</td>
+                <td class="px-6 py-4 text-theme-secondary">{{ persona.documento || '—' }}</td>
+                <td class="px-6 py-4 font-medium text-theme-primary">{{ persona.nombre }}</td>
                 <td class="px-6 py-4">
                   <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-forest-100 dark:bg-forest-800 text-forest-700 dark:text-forest-300">
                     {{ persona.tipoPersona }}
@@ -241,9 +241,9 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="!personas.data?.length">
-                <td colspan="7" class="px-6 py-12 text-center text-sage-500 dark:text-sage-400">
+                <td colspan="7" class="px-6 py-12 text-center text-theme-muted">
                   <div class="flex flex-col items-center gap-2">
-                    <svg class="h-8 w-8 text-sage-400 dark:text-sage-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <svg class="h-8 w-8 text-theme-muted" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
                     <span>No se encontraron personas</span>
@@ -255,9 +255,9 @@ onMounted(() => {
         </div>
 
         <!-- Paginación -->
-        <div v-if="personas.links && personas.data?.length > 0" class="border-t border-forest-100 dark:border-sage-700 bg-sage-50 dark:bg-sage-800 px-6 py-4">
+        <div v-if="personas.links && personas.data?.length > 0" class="border-t border-theme-primary bg-theme-secondary px-6 py-4">
           <div class="flex flex-col sm:flex-row justify-between items-center gap-4">
-            <div class="text-sm text-sage-600 dark:text-sage-400">
+            <div class="text-sm text-theme-secondary">
               Mostrando {{ personas.from }} a {{ personas.to }} de {{ personas.total }} registros
             </div>
             <div class="flex gap-1">
@@ -271,8 +271,8 @@ onMounted(() => {
                   link.active
                     ? 'bg-forest-600 text-white border-forest-600'
                     : link.url
-                      ? 'bg-white dark:bg-sage-700 text-sage-700 dark:text-sage-300 border-sage-300 dark:border-sage-600 hover:bg-sage-50 dark:hover:bg-sage-600'
-                      : 'bg-sage-100 dark:bg-sage-800 text-sage-400 dark:text-sage-500 border-sage-200 dark:border-sage-700 cursor-not-allowed'
+                      ? 'bg-theme-card text-theme-secondary border-theme-primary hover:bg-theme-secondary'
+                      : 'bg-theme-tertiary text-theme-muted border-theme-primary cursor-not-allowed'
                 ]"
                 v-html="link.label"
               />
@@ -287,17 +287,17 @@ onMounted(() => {
       <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
         <!-- Overlay -->
         <div
-          class="fixed inset-0 transition-opacity bg-sage-500 bg-opacity-75 dark:bg-sage-900 dark:bg-opacity-75"
+          class="fixed inset-0 transition-opacity bg-black bg-opacity-50"
           @click="closeModal"
         ></div>
 
         <!-- Modal -->
-        <div class="inline-block align-bottom bg-white dark:bg-sage-800 rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
+        <div class="inline-block align-bottom bg-theme-card rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
           <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-forest-800 dark:text-forest-200">Detalles de Persona</h3>
+            <h3 class="text-lg font-semibold text-theme-primary">Detalles de Persona</h3>
             <button
               @click="closeModal"
-              class="text-sage-400 hover:text-sage-600 dark:text-sage-500 dark:hover:text-sage-300"
+              class="text-theme-muted hover:text-theme-secondary"
             >
               <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
@@ -307,34 +307,34 @@ onMounted(() => {
 
           <div v-if="selectedPersona" class="space-y-6">
             <!-- Información personal -->
-            <div class="bg-sage-50 dark:bg-sage-700 rounded-lg p-4">
-              <h4 class="text-md font-semibold mb-4 text-forest-800 dark:text-forest-200">Información Personal</h4>
+            <div class="bg-theme-secondary rounded-lg p-4">
+              <h4 class="text-md font-semibold mb-4 text-theme-primary">Información Personal</h4>
               <div class="grid md:grid-cols-2 gap-4">
                 <div>
-                  <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">ID</label>
-                  <p class="text-forest-900 dark:text-forest-100">{{ selectedPersona.id }}</p>
+                  <label class="block text-sm font-medium text-theme-secondary mb-1">ID</label>
+                  <p class="text-theme-primary">{{ selectedPersona.id }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Documento</label>
-                  <p class="text-forest-900 dark:text-forest-100">{{ selectedPersona.documento || '—' }}</p>
+                  <label class="block text-sm font-medium text-theme-secondary mb-1">Documento</label>
+                  <p class="text-theme-primary">{{ selectedPersona.documento || '—' }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Nombre</label>
-                  <p class="text-forest-900 dark:text-forest-100 font-medium">{{ selectedPersona.nombre }}</p>
+                  <label class="block text-sm font-medium text-theme-secondary mb-1">Nombre</label>
+                  <p class="text-theme-primary font-medium">{{ selectedPersona.nombre }}</p>
                 </div>
                 <div>
-                  <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Tipo de Persona</label>
+                  <label class="block text-sm font-medium text-theme-secondary mb-1">Tipo de Persona</label>
                   <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-forest-100 dark:bg-forest-800 text-forest-700 dark:text-forest-300">
                     {{ selectedPersona.tipoPersona }}
                   </span>
                 </div>
                 <div v-if="selectedPersona.correo" class="md:col-span-2">
-                  <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Correo Electrónico</label>
-                  <p class="text-forest-900 dark:text-forest-100">{{ selectedPersona.correo }}</p>
+                  <label class="block text-sm font-medium text-theme-secondary mb-1">Correo Electrónico</label>
+                  <p class="text-theme-primary">{{ selectedPersona.correo }}</p>
                 </div>
                 <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Fechas</label>
-                  <div class="text-sm text-sage-600 dark:text-sage-400">
+                  <label class="block text-sm font-medium text-theme-secondary mb-1">Fechas</label>
+                  <div class="text-sm text-theme-secondary">
                     <p>Creado: {{ formatDate(selectedPersona.createdAt) }}</p>
                     <p>Actualizado: {{ formatDate(selectedPersona.updatedAt) }}</p>
                   </div>
@@ -343,26 +343,26 @@ onMounted(() => {
             </div>
 
             <!-- Portátiles -->
-            <div v-if="selectedPersona.portatiles && selectedPersona.portatiles.length > 0" class="bg-sage-50 dark:bg-sage-700 rounded-lg p-4">
-              <h4 class="text-md font-semibold mb-4 text-forest-800 dark:text-forest-200">Portátiles Registrados</h4>
+            <div v-if="selectedPersona.portatiles && selectedPersona.portatiles.length > 0" class="bg-theme-secondary rounded-lg p-4">
+              <h4 class="text-md font-semibold mb-4 text-theme-primary">Portátiles Registrados</h4>
               <div class="space-y-3">
                 <div
                   v-for="portatil in selectedPersona.portatiles"
                   :key="portatil.id"
-                  class="border border-sage-200 dark:border-sage-600 rounded-lg p-3 bg-white dark:bg-sage-800"
+                  class="border border-theme-primary rounded-lg p-3 bg-theme-card"
                 >
                   <div class="grid md:grid-cols-3 gap-3">
                     <div>
-                      <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Serial</label>
-                      <p class="text-forest-900 dark:text-forest-100 font-mono text-sm">{{ portatil.serial }}</p>
+                      <label class="block text-sm font-medium text-theme-secondary mb-1">Serial</label>
+                      <p class="text-theme-primary font-mono text-sm">{{ portatil.serial }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Marca</label>
-                      <p class="text-forest-900 dark:text-forest-100">{{ portatil.marca }}</p>
+                      <label class="block text-sm font-medium text-theme-secondary mb-1">Marca</label>
+                      <p class="text-theme-primary">{{ portatil.marca }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Modelo</label>
-                      <p class="text-forest-900 dark:text-forest-100">{{ portatil.modelo }}</p>
+                      <label class="block text-sm font-medium text-theme-secondary mb-1">Modelo</label>
+                      <p class="text-theme-primary">{{ portatil.modelo }}</p>
                     </div>
                   </div>
                 </div>
@@ -370,22 +370,22 @@ onMounted(() => {
             </div>
 
             <!-- Vehículos -->
-            <div v-if="selectedPersona.vehiculos && selectedPersona.vehiculos.length > 0" class="bg-sage-50 dark:bg-sage-700 rounded-lg p-4">
-              <h4 class="text-md font-semibold mb-4 text-forest-800 dark:text-forest-200">Vehículos Registrados</h4>
+            <div v-if="selectedPersona.vehiculos && selectedPersona.vehiculos.length > 0" class="bg-theme-secondary rounded-lg p-4">
+              <h4 class="text-md font-semibold mb-4 text-theme-primary">Vehículos Registrados</h4>
               <div class="space-y-3">
                 <div
                   v-for="vehiculo in selectedPersona.vehiculos"
                   :key="vehiculo.id"
-                  class="border border-sage-200 dark:border-sage-600 rounded-lg p-3 bg-white dark:bg-sage-800"
+                  class="border border-theme-primary rounded-lg p-3 bg-theme-card"
                 >
                   <div class="grid md:grid-cols-2 gap-3">
                     <div>
-                      <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Tipo</label>
-                      <p class="text-forest-900 dark:text-forest-100">{{ vehiculo.tipo }}</p>
+                      <label class="block text-sm font-medium text-theme-secondary mb-1">Tipo</label>
+                      <p class="text-theme-primary">{{ vehiculo.tipo }}</p>
                     </div>
                     <div>
-                      <label class="block text-sm font-medium text-sage-700 dark:text-sage-300 mb-1">Placa</label>
-                      <p class="text-forest-900 dark:text-forest-100 font-mono">{{ vehiculo.placa }}</p>
+                      <label class="block text-sm font-medium text-theme-secondary mb-1">Placa</label>
+                      <p class="text-theme-primary font-mono">{{ vehiculo.placa }}</p>
                     </div>
                   </div>
                 </div>
@@ -394,12 +394,12 @@ onMounted(() => {
 
             <!-- Mensaje si no hay portátiles ni vehículos -->
             <div v-if="(!selectedPersona.portatiles || selectedPersona.portatiles.length === 0) && (!selectedPersona.vehiculos || selectedPersona.vehiculos.length === 0)"
-                 class="bg-sage-100 dark:bg-sage-700 border border-sage-200 dark:border-sage-600 rounded-lg p-4 text-center">
-              <p class="text-sage-600 dark:text-sage-400">Esta persona no tiene portátiles ni vehículos registrados.</p>
+                 class="bg-theme-tertiary border border-theme-primary rounded-lg p-4 text-center">
+              <p class="text-theme-secondary">Esta persona no tiene portátiles ni vehículos registrados.</p>
             </div>
 
             <!-- Acciones -->
-            <div class="flex justify-end gap-3 pt-4 border-t border-sage-200 dark:border-sage-600">
+            <div class="flex justify-end gap-3 pt-4 border-t border-theme-primary">
               <a
                 :href="`/personas/${selectedPersona.id}/edit`"
                 class="px-4 py-2 bg-yellow-600 dark:bg-yellow-700 text-white rounded-lg hover:bg-yellow-700 dark:hover:bg-yellow-600 transition-colors"

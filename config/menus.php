@@ -9,14 +9,33 @@ return [
                 'route' => 'system.admin.dashboard',
             ],
             [
-                'label' => 'Gestión de Personas',
-                'icon'  => 'heroicon-m-user-group',
+                'label' => 'Personas',
+                'icon'  => 'heroicon-m-users',
                 'route' => 'system.admin.personas',
             ],
-            // Ejemplo de item controlado por Gate/Policy
+            [
+                'label' => 'Accesos',
+                'icon'  => 'heroicon-m-key',
+                'route' => 'system.admin.accesos.index',
+            ],
+            [
+                'label' => 'Verificación QR',
+                'icon'  => 'heroicon-m-qr-code',
+                'route' => 'system.admin.qr.index',
+            ],
+            [
+                'label' => 'Incidencias',
+                'icon'  => 'heroicon-m-exclamation-triangle',
+                'route' => 'system.admin.incidencias.index',
+            ],
+            [
+                'label' => 'Historial',
+                'icon'  => 'heroicon-m-archive-box',
+                'route' => 'system.admin.historial.index',
+            ],
             [
                 'label' => 'Gestión de Usuarios',
-                'icon'  => 'heroicon-m-users',
+                'icon'  => 'heroicon-m-user-cog',
                 'route' => 'system.admin.users.index',
                 'can'   => 'manage-users',
             ],

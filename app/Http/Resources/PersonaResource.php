@@ -18,8 +18,10 @@ class PersonaResource extends JsonResource
             'id' => $this->idPersona, // Alias para compatibilidad
             'idPersona' => $this->idPersona,
             'documento' => $this->documento,
-            'Nombre' => $this->Nombre,
-            'TipoPersona' => $this->TipoPersona,
+            'nombre' => $this->Nombre, // Minúscula para consistencia en frontend
+            'Nombre' => $this->Nombre, // Mantenemos mayúscula para compatibilidad
+            'tipoPersona' => $this->TipoPersona, // Minúscula para consistencia en frontend
+            'TipoPersona' => $this->TipoPersona, // Mantenemos mayúscula para compatibilidad
             'correo' => $this->correo,
             'qrCode' => $this->qrCode, // Ya viene como /storage/qrcodes/xxx.png
             'created_at' => $this->created_at,

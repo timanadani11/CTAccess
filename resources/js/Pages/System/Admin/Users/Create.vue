@@ -22,29 +22,29 @@ const canSave = computed(() => form.UserName && form.password && form.nombre)
     <Head title="Nuevo Usuario" />
 
     <template #header>
-      <h2 class="text-xl font-semibold leading-tight text-gray-800">Nuevo Usuario del Sistema</h2>
+      <h2 class="text-xl font-semibold leading-tight text-forest-800 dark:text-forest-200">Nuevo Usuario del Sistema</h2>
     </template>
 
     <form class="space-y-6" @submit.prevent="submit">
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
-          <label class="block text-sm font-medium text-slate-700">Usuario</label>
-          <input v-model="form.UserName" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <label class="block text-sm font-medium text-sage-700 dark:text-sage-300">Usuario</label>
+          <input v-model="form.UserName" class="mt-1 w-full rounded-md border border-forest-200 dark:border-sage-700 px-3 py-2 text-sm bg-white dark:bg-sage-700 text-sage-700 dark:text-sage-300 placeholder-sage-500 dark:placeholder-sage-400 focus:ring-2 focus:ring-forest-500 dark:focus:ring-forest-400 focus:border-transparent" />
           <div v-if="form.errors.UserName" class="mt-1 text-xs text-red-600">{{ form.errors.UserName }}</div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700">Contraseña</label>
-          <input type="password" v-model="form.password" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <label class="block text-sm font-medium text-sage-700 dark:text-sage-300">Contraseña</label>
+          <input type="password" v-model="form.password" class="mt-1 w-full rounded-md border border-forest-200 dark:border-sage-700 px-3 py-2 text-sm bg-white dark:bg-sage-700 text-sage-700 dark:text-sage-300 placeholder-sage-500 dark:placeholder-sage-400 focus:ring-2 focus:ring-forest-500 dark:focus:ring-forest-400 focus:border-transparent" />
           <div v-if="form.errors.password" class="mt-1 text-xs text-red-600">{{ form.errors.password }}</div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700">Nombre</label>
-          <input v-model="form.nombre" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm" />
+          <label class="block text-sm font-medium text-sage-700 dark:text-sage-300">Nombre</label>
+          <input v-model="form.nombre" class="mt-1 w-full rounded-md border border-forest-200 dark:border-sage-700 px-3 py-2 text-sm bg-white dark:bg-sage-700 text-sage-700 dark:text-sage-300 placeholder-sage-500 dark:placeholder-sage-400 focus:ring-2 focus:ring-forest-500 dark:focus:ring-forest-400 focus:border-transparent" />
           <div v-if="form.errors.nombre" class="mt-1 text-xs text-red-600">{{ form.errors.nombre }}</div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700">Activo</label>
-          <select v-model="form.activo" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+          <label class="block text-sm font-medium text-sage-700 dark:text-sage-300">Activo</label>
+          <select v-model="form.activo" class="mt-1 w-full rounded-md border border-forest-200 dark:border-sage-700 px-3 py-2 text-sm bg-white dark:bg-sage-700 text-sage-700 dark:text-sage-300 focus:ring-2 focus:ring-forest-500 dark:focus:ring-forest-400 focus:border-transparent">
             <option :value="true">Sí</option>
             <option :value="false">No</option>
           </select>
@@ -53,27 +53,27 @@ const canSave = computed(() => form.UserName && form.password && form.nombre)
 
       <div class="grid gap-4 sm:grid-cols-2">
         <div>
-          <label class="block text-sm font-medium text-slate-700">Roles</label>
+          <label class="block text-sm font-medium text-sage-700 dark:text-sage-300">Roles</label>
           <div class="mt-2 grid grid-cols-1 gap-2">
-            <label v-for="r in props.roles" :key="r.id" class="flex items-center gap-2 text-sm">
-              <input type="checkbox" :value="r.id" v-model="form.roles" />
+            <label v-for="r in props.roles" :key="r.id" class="flex items-center gap-2 text-sm text-sage-700 dark:text-sage-300">
+              <input type="checkbox" :value="r.id" v-model="form.roles" class="rounded border-forest-200 dark:border-sage-700 text-forest-600 focus:ring-forest-500 dark:focus:ring-forest-400 bg-white dark:bg-sage-700" />
               <span>{{ r.nombre }}</span>
             </label>
           </div>
           <div v-if="form.errors.roles" class="mt-1 text-xs text-red-600">{{ form.errors.roles }}</div>
         </div>
         <div>
-          <label class="block text-sm font-medium text-slate-700">Rol principal</label>
-          <select v-model="form.rol_principal_id" class="mt-1 w-full rounded-md border border-slate-300 px-3 py-2 text-sm">
+          <label class="block text-sm font-medium text-sage-700 dark:text-sage-300">Rol principal</label>
+          <select v-model="form.rol_principal_id" class="mt-1 w-full rounded-md border border-forest-200 dark:border-sage-700 px-3 py-2 text-sm bg-white dark:bg-sage-700 text-sage-700 dark:text-sage-300 focus:ring-2 focus:ring-forest-500 dark:focus:ring-forest-400 focus:border-transparent">
             <option :value="null">—</option>
             <option v-for="r in props.roles" :key="r.id" :value="r.id">{{ r.nombre }}</option>
           </select>
-          <div class="mt-1 text-xs text-slate-500">Se incluirá automáticamente en la lista de roles.</div>
+          <div class="mt-1 text-xs text-sage-500 dark:text-sage-400">Se incluirá automáticamente en la lista de roles.</div>
         </div>
       </div>
 
       <div class="flex justify-end gap-2">
-        <button type="button" class="rounded-md border border-slate-300 px-3 py-1.5 text-sm" @click="router.visit(route('system.admin.users.index'))">Cancelar</button>
+        <button type="button" class="rounded-md border border-forest-200 dark:border-sage-700 px-3 py-1.5 text-sm text-sage-700 dark:text-sage-300 hover:bg-forest-50 dark:hover:bg-sage-700" @click="router.visit(route('system.admin.users.index'))">Cancelar</button>
         <button :disabled="!canSave || form.processing" class="rounded-md bg-emerald-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-emerald-700 disabled:opacity-50">Guardar</button>
       </div>
     </form>
