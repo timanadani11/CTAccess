@@ -11,30 +11,32 @@
 
     <!-- Layout responsive: horizontal en desktop, vertical en móvil -->
     <div class="flex flex-col lg:flex-row min-h-screen">
-      
+
       <!-- Panel izquierdo: Logo y progreso (desktop) / Header (móvil) -->
-      <div class="lg:w-1/3 lg:min-h-screen flex flex-col justify-center items-center p-6 lg:p-8">
+      <div class="lg:w-80 xl:w-96 lg:min-h-screen flex flex-col justify-center items-center p-4 sm:p-6 lg:p-8 lg:sticky lg:top-0 lg:max-h-screen">
         <!-- Logo -->
-        <div class="text-center mb-6 lg:mb-8">
-          <div class="mx-auto h-20 w-20 lg:h-24 lg:w-24 rounded-2xl flex items-center justify-center mb-4 shadow-theme-lg" style="background: linear-gradient(135deg, #39A900, #50E5F9);">
-            <Icon name="user-plus" :size="40" class="text-white lg:hidden" />
+        <div class="text-center mb-4 sm:mb-6 lg:mb-8">
+          <div class="mx-auto h-16 w-16 sm:h-20 sm:w-20 lg:h-24 lg:w-24 rounded-2xl flex items-center justify-center mb-3 sm:mb-4 shadow-theme-lg" style="background: linear-gradient(135deg, #39A900, #50E5F9);">
+            <Icon name="user-plus" :size="32" class="text-white sm:hidden" />
+            <Icon name="user-plus" :size="40" class="text-white hidden sm:block lg:hidden" />
             <Icon name="user-plus" :size="48" class="text-white hidden lg:block" />
           </div>
-          <h1 class="text-2xl lg:text-3xl font-bold text-theme-primary mb-2">Nueva Persona</h1>
-          <p class="text-theme-secondary text-sm lg:text-base">{{ getStepDescription() }}</p>
+          <h1 class="text-xl sm:text-2xl lg:text-3xl font-bold text-theme-primary mb-2">Nueva Persona</h1>
+          <p class="text-theme-secondary text-xs sm:text-sm lg:text-base px-2">{{ getStepDescription() }}</p>
         </div>
-        
+
         <!-- Indicador de progreso -->
-        <div class="w-full max-w-sm">
-          <!-- Progreso horizontal en móvil -->
+        <div class="w-full max-w-xs lg:max-w-sm">
+          <!-- Progreso horizontal en móvil y tablet -->
           <div class="lg:hidden">
-            <div class="flex items-center justify-center space-x-2 mb-4">
+            <div class="flex items-center justify-center space-x-1 sm:space-x-2 mb-3 sm:mb-4">
               <div v-for="step in totalSteps" :key="step" class="flex items-center">
-                <div class="w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
-                  <Icon v-if="step < currentStep" name="check" :size="16" />
+                <div class="w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center text-xs sm:text-sm font-medium transition-all duration-200" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
+                  <Icon v-if="step < currentStep" name="check" :size="14" class="sm:hidden" />
+                  <Icon v-if="step < currentStep" name="check" :size="16" class="hidden sm:block" />
                   <span v-else>{{ step }}</span>
                 </div>
-                <div v-if="step < totalSteps" class="w-6 h-0.5 mx-1 transition-all duration-200" :class="step < currentStep ? 'bg-green-500' : 'bg-theme-secondary'"></div>
+                <div v-if="step < totalSteps" class="w-4 sm:w-6 h-0.5 mx-0.5 sm:mx-1 transition-all duration-200" :class="step < currentStep ? 'bg-green-500' : 'bg-theme-secondary'"></div>
               </div>
             </div>
             <div class="text-center text-xs text-theme-muted">Paso {{ currentStep }} de {{ totalSteps }}</div>
@@ -42,17 +44,17 @@
 
           <!-- Progreso vertical en desktop -->
           <div class="hidden lg:block">
-            <div class="space-y-4">
-              <div v-for="step in totalSteps" :key="step" class="flex items-center space-x-4">
-                <div class="w-10 h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
+            <div class="space-y-3 xl:space-y-4">
+              <div v-for="step in totalSteps" :key="step" class="flex items-center space-x-3 xl:space-x-4">
+                <div class="w-9 h-9 xl:w-10 xl:h-10 rounded-full flex items-center justify-center text-sm font-medium transition-all duration-200 flex-shrink-0" :class="step <= currentStep ? 'bg-green-500 text-white' : 'bg-theme-secondary text-theme-muted border border-theme-primary'">
                   <Icon v-if="step < currentStep" name="check" :size="18" />
                   <span v-else>{{ step }}</span>
                 </div>
-                <div class="flex-1">
-                  <div class="text-sm font-medium text-theme-primary" :class="step === currentStep ? 'text-green-600' : ''">
+                <div class="flex-1 min-w-0">
+                  <div class="text-sm xl:text-base font-medium text-theme-primary truncate" :class="step === currentStep ? 'text-green-600' : ''">
                     {{ getStepTitle(step) }}
                   </div>
-                  <div class="text-xs text-theme-muted">{{ getStepSubtitle(step) }}</div>
+                  <div class="text-xs text-theme-muted truncate">{{ getStepSubtitle(step) }}</div>
                 </div>
               </div>
             </div>
@@ -61,16 +63,16 @@
       </div>
 
       <!-- Panel derecho: Formulario -->
-      <div class="lg:w-2/3 flex items-center justify-center p-4 lg:p-8">
-        <div class="w-full max-w-lg">
+      <div class="flex-1 flex items-center justify-center p-4 sm:p-6 lg:p-8 xl:p-12">
+        <div class="w-full max-w-md lg:max-w-2xl xl:max-w-3xl 2xl:max-w-4xl">
 
       <!-- Formulario paso a paso -->
-      <div class="bg-theme-card backdrop-blur-lg rounded-2xl shadow-theme-lg p-8 border border-theme-primary">
+      <div class="bg-theme-card backdrop-blur-lg rounded-2xl shadow-theme-lg p-5 sm:p-6 lg:p-8 xl:p-10 border border-theme-primary">
         
         <!-- Paso 1: Información Personal -->
-        <div v-if="currentStep === 1" class="space-y-4">
+        <div v-if="currentStep === 1" class="space-y-4 sm:space-y-5">
 
-          <div class="space-y-4">
+          <div class="space-y-4 sm:space-y-5">
             <div>
               <label for="nombre" class="block text-sm font-medium text-theme-primary mb-2">Nombre Completo *</label>
               <div class="relative">
@@ -149,7 +151,7 @@
                   <label class="block text-sm font-medium text-theme-primary mb-1">Serial *</label>
                   <input v-model="portatil.serial" type="text" required class="w-full px-3 py-2 border border-theme-primary rounded-lg bg-theme-primary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-blue-500" placeholder="Ej: ABC123456" />
                 </div>
-                <div class="grid grid-cols-2 gap-3">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                   <div>
                     <label class="block text-sm font-medium text-theme-primary mb-1">Marca *</label>
                     <input v-model="portatil.marca" type="text" required class="w-full px-3 py-2 border border-theme-primary rounded-lg bg-theme-primary text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-blue-500" placeholder="Dell, HP..." />
@@ -215,9 +217,9 @@
         </div>
 
         <!-- Paso 4: Resumen -->
-        <div v-if="currentStep === 4" class="space-y-4">
+        <div v-if="currentStep === 4" class="space-y-4 sm:space-y-5">
 
-          <div class="space-y-4">
+          <div class="space-y-4 sm:space-y-5 lg:grid lg:grid-cols-1 xl:grid-cols-2 lg:gap-5">
             <div class="border border-theme-primary rounded-lg p-4 bg-theme-secondary">
               <h4 class="font-medium text-theme-primary mb-3 flex items-center">
                 <Icon name="user" :size="16" class="mr-2" style="color: #39A900;" />Información Personal
@@ -255,22 +257,22 @@
         </div>
 
         <!-- Botones de navegación -->
-        <div class="flex justify-between pt-6">
-          <button v-if="currentStep > 1" type="button" @click="previousStep" class="inline-flex items-center px-4 py-2 border border-theme-primary rounded-lg text-theme-secondary hover:bg-theme-secondary transition-all duration-200">
+        <div class="flex flex-col sm:flex-row justify-between gap-3 sm:gap-0 pt-6">
+          <button v-if="currentStep > 1" type="button" @click="previousStep" class="inline-flex items-center justify-center px-4 py-2.5 border border-theme-primary rounded-lg text-theme-secondary hover:bg-theme-secondary transition-all duration-200 order-2 sm:order-1">
             <Icon name="arrow-left" :size="16" class="mr-2" />Anterior
           </button>
-          <div v-else></div>
+          <div v-else class="hidden sm:block"></div>
 
-          <div class="flex space-x-3">
-            <Link :href="route('personas.index')" class="inline-flex items-center px-4 py-2 border border-theme-primary rounded-lg text-theme-secondary hover:bg-theme-secondary transition-all duration-200">
+          <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 order-1 sm:order-2">
+            <Link :href="route('personas.index')" class="inline-flex items-center justify-center px-4 py-2.5 border border-theme-primary rounded-lg text-theme-secondary hover:bg-theme-secondary transition-all duration-200">
               <Icon name="x" :size="16" class="mr-2" />Cancelar
             </Link>
 
-            <button v-if="currentStep < totalSteps" type="button" @click="nextStep" :disabled="!canProceedToNextStep()" class="inline-flex items-center px-6 py-2 rounded-lg text-white font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+            <button v-if="currentStep < totalSteps" type="button" @click="nextStep" :disabled="!canProceedToNextStep()" class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg text-white font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
               Siguiente<Icon name="arrow-right" :size="16" class="ml-2" />
             </button>
 
-            <button v-else type="submit" @click="submit" :disabled="form.processing" class="inline-flex items-center px-6 py-2 rounded-lg text-white font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+            <button v-else type="submit" @click="submit" :disabled="form.processing" class="inline-flex items-center justify-center px-6 py-2.5 rounded-lg text-white font-medium transition-all duration-200 shadow-theme-md hover:shadow-theme-lg disabled:opacity-50 disabled:cursor-not-allowed" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
               <Icon v-if="form.processing" name="loader" :size="16" class="animate-spin mr-2" />
               <span v-if="form.processing">Creando...</span><span v-else>Crear Persona</span>
             </button>
