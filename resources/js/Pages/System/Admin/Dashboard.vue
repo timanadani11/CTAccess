@@ -20,56 +20,60 @@ const meta = page.props.meta || {}
       </div>
     </template>
 
-    <div class="space-y-8">
+    <div class="space-y-6 lg:space-y-8">
       <!-- KPIs -->
       <section>
-        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-theme-card p-6 shadow-theme-sm transition-all hover:shadow-theme-md">
-            <div class="absolute top-0 right-0 h-20 w-20 -translate-y-10 translate-x-10 rounded-full bg-theme-tertiary opacity-50"></div>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-6">
+          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-sm transition-all hover:shadow-theme-lg hover:scale-105">
+            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 opacity-20"></div>
             <div class="relative">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-theme-tertiary">
-                  <Icon name="users" :size="20" class="text-forest-600 dark:text-forest-400" />
+              <div class="flex items-center gap-3 mb-3">
+                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+                  <Icon name="users" :size="24" class="text-white" />
                 </div>
-                <div class="text-sm font-medium text-theme-secondary">Personas registradas</div>
+                <div class="text-sm lg:text-base font-medium text-theme-secondary">Personas registradas</div>
               </div>
-              <div class="text-3xl font-bold text-theme-primary">{{ stats.personas }}</div>
+              <div class="text-3xl lg:text-4xl xl:text-5xl font-bold text-theme-primary">{{ stats.personas }}</div>
+              <div class="mt-2 text-xs text-theme-muted">Total en el sistema</div>
             </div>
           </div>
-          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-theme-card p-6 shadow-theme-sm transition-all hover:shadow-theme-md">
-            <div class="absolute top-0 right-0 h-20 w-20 -translate-y-10 translate-x-10 rounded-full bg-theme-tertiary opacity-50"></div>
+          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-sm transition-all hover:shadow-theme-lg hover:scale-105">
+            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-20"></div>
             <div class="relative">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-theme-tertiary">
-                  <Icon name="user-cog" :size="20" class="text-forest-600 dark:text-forest-400" />
+              <div class="flex items-center gap-3 mb-3">
+                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #50E5F9, #00B4D8);">
+                  <Icon name="user-cog" :size="24" class="text-white" />
                 </div>
-                <div class="text-sm font-medium text-theme-secondary">Usuarios del sistema</div>
+                <div class="text-sm lg:text-base font-medium text-theme-secondary">Usuarios del sistema</div>
               </div>
-              <div class="text-3xl font-bold text-theme-primary">{{ stats.usuarios }}</div>
+              <div class="text-3xl lg:text-4xl xl:text-5xl font-bold text-theme-primary">{{ stats.usuarios }}</div>
+              <div class="mt-2 text-xs text-theme-muted">Usuarios activos</div>
             </div>
           </div>
-          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-theme-card p-6 shadow-theme-sm transition-all hover:shadow-theme-md">
-            <div class="absolute top-0 right-0 h-20 w-20 -translate-y-10 translate-x-10 rounded-full bg-theme-tertiary opacity-50"></div>
+          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-sm transition-all hover:shadow-theme-lg hover:scale-105">
+            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-20"></div>
             <div class="relative">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-theme-tertiary">
-                  <Icon name="log-in" :size="20" class="text-forest-600 dark:text-forest-400" />
+              <div class="flex items-center gap-3 mb-3">
+                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #FDC300, #E6B000);">
+                  <Icon name="log-in" :size="24" class="text-black" />
                 </div>
-                <div class="text-sm font-medium text-theme-secondary">Accesos hoy</div>
+                <div class="text-sm lg:text-base font-medium text-theme-secondary">Accesos hoy</div>
               </div>
-              <div class="text-3xl font-bold text-theme-primary">{{ stats.accesos_hoy }}</div>
+              <div class="text-3xl lg:text-4xl xl:text-5xl font-bold text-theme-primary">{{ stats.accesos_hoy }}</div>
+              <div class="mt-2 text-xs text-theme-muted">Hoy {{ new Date().toLocaleDateString() }}</div>
             </div>
           </div>
-          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-theme-card p-6 shadow-theme-sm transition-all hover:shadow-theme-md">
-            <div class="absolute top-0 right-0 h-20 w-20 -translate-y-10 translate-x-10 rounded-full bg-red-100 dark:bg-red-900/20 opacity-50"></div>
+          <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-sm transition-all hover:shadow-theme-lg hover:scale-105">
+            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-red-400 to-red-600 opacity-20"></div>
             <div class="relative">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-red-100 dark:bg-red-900/20">
-                  <Icon name="alert-triangle" :size="20" class="text-red-600 dark:text-red-400" />
+              <div class="flex items-center gap-3 mb-3">
+                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-red-700 shadow-md">
+                  <Icon name="alert-triangle" :size="24" class="text-white" />
                 </div>
-                <div class="text-sm font-medium text-theme-secondary">Incidencias (7 días)</div>
+                <div class="text-sm lg:text-base font-medium text-theme-secondary">Incidencias (7 días)</div>
               </div>
-              <div class="text-3xl font-bold text-red-600 dark:text-red-400">{{ stats.incidencias_7d }}</div>
+              <div class="text-3xl lg:text-4xl xl:text-5xl font-bold text-red-600 dark:text-red-400">{{ stats.incidencias_7d }}</div>
+              <div class="mt-2 text-xs text-theme-muted">Últimos 7 días</div>
             </div>
           </div>
         </div>
@@ -77,43 +81,50 @@ const meta = page.props.meta || {}
 
       <!-- Últimos accesos -->
       <section>
-        <div class="overflow-hidden rounded-xl border border-theme-primary bg-theme-card shadow-theme-sm">
-          <div class="flex items-center gap-3 border-b border-theme-primary bg-theme-secondary p-6">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-forest-600">
-              <Icon name="clock" :size="16" class="text-white" />
+        <div class="overflow-hidden rounded-xl border-2 border-theme-primary bg-theme-card shadow-theme-md hover:shadow-theme-lg transition-shadow">
+          <div class="flex items-center gap-3 border-b-2 border-theme-primary bg-gradient-to-r from-theme-secondary to-theme-tertiary p-5 lg:p-6">
+            <div class="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+              <Icon name="clock" :size="20" class="text-white lg:hidden" />
+              <Icon name="clock" :size="24" class="text-white hidden lg:block" />
             </div>
-            <h3 class="text-lg font-semibold text-theme-primary">Últimos accesos</h3>
+            <div>
+              <h3 class="text-lg lg:text-xl font-bold text-theme-primary">Últimos accesos</h3>
+              <p class="text-xs text-theme-muted">Movimientos recientes del día</p>
+            </div>
           </div>
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-theme-primary text-sm">
+            <table class="min-w-full divide-y divide-theme-primary text-sm lg:text-base">
               <thead class="bg-theme-secondary">
                 <tr>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Persona</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Entrada</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Salida</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Estado</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Entrada por</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Salida por</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Persona</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Entrada</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Salida</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Estado</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Entrada por</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Salida por</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-theme-primary bg-theme-card">
-                <tr v-for="row in recent.accesos" :key="row.id" class="transition-colors hover:bg-theme-secondary">
-                  <td class="px-6 py-4 font-medium text-theme-primary">{{ row.persona || '—' }}</td>
-                  <td class="px-6 py-4 text-theme-secondary">{{ row.fecha_entrada || '—' }}</td>
-                  <td class="px-6 py-4 text-theme-secondary">{{ row.fecha_salida || '—' }}</td>
-                  <td class="px-6 py-4">
+                <tr v-for="row in recent.accesos" :key="row.id" class="transition-all hover:bg-theme-secondary hover:scale-[1.01]">
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 font-semibold text-theme-primary">{{ row.persona || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 text-theme-secondary">{{ row.fecha_entrada || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 text-theme-secondary">{{ row.fecha_salida || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4">
                     <span :class="[
-                      'inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium',
-                      row.estado === 'Dentro' ? 'bg-forest-100 dark:bg-forest-800 text-forest-700 dark:text-forest-300' : 'bg-theme-tertiary text-theme-secondary'
+                      'inline-flex items-center rounded-full px-3 py-1 text-xs lg:text-sm font-semibold shadow-sm',
+                      row.estado === 'Dentro' ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                     ]">
                       {{ row.estado || '—' }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 text-theme-secondary">{{ row.entrada_por || '—' }}</td>
-                  <td class="px-6 py-4 text-theme-secondary">{{ row.salida_por || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 text-theme-secondary">{{ row.entrada_por || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 text-theme-secondary">{{ row.salida_por || '—' }}</td>
                 </tr>
                 <tr v-if="!recent.accesos?.length">
-                  <td colspan="6" class="px-6 py-12 text-center text-theme-muted">Sin datos disponibles</td>
+                  <td colspan="6" class="px-6 py-16 text-center">
+                    <Icon name="inbox" :size="48" class="mx-auto text-theme-muted mb-3" />
+                    <p class="text-theme-muted text-base">Sin datos disponibles</p>
+                  </td>
                 </tr>
               </tbody>
             </table>
@@ -123,36 +134,44 @@ const meta = page.props.meta || {}
 
       <!-- Últimas incidencias -->
       <section>
-        <div class="overflow-hidden rounded-xl border border-theme-primary bg-theme-card shadow-theme-sm">
-          <div class="flex items-center gap-3 border-b border-theme-primary bg-red-50 dark:bg-red-900/20 p-6">
-            <div class="flex h-8 w-8 items-center justify-center rounded-lg bg-red-600">
-              <Icon name="alert-triangle" :size="16" class="text-white" />
+        <div class="overflow-hidden rounded-xl border-2 border-red-300 dark:border-red-800 bg-theme-card shadow-theme-md hover:shadow-theme-lg transition-shadow">
+          <div class="flex items-center gap-3 border-b-2 border-red-300 dark:border-red-800 bg-gradient-to-r from-red-50 to-red-100 dark:from-red-900/20 dark:to-red-900/30 p-5 lg:p-6">
+            <div class="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-xl bg-gradient-to-br from-red-500 to-red-700 shadow-md">
+              <Icon name="alert-triangle" :size="20" class="text-white lg:hidden" />
+              <Icon name="alert-triangle" :size="24" class="text-white hidden lg:block" />
             </div>
-            <h3 class="text-lg font-semibold text-red-800 dark:text-red-200">Últimas incidencias</h3>
+            <div>
+              <h3 class="text-lg lg:text-xl font-bold text-red-800 dark:text-red-200">Últimas incidencias</h3>
+              <p class="text-xs text-red-600 dark:text-red-400">Reportes de los últimos 7 días</p>
+            </div>
           </div>
           <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-theme-primary text-sm">
+            <table class="min-w-full divide-y divide-theme-primary text-sm lg:text-base">
               <thead class="bg-theme-secondary">
                 <tr>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Tipo</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Descripción</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Persona</th>
-                  <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Fecha</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Tipo</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Descripción</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Persona</th>
+                  <th class="px-4 lg:px-6 py-3 lg:py-4 text-left font-semibold text-theme-secondary">Fecha</th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-theme-primary bg-theme-card">
-                <tr v-for="row in recent.incidencias" :key="row.id" class="transition-colors hover:bg-red-50 dark:hover:bg-red-900/10">
-                  <td class="px-6 py-4">
-                    <span class="inline-flex items-center rounded-full bg-red-100 dark:bg-red-900/30 px-2.5 py-0.5 text-xs font-medium text-red-700 dark:text-red-300">
+                <tr v-for="row in recent.incidencias" :key="row.id" class="transition-all hover:bg-red-50 dark:hover:bg-red-900/10 hover:scale-[1.01]">
+                  <td class="px-4 lg:px-6 py-3 lg:py-4">
+                    <span class="inline-flex items-center rounded-full bg-red-100 dark:bg-red-900/30 px-3 py-1 text-xs lg:text-sm font-semibold text-red-700 dark:text-red-300 shadow-sm">
                       {{ row.tipo || '—' }}
                     </span>
                   </td>
-                  <td class="px-6 py-4 font-medium text-theme-primary">{{ row.descripcion || '—' }}</td>
-                  <td class="px-6 py-4 text-theme-secondary">{{ row.persona || '—' }}</td>
-                  <td class="px-6 py-4 text-theme-secondary">{{ row.fecha || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 font-semibold text-theme-primary">{{ row.descripcion || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 text-theme-secondary">{{ row.persona || '—' }}</td>
+                  <td class="px-4 lg:px-6 py-3 lg:py-4 text-theme-secondary">{{ row.fecha || '—' }}</td>
                 </tr>
                 <tr v-if="!recent.incidencias?.length">
-                  <td colspan="4" class="px-6 py-12 text-center text-theme-muted">Sin incidencias reportadas</td>
+                  <td colspan="4" class="px-6 py-16 text-center">
+                    <Icon name="check-circle" :size="48" class="mx-auto text-green-500 mb-3" />
+                    <p class="text-theme-muted text-base">Sin incidencias reportadas</p>
+                    <p class="text-xs text-theme-muted mt-1">¡Todo está en orden!</p>
+                  </td>
                 </tr>
               </tbody>
             </table>
