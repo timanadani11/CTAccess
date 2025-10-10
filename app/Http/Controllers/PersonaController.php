@@ -101,10 +101,17 @@ class PersonaController extends Controller
     /**
      * Display the specified resource.
      */
-    public function show(Persona $persona): Response
+    public function show(Persona $persona): Response|JsonResponse
     {
         $persona->load(['portatiles', 'vehiculos']);
-        
+
+        // Si es una petición AJAX, devolver JSON
+        if (request()->wantsJson() || request()->ajax()) {
+            return response()->json([
+                'persona' => new PersonaResource($persona)
+            ]);
+        }
+
         return Inertia::render('Personas/Show', [
             'persona' => new PersonaResource($persona),
         ]);
