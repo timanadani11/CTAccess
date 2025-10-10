@@ -102,34 +102,163 @@
 
               <!-- Info y controles -->
               <div class="mt-4 space-y-3">
-                <!-- Último escaneo -->
-                <div v-if="lastScanResult" class="rounded-lg bg-blue-50 p-3">
+                <!-- Información de la Persona (cuando se detecta) -->
+                <div v-if="personaInfo && !error" class="space-y-3">
+                  <!-- Datos de la persona -->
+                  <div class="rounded-lg bg-emerald-50 border-2 border-emerald-200 p-3">
+                    <div class="flex items-start space-x-2">
+                      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-emerald-600 text-white flex-shrink-0">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1">
+                        <h4 class="text-sm font-bold text-emerald-900">{{ personaInfo.persona?.Nombre }}</h4>
+                        <p class="text-xs text-emerald-700">
+                          <span class="font-medium">Cédula:</span> {{ personaInfo.persona?.documento }}
+                        </p>
+                        <p class="text-xs text-emerald-700">
+                          <span class="font-medium">Tipo:</span> {{ personaInfo.persona?.TipoPersona }}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Equipos -->
+                  <div class="space-y-2">
+                    <div v-if="personaInfo.tiene_portatil" class="flex items-center space-x-2 rounded-lg bg-blue-50 border border-blue-200 p-2">
+                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-blue-600 text-white flex-shrink-0">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-blue-900 truncate">
+                          {{ personaInfo.portatil_asociado?.marca }} {{ personaInfo.portatil_asociado?.modelo }}
+                        </p>
+                        <p class="text-xs text-blue-700">Serial: {{ personaInfo.portatil_asociado?.serial }}</p>
+                      </div>
+                      <svg class="h-4 w-4 text-blue-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+
+                    <div v-if="personaInfo.tiene_vehiculo" class="flex items-center space-x-2 rounded-lg bg-orange-50 border border-orange-200 p-2">
+                      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-orange-600 text-white flex-shrink-0">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
+                        </svg>
+                      </div>
+                      <div class="flex-1 min-w-0">
+                        <p class="text-xs font-semibold text-orange-900">{{ personaInfo.vehiculo_asociado?.tipo }}</p>
+                        <p class="text-xs text-orange-700">Placa: <span class="font-bold">{{ personaInfo.vehiculo_asociado?.placa }}</span></p>
+                      </div>
+                      <svg class="h-4 w-4 text-orange-600 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
+                      </svg>
+                    </div>
+                  </div>
+
+                  <!-- Tipo de acceso -->
+                  <div class="rounded-lg border-2 p-2" :class="{
+                    'bg-green-50 border-green-300': personaInfo.es_entrada,
+                    'bg-yellow-50 border-yellow-300': personaInfo.es_salida
+                  }">
+                    <div class="flex items-center space-x-2">
+                      <svg v-if="personaInfo.es_entrada" class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 1.414L10.586 9H7a1 1 0 100 2h3.586l-1.293 1.293a1 1 0 101.414 1.414l3-3a1 1 0 000-1.414z" clip-rule="evenodd"></path>
+                      </svg>
+                      <svg v-else class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707l-3-3a1 1 0 00-1.414 0l-3 3a1 1 0 001.414 1.414L9 9.414V13a1 1 0 102 0V9.414l1.293 1.293a1 1 0 001.414-1.414z" clip-rule="evenodd"></path>
+                      </svg>
+                      <span class="text-xs font-bold" :class="{
+                        'text-green-800': personaInfo.es_entrada,
+                        'text-yellow-800': personaInfo.es_salida
+                      }">
+                        {{ personaInfo.mensaje_accion }}
+                      </span>
+                    </div>
+                  </div>
+
+                  <!-- Botones de acción -->
+                  <div class="flex space-x-2 pt-1">
+                    <button
+                      type="button"
+                      @click="resetScan"
+                      :disabled="confirming"
+                      class="flex-1 rounded-lg border-2 border-gray-300 bg-white px-3 py-2 text-sm font-medium text-gray-700 transition-all hover:bg-gray-50 active:scale-95 disabled:opacity-50"
+                    >
+                      <span class="flex items-center justify-center space-x-1">
+                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        <span>Nuevo</span>
+                      </span>
+                    </button>
+                    <button
+                      type="button"
+                      @click="confirmAcceso"
+                      :disabled="confirming"
+                      class="flex-1 rounded-lg bg-gradient-to-r from-emerald-600 to-emerald-500 px-3 py-2 text-sm font-bold text-white shadow-lg transition-all hover:shadow-xl active:scale-95 disabled:opacity-50"
+                    >
+                      <span v-if="confirming" class="flex items-center justify-center space-x-1">
+                        <svg class="h-4 w-4 animate-spin" fill="none" viewBox="0 0 24 24">
+                          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                          <path class="opacity-75" fill="currentColor" d="M4 12a8 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                        </svg>
+                        <span>Registrando...</span>
+                      </span>
+                      <span v-else class="flex items-center justify-center space-x-1">
+                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                        </svg>
+                        <span>Confirmar</span>
+                      </span>
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Estado: Buscando -->
+                <div v-else-if="searching" class="rounded-lg bg-blue-50 border-2 border-blue-200 p-4">
+                  <div class="flex items-center justify-center space-x-2">
+                    <svg class="h-5 w-5 animate-spin text-blue-600" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor" d="M4 12a8 8-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <p class="text-sm font-medium text-blue-900">Buscando persona...</p>
+                  </div>
+                </div>
+
+                <!-- Error -->
+                <div v-else-if="error" class="rounded-lg bg-red-50 border-2 border-red-200 p-3">
                   <div class="flex items-start space-x-2">
-                    <svg class="h-5 w-5 mt-0.5 flex-shrink-0 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    <svg class="h-5 w-5 mt-0.5 flex-shrink-0 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                      <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
                     </svg>
                     <div class="flex-1">
-                      <p class="text-xs font-medium text-blue-900">Último escaneo</p>
-                      <p class="text-sm font-bold text-blue-700">{{ lastScanResult }}</p>
-                      <p class="text-xs text-blue-600">{{ lastScanTime }}</p>
+                      <p class="text-sm font-medium text-red-900">Error</p>
+                      <p class="text-xs text-red-700">{{ error }}</p>
                     </div>
                   </div>
                 </div>
 
-                <!-- Instrucciones -->
-                <div class="rounded-lg bg-gray-50 p-3">
+                <!-- Instrucciones (cuando no hay escaneo) -->
+                <div v-else class="rounded-lg bg-gray-50 p-3">
                   <div class="flex items-start space-x-2">
                     <svg class="h-5 w-5 mt-0.5 flex-shrink-0 text-gray-600" fill="currentColor" viewBox="0 0 20 20">
                       <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
                     </svg>
-                    <p class="text-xs text-gray-600">
-                      Centra el código QR dentro del marco. El escaneo es automático.
-                    </p>
+                    <div class="flex-1">
+                      <p class="text-xs font-medium text-gray-900">Instrucciones</p>
+                      <p class="text-xs text-gray-600 mt-1">
+                        Centra el código QR o código de barras con la cédula dentro del marco. El escaneo es automático.
+                      </p>
+                    </div>
                   </div>
                 </div>
 
-                <!-- Botones -->
-                <div class="flex space-x-3">
+                <!-- Botón cerrar/activar cámara (cuando no hay persona detectada) -->
+                <div v-if="!personaInfo" class="flex space-x-3">
                   <button
                     type="button"
                     @click="handleClose"
@@ -163,7 +292,7 @@
 
 <script setup>
 import { ref, watch, nextTick, onUnmounted } from 'vue'
-import { useQrScanner } from '@/utils/qr-scanner'
+import jsQR from 'jsqr'
 
 const props = defineProps({
   show: {
@@ -176,7 +305,7 @@ const props = defineProps({
   }
 })
 
-const emit = defineEmits(['close', 'qr-scanned'])
+const emit = defineEmits(['close', 'acceso-registrado'])
 
 const videoElement = ref(null)
 const canvasElement = ref(null)
@@ -185,11 +314,13 @@ const cameraActive = ref(false)
 const lastScanResult = ref('')
 const lastScanTime = ref('')
 const successMessage = ref('')
+const searching = ref(false)
+const confirming = ref(false)
+const personaInfo = ref(null)
+const error = ref('')
 
 let scanningInterval = null
 let mediaStream = null
-
-const { scanQrCode } = useQrScanner()
 
 // Watch para iniciar cámara cuando se abre el modal
 watch(() => props.show, async (newValue) => {
@@ -284,24 +415,33 @@ const processFrame = async () => {
     return
   }
 
-  // Configurar canvas
-  canvas.width = video.videoWidth
-  canvas.height = video.videoHeight
+  try {
+    // Configurar canvas
+    canvas.width = video.videoWidth
+    canvas.height = video.videoHeight
 
-  const context = canvas.getContext('2d')
-  context.drawImage(video, 0, 0, canvas.width, canvas.height)
+    const context = canvas.getContext('2d')
+    context.drawImage(video, 0, 0, canvas.width, canvas.height)
 
-  // Escanear QR
-  const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
-  const qrData = await scanQrCode(imageData)
+    // Obtener datos de la imagen
+    const imageData = context.getImageData(0, 0, canvas.width, canvas.height)
 
-  if (qrData) {
-    handleQrDetected(qrData)
+    // Escanear QR usando jsQR
+    const code = jsQR(imageData.data, imageData.width, imageData.height, {
+      inversionAttempts: 'dontInvert'
+    })
+    
+    if (code && code.data) {
+      handleQrDetected(code.data)
+    }
+  } catch (err) {
+    // Error al escanear (esto puede ser normal si no hay QR visible)
+    console.error('Error al escanear:', err)
   }
 }
 
-const handleQrDetected = (qrData) => {
-  // Detener escaneo temporalmente
+const handleQrDetected = async (qrData) => {
+  // Detener escaneo para evitar múltiples lecturas
   if (scanningInterval) {
     clearInterval(scanningInterval)
     scanningInterval = null
@@ -310,49 +450,133 @@ const handleQrDetected = (qrData) => {
   lastScanResult.value = qrData
   lastScanTime.value = new Date().toLocaleTimeString()
 
-  // Determinar tipo de QR y emitir evento
+  // Extraer solo el número de cédula del QR
+  // El QR puede venir como "1125180688" o "PERSONA_1125180688"
+  let cedula = qrData
   if (qrData.startsWith('PERSONA_')) {
-    successMessage.value = '✓ Persona detectada'
-    emit('qr-scanned', {
-      type: 'persona',
-      data: qrData,
-      timestamp: new Date(),
-      manual: false
-    })
-  } else if (qrData.startsWith('PORTATIL_')) {
-    successMessage.value = '✓ Portátil detectado'
-    emit('qr-scanned', {
-      type: 'portatil',
-      data: qrData,
-      timestamp: new Date(),
-      manual: false
-    })
-  } else if (qrData.startsWith('VEHICULO_')) {
-    successMessage.value = '✓ Vehículo detectado'
-    emit('qr-scanned', {
-      type: 'vehiculo',
-      data: qrData,
-      timestamp: new Date(),
-      manual: false
-    })
-  } else {
-    successMessage.value = '✓ QR detectado'
-    emit('qr-scanned', {
-      type: 'unknown',
-      data: qrData,
-      timestamp: new Date(),
-      manual: false
-    })
+    cedula = qrData.replace('PERSONA_', '')
   }
 
-  // Cerrar modal después de 800ms
-  setTimeout(() => {
-    handleClose()
-  }, 800)
+  // Buscar la persona automáticamente
+  await buscarPersona(cedula)
+}
+
+const buscarPersona = async (cedula) => {
+  searching.value = true
+  error.value = ''
+  successMessage.value = ''
+
+  try {
+    const response = await window.axios.post(route('system.celador.qr.buscar-persona'), {
+      qr_persona: `PERSONA_${cedula}`
+    })
+
+    if (response.data) {
+      personaInfo.value = response.data
+      successMessage.value = `✓ ${response.data.persona.Nombre} detectado/a`
+    } else {
+      error.value = 'No se recibió información de la persona'
+      // Reiniciar escaneo si no se encontró
+      setTimeout(() => {
+        startScanning()
+      }, 2000)
+    }
+  } catch (err) {
+    console.error('Error en búsqueda:', err)
+
+    if (err.response) {
+      if (err.response.status === 404) {
+        error.value = 'Persona no encontrada'
+      } else if (err.response.status === 419) {
+        error.value = 'Sesión expirada. Por favor recarga la página.'
+      } else if (err.response.data?.message) {
+        error.value = err.response.data.message
+      } else {
+        error.value = `Error del servidor (${err.response.status})`
+      }
+    } else if (err.request) {
+      error.value = 'Sin respuesta del servidor'
+    } else {
+      error.value = err.message || 'Error al buscar persona'
+    }
+
+    // Reiniciar escaneo después del error
+    setTimeout(() => {
+      startScanning()
+    }, 2000)
+  } finally {
+    searching.value = false
+  }
+}
+
+const confirmAcceso = async () => {
+  if (!personaInfo.value) return
+  confirming.value = true
+  error.value = ''
+
+  try {
+    // Registrar el acceso directamente desde el modal
+    const response = await window.axios.post(route('system.celador.qr.registrar'), {
+      qr_persona: `PERSONA_${lastScanResult.value.replace('PERSONA_', '')}`,
+      qr_portatil: personaInfo.value.tiene_portatil ? `PORTATIL_${personaInfo.value.portatil_asociado.serial}` : null,
+      qr_vehiculo: personaInfo.value.tiene_vehiculo ? `VEHICULO_${personaInfo.value.vehiculo_asociado.placa}` : null
+    })
+
+    if (response.data) {
+      // Emitir evento de éxito
+      emit('acceso-registrado', response.data)
+
+      const tipoAcceso = personaInfo.value.es_entrada ? 'ENTRADA' : 'SALIDA'
+      successMessage.value = `✅ ${tipoAcceso} registrada para ${personaInfo.value.persona.Nombre}`
+
+      // Limpiar y preparar para siguiente escaneo
+      setTimeout(() => {
+        resetScan()
+        confirming.value = false
+      }, 1500)
+    }
+  } catch (err) {
+    console.error('Error al registrar acceso:', err)
+
+    if (err.response) {
+      if (err.response.status === 422) {
+        const errors = err.response.data.errors
+        error.value = errors ? Object.values(errors)[0][0] : 'Error de validación'
+      } else if (err.response.status === 419) {
+        error.value = 'Sesión expirada. Por favor recarga la página.'
+      } else if (err.response.data?.message) {
+        error.value = err.response.data.message
+      } else {
+        error.value = `Error al registrar acceso (${err.response.status})`
+      }
+    } else if (err.request) {
+      error.value = 'Sin respuesta del servidor'
+    } else {
+      error.value = err.message || 'Error al registrar acceso'
+    }
+
+    confirming.value = false
+  }
+}
+
+const resetScan = () => {
+  personaInfo.value = null
+  error.value = ''
+  successMessage.value = ''
+  lastScanResult.value = ''
+  lastScanTime.value = ''
+  
+  // Reiniciar escaneo
+  if (cameraActive.value) {
+    startScanning()
+  }
 }
 
 const handleClose = () => {
   stopCamera()
+  personaInfo.value = null
+  error.value = ''
+  successMessage.value = ''
   emit('close')
 }
 

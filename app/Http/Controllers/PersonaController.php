@@ -73,6 +73,8 @@ class PersonaController extends Controller
             // Enviar email con el QR adjunto si hay correo (no bloquear en caso de error)
             if (!empty($persona->correo)) {
                 try {
+                    // Recargar persona con portátiles para el email
+                    $persona->load('portatiles');
                     Mail::to($persona->correo)->send(new PersonaQrMailable($persona));
                 } catch (\Throwable $mailEx) {
                     // Registrar pero no interrumpir el flujo de creación

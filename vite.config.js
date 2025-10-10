@@ -29,17 +29,19 @@ export default defineConfig({
                 display: 'standalone',
                 orientation: 'portrait-primary',
                 scope: '/',
-                start_url: '/',
+                start_url: '/?source=pwa',
                 icons: [
                     {
-                        src: 'icons/icon-192x192.png',
+                        src: '/icons/icon-192x192.png',
                         sizes: '192x192',
-                        type: 'image/png'
+                        type: 'image/png',
+                        purpose: 'any maskable'
                     },
                     {
-                        src: 'icons/icon-512x512.png',
+                        src: '/icons/icon-512x512.png',
                         sizes: '512x512',
-                        type: 'image/png'
+                        type: 'image/png',
+                        purpose: 'any maskable'
                     }
                 ]
             },
@@ -120,7 +122,9 @@ export default defineConfig({
                 ]
             },
             devOptions: {
-                enabled: false
+                enabled: true,
+                type: 'module',
+                navigateFallback: 'index.html'
             }
         })
     ],

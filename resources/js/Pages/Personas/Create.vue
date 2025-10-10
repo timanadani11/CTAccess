@@ -102,11 +102,9 @@
                 </div>
                 <select id="tipoPersona" v-model="form.tipoPersona" required class="block w-full pl-10 pr-3 py-3 border border-theme-primary rounded-lg bg-theme-secondary text-theme-primary focus:outline-none focus:ring-2 focus:border-transparent transition-all duration-200 focus:ring-green-500">
                   <option value="">Seleccionar tipo</option>
-                  <option value="Estudiante">👨‍🎓 Estudiante</option>
-                  <option value="Docente">👨‍🏫 Docente</option>
-                  <option value="Administrativo">👨‍💼 Administrativo</option>
-                  <option value="Visitante">👤 Visitante</option>
-                  <option value="Contratista">🔧 Contratista</option>
+                  <option value="Aprendiz">Aprendiz</option>
+                  <option value="Instructor">Instructor</option>
+                  <option value="Visitante">Visitante</option>
                 </select>
               </div>
             </div>

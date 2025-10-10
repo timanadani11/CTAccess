@@ -61,20 +61,16 @@ const closeCedulaModal = () => {
   showCedulaModal.value = false
 }
 
-const handleCedulaSubmit = async (cedula) => {
-  // Crear QR virtual igual que en el modal del escáner
-  const qrVirtual = `PERSONA_${cedula}`
+const handleAccesoRegistrado = (data) => {
+  // El modal ya registró el acceso, solo necesitamos actualizar la UI
+  console.log('Acceso registrado desde modal:', data)
   
-  await handleQrScanned({
-    type: 'persona',
-    data: qrVirtual,
-    manual: true
+  // Recargar la página para actualizar las estadísticas y el historial
+  router.reload({
+    only: ['accesosActivos', 'historial', 'estadisticas']
   })
   
-  // Cerrar modal después de procesar
-  setTimeout(() => {
-    closeCedulaModal()
-  }, 500)
+  // El modal se encarga de limpiarse y quedar abierto para el siguiente registro
 }
 
 // Métodos de escaneo
@@ -112,8 +108,50 @@ const buscarPersona = async (qrPersona) => {
       // Establecer el QR de persona para procesamiento
       scannedCodes.value.persona = qrPersona
       
-      // Si está activado el registro instantáneo, procesar directamente
-      if (registroInstantaneo.value) {
+      // 🔥 INFORMACIÓN IMPORTANTE PARA EL CELADOR
+      const esEntrada = result.es_entrada
+      const esSalida = result.es_salida
+      
+      // Mostrar información al celador
+      let mensaje = `${result.persona.Nombre} - ${result.mensaje_accion}`
+      
+      // Agregar info de portátil/vehículo automáticamente detectados
+      if (esEntrada) {
+        const elementos = []
+        if (result.tiene_portatil) {
+          elementos.push(`✓ Portátil: ${result.portatil_asociado.marca} ${result.portatil_asociado.modelo}`)
+        }
+        if (result.tiene_vehiculo) {
+          elementos.push(`✓ Vehículo: ${result.vehiculo_asociado.placa}`)
+        }
+        
+        if (elementos.length > 0) {
+          showNotification('info', `${mensaje}\n${elementos.join('\n')}`)
+        }
+      }
+      
+      // Si es SALIDA, verificar si necesita escanear portátil/vehículo
+      if (esSalida && result.acceso_activo) {
+        const requiereVerificaciones = []
+        
+        if (result.acceso_activo.requiere_verificacion_portatil) {
+          requiereVerificaciones.push(`📱 Debe escanear QR del portátil: ${result.acceso_activo.portatil_entrada.serial}`)
+        }
+        
+        if (result.acceso_activo.requiere_verificacion_vehiculo) {
+          requiereVerificaciones.push(`🚗 Debe escanear QR del vehículo: ${result.acceso_activo.vehiculo_entrada.placa}`)
+        }
+        
+        if (requiereVerificaciones.length > 0) {
+          showNotification('warning', `SALIDA - Verificación requerida:\n${requiereVerificaciones.join('\n')}`)
+          // NO procesar automáticamente - debe escanear portátil/vehículo
+          showConfirmModal.value = true
+          return
+        }
+      }
+      
+      // Si está activado el registro instantáneo Y no requiere verificaciones, procesar directamente
+      if (registroInstantaneo.value && (!esSalida || !result.acceso_activo?.requiere_verificacion_portatil)) {
         await procesarAcceso()
       } else {
         showConfirmModal.value = true
@@ -696,14 +734,14 @@ onUnmounted(() => {
     <QrScannerModal
       :show="showQrScannerModal"
       @close="closeQrScanner"
-      @qr-scanned="handleQrScanned"
+      @acceso-registrado="handleAccesoRegistrado"
       ref="qrScannerModalRef"
     />
 
     <CedulaModal
       :show="showCedulaModal"
       @close="closeCedulaModal"
-      @submit="handleCedulaSubmit"
+      @acceso-registrado="handleAccesoRegistrado"
       ref="cedulaModalRef"
     />
   </SystemLayout>
