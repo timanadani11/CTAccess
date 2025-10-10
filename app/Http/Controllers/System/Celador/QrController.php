@@ -102,36 +102,25 @@ class QrController extends Controller
 
     private function procesarEntrada($persona, $request, $usuario)
     {
+        // 🔥 OBTENER AUTOMÁTICAMENTE portátil y vehículo asociados a la persona
+        $persona->load(['portatiles', 'vehiculos']);
+        
         $portatilId = null;
         $vehiculoId = null;
 
-        // Verificar portátil si se proporcionó QR
-        if ($request->qr_portatil) {
-            $portatil = $this->buscarPortatilPorQr($request->qr_portatil);
-            
-            if (!$portatil->perteneceAPersona($persona->idPersona)) {
-                throw ValidationException::withMessages([
-                    'qr_portatil' => 'El portátil no pertenece a esta persona.'
-                ]);
-            }
-            
+        // Si la persona tiene portátil registrado, usarlo automáticamente
+        if ($persona->portatiles->isNotEmpty()) {
+            $portatil = $persona->portatiles->first(); // Portátil principal
             $portatilId = $portatil->portatil_id;
         }
 
-        // Verificar vehículo si se proporcionó QR
-        if ($request->qr_vehiculo) {
-            $vehiculo = $this->buscarVehiculoPorQr($request->qr_vehiculo);
-            
-            if (!$vehiculo->perteneceAPersona($persona->idPersona)) {
-                throw ValidationException::withMessages([
-                    'qr_vehiculo' => 'El vehículo no pertenece a esta persona.'
-                ]);
-            }
-            
+        // Si la persona tiene vehículo registrado, usarlo automáticamente
+        if ($persona->vehiculos->isNotEmpty()) {
+            $vehiculo = $persona->vehiculos->first(); // Vehículo principal
             $vehiculoId = $vehiculo->id;
         }
 
-        // Registrar entrada
+        // Registrar entrada con los datos obtenidos automáticamente
         $acceso = Acceso::registrarEntrada(
             $persona->idPersona,
             $portatilId,
@@ -146,65 +135,122 @@ class QrController extends Controller
             'documento' => $persona->documento,
             'hora' => $acceso->fecha_entrada->format('H:i:s'),
             'portatil' => $portatilId ? 'Sí' : 'No',
-            'vehiculo' => $vehiculoId ? 'Sí' : 'No'
+            'vehiculo' => $vehiculoId ? 'Sí' : 'No',
+            'portatil_info' => $portatilId ? $persona->portatiles->first()->marca . ' ' . $persona->portatiles->first()->modelo : null,
+            'vehiculo_info' => $vehiculoId ? $persona->vehiculos->first()->tipo . ' - ' . $persona->vehiculos->first()->placa : null
         ]);
     }
 
     private function procesarSalida($persona, $accesoActivo, $request, $usuario)
     {
         $errores = [];
+        $requiereVerificacion = false;
+        $confio = $request->input('confiar', false); // Nuevo: el celador confió
 
-        // Verificar portátil en la salida
+        // 🔥 VERIFICACIÓN DE PORTÁTIL EN SALIDA
         if ($accesoActivo->portatil_id) {
-            if (!$request->qr_portatil) {
-                $errores[] = 'Debe escanear el QR del portátil que registró en la entrada.';
+            $requiereVerificacion = true;
+            
+            if ($confio) {
+                // ✅ El celador confió - NO verificar
+                Log::info('Salida sin verificación de portátil (celador confió)', [
+                    'persona_id' => $persona->idPersona,
+                    'acceso_id' => $accesoActivo->idAcceso,
+                    'portatil_entrada' => $accesoActivo->portatil->serial
+                ]);
+            } elseif ($request->has('serial_verificado')) {
+                // 🔍 Se verificó el serial
+                $serialVerificado = $request->serial_verificado;
+                $serialEsperado = $accesoActivo->portatil->serial;
+                
+                if ($serialVerificado != $serialEsperado) {
+                    // ⚠️ Serial NO COINCIDE - INCIDENCIA
+                    $errores[] = "Portátil NO coincide. Entrada: {$serialEsperado}, Verificado: {$serialVerificado}";
+                }
+            } elseif (!$request->qr_portatil) {
+                // ⚠️ No escaneó QR de portátil - INCIDENCIA
+                $errores[] = 'No se verificó el portátil (Serial esperado: ' . $accesoActivo->portatil->serial . ')';
             } else {
+                // Verificación tradicional con QR completo
                 $portatil = $this->buscarPortatilPorQr($request->qr_portatil);
                 
                 if ($portatil->portatil_id != $accesoActivo->portatil_id) {
-                    $errores[] = 'El portátil escaneado no coincide con el registrado en la entrada.';
+                    $errores[] = 'Portátil NO coincide. Entrada: ' . $accesoActivo->portatil->serial . ', Verificado: ' . $portatil->serial;
                 }
             }
         }
 
-        // Verificar vehículo en la salida
+        // 🔥 VERIFICACIÓN DE VEHÍCULO EN SALIDA
         if ($accesoActivo->vehiculo_id) {
-            if (!$request->qr_vehiculo) {
-                $errores[] = 'Debe escanear el QR del vehículo que registró en la entrada.';
+            $requiereVerificacion = true;
+            
+            if ($confio) {
+                // ✅ El celador confió - NO verificar
+                Log::info('Salida sin verificación de vehículo (celador confió)', [
+                    'persona_id' => $persona->idPersona,
+                    'acceso_id' => $accesoActivo->idAcceso,
+                    'vehiculo_entrada' => $accesoActivo->vehiculo->placa
+                ]);
+            } elseif ($request->has('placa_verificada')) {
+                // 🔍 Se verificó la placa
+                $placaVerificada = $request->placa_verificada;
+                $placaEsperada = $accesoActivo->vehiculo->placa;
+                
+                if ($placaVerificada != $placaEsperada) {
+                    // ⚠️ Placa NO COINCIDE - INCIDENCIA
+                    $errores[] = "Vehículo NO coincide. Entrada: {$placaEsperada}, Verificado: {$placaVerificada}";
+                }
+            } elseif (!$request->qr_vehiculo) {
+                // ⚠️ No escaneó QR de vehículo - INCIDENCIA
+                $errores[] = 'No se verificó el vehículo (Placa esperada: ' . $accesoActivo->vehiculo->placa . ')';
             } else {
+                // Verificación tradicional con QR completo
                 $vehiculo = $this->buscarVehiculoPorQr($request->qr_vehiculo);
                 
                 if ($vehiculo->id != $accesoActivo->vehiculo_id) {
-                    $errores[] = 'El vehículo escaneado no coincide con el registrado en la entrada.';
+                    $errores[] = 'Vehículo NO coincide. Entrada: ' . $accesoActivo->vehiculo->placa . ', Verificado: ' . $vehiculo->placa;
                 }
             }
         }
 
-        // Si hay errores, registrar incidencia
+        // Si hay errores, registrar incidencia PERO PERMITIR SALIDA
         if (!empty($errores)) {
-            $descripcion = 'Inconsistencias en salida: ' . implode(' ', $errores);
+            $descripcion = 'Inconsistencias en salida: ' . implode(' | ', $errores);
             $incidencia = $accesoActivo->marcarIncidencia($descripcion, $usuario->idUsuario);
             
+            // Marcar salida CON incidencia
+            $accesoActivo->marcarSalida($usuario->idUsuario);
+            
             return back()->with('warning', [
-                'tipo' => 'incidencia',
-                'mensaje' => 'Se registró una incidencia en la salida',
+                'tipo' => 'salida_con_incidencia',
+                'mensaje' => '⚠️ SALIDA REGISTRADA CON INCIDENCIA',
                 'persona' => $persona->Nombre,
+                'documento' => $persona->documento,
                 'errores' => $errores,
-                'incidencia_id' => $incidencia->incidenciaId
+                'incidencia_id' => $incidencia->incidenciaId,
+                'acceso_id' => $accesoActivo->idAcceso,
+                'hora_entrada' => $accesoActivo->fecha_entrada->format('H:i:s'),
+                'hora_salida' => $accesoActivo->fecha_salida->format('H:i:s')
             ]);
         }
 
-        // Registrar salida exitosa
+        // ✅ Registrar salida exitosa (sin errores o con confianza)
         $accesoActivo->marcarSalida($usuario->idUsuario);
+
+        $mensaje = $confio 
+            ? '✅ Salida registrada (celador confió en verificación)'
+            : '✅ Salida registrada exitosamente (equipos verificados)';
 
         return back()->with('success', [
             'tipo' => 'salida',
-            'mensaje' => 'Salida registrada exitosamente',
+            'mensaje' => $mensaje,
             'persona' => $persona->Nombre,
             'documento' => $persona->documento,
             'hora_entrada' => $accesoActivo->fecha_entrada->format('H:i:s'),
             'hora_salida' => $accesoActivo->fecha_salida->format('H:i:s'),
-            'duracion' => $accesoActivo->duracion
+            'duracion' => $accesoActivo->duracion,
+            'verificaciones_ok' => $requiereVerificacion && !$confio,
+            'confio' => $confio
         ]);
     }
 
@@ -342,34 +388,76 @@ class QrController extends Controller
         // Cargar relaciones necesarias
         $persona->load(['portatiles', 'vehiculos']);
         
-        return response()->json([
+        // Información del portátil asociado (si tiene)
+        $portatilInfo = null;
+        if ($persona->portatiles->isNotEmpty()) {
+            $portatil = $persona->portatiles->first();
+            $portatilInfo = [
+                'portatil_id' => $portatil->portatil_id,
+                'marca' => $portatil->marca,
+                'modelo' => $portatil->modelo,
+                'serial' => $portatil->serial,
+                'descripcion' => $portatil->marca . ' ' . $portatil->modelo . ' (Serial: ' . $portatil->serial . ')'
+            ];
+        }
+        
+        // Información del vehículo asociado (si tiene)
+        $vehiculoInfo = null;
+        if ($persona->vehiculos->isNotEmpty()) {
+            $vehiculo = $persona->vehiculos->first();
+            $vehiculoInfo = [
+                'id' => $vehiculo->id,
+                'tipo' => $vehiculo->tipo,
+                'placa' => $vehiculo->placa,
+                'descripcion' => $vehiculo->tipo . ' - Placa: ' . $vehiculo->placa
+            ];
+        }
+        
+        // Construir respuesta completa
+        $response = [
             'persona' => [
+                'idPersona' => $persona->idPersona,
                 'Nombre' => $persona->Nombre,
                 'documento' => $persona->documento,
                 'TipoPersona' => $persona->TipoPersona,
                 'correo' => $persona->correo
             ],
             'tiene_acceso_activo' => $accesoActivo ? true : false,
-            'acceso_activo' => $accesoActivo ? [
-                'fecha_entrada' => $accesoActivo->fecha_entrada,
-                'portatil_id' => $accesoActivo->portatil_id,
-                'vehiculo_id' => $accesoActivo->vehiculo_id
-            ] : null,
-            'portatiles' => $persona->portatiles->map(function($p) {
-                return [
-                    'portatil_id' => $p->portatil_id,
-                    'marca' => $p->marca,
-                    'modelo' => $p->modelo,
-                    'serial' => $p->serial
-                ];
-            }),
-            'vehiculos' => $persona->vehiculos->map(function($v) {
-                return [
-                    'id' => $v->id,
-                    'tipo' => $v->tipo,
-                    'placa' => $v->placa
-                ];
-            })
-        ]);
+            'es_entrada' => !$accesoActivo,
+            'es_salida' => $accesoActivo ? true : false,
+            'portatil_asociado' => $portatilInfo,
+            'vehiculo_asociado' => $vehiculoInfo,
+            'tiene_portatil' => $portatilInfo !== null,
+            'tiene_vehiculo' => $vehiculoInfo !== null,
+            'mensaje_accion' => $accesoActivo ? 'SALIDA detectada' : 'ENTRADA detectada'
+        ];
+        
+        // Si tiene acceso activo (es salida), agregar datos del acceso
+        if ($accesoActivo) {
+            $accesoActivo->load(['portatil', 'vehiculo']);
+            
+            $response['acceso_activo'] = [
+                'idAcceso' => $accesoActivo->idAcceso,
+                'fecha_entrada' => $accesoActivo->fecha_entrada->format('Y-m-d H:i:s'),
+                'hora_entrada' => $accesoActivo->fecha_entrada->format('H:i'),
+                'portatil_entrada' => $accesoActivo->portatil ? [
+                    'portatil_id' => $accesoActivo->portatil->portatil_id,
+                    'marca' => $accesoActivo->portatil->marca,
+                    'modelo' => $accesoActivo->portatil->modelo,
+                    'serial' => $accesoActivo->portatil->serial,
+                    'descripcion' => $accesoActivo->portatil->marca . ' ' . $accesoActivo->portatil->modelo . ' (Serial: ' . $accesoActivo->portatil->serial . ')'
+                ] : null,
+                'vehiculo_entrada' => $accesoActivo->vehiculo ? [
+                    'id' => $accesoActivo->vehiculo->id,
+                    'tipo' => $accesoActivo->vehiculo->tipo,
+                    'placa' => $accesoActivo->vehiculo->placa,
+                    'descripcion' => $accesoActivo->vehiculo->tipo . ' - Placa: ' . $accesoActivo->vehiculo->placa
+                ] : null,
+                'requiere_verificacion_portatil' => $accesoActivo->portatil_id !== null,
+                'requiere_verificacion_vehiculo' => $accesoActivo->vehiculo_id !== null
+            ];
+        }
+        
+        return response()->json($response);
     }
 }
