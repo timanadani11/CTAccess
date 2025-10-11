@@ -50,10 +50,37 @@ onMounted(() => {
   fetchSystemStatus()
   fetchWeather()
 
-  // Actualizar actividad reciente cada 30 segundos
-  setInterval(() => {
-    fetchRecentActivity()
-  }, 30000)
+  // 🔥 WEBSOCKET: Escuchar nuevos accesos en tiempo real
+  if (typeof window.Echo !== 'undefined') {
+    window.Echo.channel('accesos')
+      .listen('.acceso.registrado', (data) => {
+        console.log('🎉 Nuevo acceso registrado:', data)
+        
+        // Agregar al inicio de la actividad reciente
+        recentActivity.value.unshift({
+          id: data.id,
+          persona: data.persona.nombre,
+          documento: data.persona.documento,
+          tipo: data.tipo_acceso,
+          tiempo: new Date(data.timestamp)
+        })
+        
+        // Mantener solo los últimos 10
+        if (recentActivity.value.length > 10) {
+          recentActivity.value = recentActivity.value.slice(0, 10)
+        }
+        
+        // Actualizar estadísticas
+        if (data.tipo_acceso === 'entrada') {
+          props.estadisticas.accesos_hoy++
+          props.estadisticas.accesos_activos++
+        } else {
+          props.estadisticas.accesos_activos--
+        }
+      })
+  } else {
+    console.warn('⚠️ Laravel Echo no está disponible. WebSockets deshabilitados.')
+  }
 
   // Actualizar clima cada 10 minutos
   setInterval(() => {
@@ -92,27 +119,13 @@ const installPWA = async () => {
   }
 }
 
-// 🔥 Actividad en Tiempo Real
+// 🔥 Actividad en Tiempo Real con WebSockets
 const fetchRecentActivity = async () => {
   try {
-    // Simulamos datos realistas hasta implementar la API real
-    const activities = [
-      { id: 1, persona: 'Juan Pérez', tipo: 'entrada', tiempo: new Date(Date.now() - Math.random() * 300000) },
-      { id: 2, persona: 'María García', tipo: 'salida', tiempo: new Date(Date.now() - Math.random() * 600000) },
-      { id: 3, persona: 'Carlos López', tipo: 'entrada', tiempo: new Date(Date.now() - Math.random() * 900000) },
-      { id: 4, persona: 'Ana Rodríguez', tipo: 'salida', tiempo: new Date(Date.now() - Math.random() * 1200000) },
-      { id: 5, persona: 'Luis Martínez', tipo: 'entrada', tiempo: new Date(Date.now() - Math.random() * 1500000) }
-    ]
-    
-    setTimeout(() => {
-      recentActivity.value = activities.sort((a, b) => b.tiempo - a.tiempo).slice(0, 5)
-      loadingActivity.value = false
-    }, 800)
-    
-    // API real cuando esté lista:
-    // const response = await fetch('/api/accesos/recientes')
-    // recentActivity.value = await response.json()
-    // loadingActivity.value = false
+    const response = await fetch('/api/accesos/recientes')
+    const data = await response.json()
+    recentActivity.value = data
+    loadingActivity.value = false
   } catch (error) {
     console.error('Error fetching recent activity:', error)
     loadingActivity.value = false

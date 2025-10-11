@@ -1,5 +1,6 @@
 import '../css/app.css';
 import './bootstrap';
+import './echo'; // 🔥 Importar configuración de Laravel Echo para WebSockets
 
 import { createInertiaApp } from '@inertiajs/vue3';
 import { resolvePageComponent } from 'laravel-vite-plugin/inertia-helpers';

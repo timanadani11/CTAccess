@@ -8,6 +8,7 @@ use App\Models\Portatiles;
 use App\Models\Vehiculo;
 use App\Models\Acceso;
 use App\Models\Incidencia;
+use App\Events\AccesoRegistrado;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -128,6 +129,13 @@ class QrController extends Controller
             $usuario->idUsuario
         );
 
+        // 🔥 EMITIR EVENTO DE WEBSOCKET para actualización en tiempo real
+        Log::info('🔥 Emitiendo evento AccesoRegistrado - ENTRADA', [
+            'acceso_id' => $acceso->id,
+            'persona' => $persona->Nombre
+        ]);
+        event(new AccesoRegistrado($acceso));
+
         return back()->with('success', [
             'tipo' => 'entrada',
             'mensaje' => 'Entrada registrada exitosamente',
@@ -221,6 +229,9 @@ class QrController extends Controller
             // Marcar salida CON incidencia
             $accesoActivo->marcarSalida($usuario->idUsuario);
             
+            // 🔥 EMITIR EVENTO DE WEBSOCKET para actualización en tiempo real
+            event(new AccesoRegistrado($accesoActivo->fresh()));
+            
             return back()->with('warning', [
                 'tipo' => 'salida_con_incidencia',
                 'mensaje' => '⚠️ SALIDA REGISTRADA CON INCIDENCIA',
@@ -236,6 +247,9 @@ class QrController extends Controller
 
         // ✅ Registrar salida exitosa (sin errores o con confianza)
         $accesoActivo->marcarSalida($usuario->idUsuario);
+
+        // 🔥 EMITIR EVENTO DE WEBSOCKET para actualización en tiempo real
+        event(new AccesoRegistrado($accesoActivo->fresh()));
 
         $mensaje = $confio 
             ? '✅ Salida registrada (celador confió en verificación)'
