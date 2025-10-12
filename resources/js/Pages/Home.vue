@@ -1,6 +1,6 @@
 <script setup>
 import { Head, Link } from '@inertiajs/vue3'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import ApplicationLogo from '@/Components/ApplicationLogo.vue'
 import Icon from '@/Components/Icon.vue'
 import { useTheme } from '@/composables/useTheme'
@@ -10,114 +10,81 @@ const props = defineProps({
   sistema_info: Object
 })
 
-// Estado para animaciones y PWA
-const isVisible = ref(false)
-const currentTime = ref(new Date())
-const deferredPrompt = ref(null)
-
-// Estado para widgets dinámicos
+// Estado para actividad reciente
 const recentActivity = ref([])
-const weeklyActivity = ref([])
-const systemStatus = ref({})
 const loadingActivity = ref(true)
-const loadingWeekly = ref(true)
-const loadingStatus = ref(true)
-
-// Estado para el clima
-const weather = ref(null)
-const loadingWeather = ref(true)
-const weatherError = ref(false)
 
 // Tema
 const { isDark, toggleTheme } = useTheme()
 
-// Actualizar hora cada segundo y configurar PWA
-onMounted(() => {
-  isVisible.value = true
-  setInterval(() => {
-    currentTime.value = new Date()
-  }, 1000)
-
-  // Escuchar evento beforeinstallprompt para PWA
-  window.addEventListener('beforeinstallprompt', (e) => {
-    e.preventDefault()
-    deferredPrompt.value = e
-  })
-
-  // Cargar datos dinámicos
-  fetchRecentActivity()
-  fetchWeeklyActivity()
-  fetchSystemStatus()
-  fetchWeather()
-
-  // 🔥 WEBSOCKET: Escuchar nuevos accesos en tiempo real
-  if (typeof window.Echo !== 'undefined') {
-    window.Echo.channel('accesos')
-      .listen('.acceso.registrado', (data) => {
-        console.log('🎉 Nuevo acceso registrado:', data)
-        
-        // Agregar al inicio de la actividad reciente
-        recentActivity.value.unshift({
-          id: data.id,
-          persona: data.persona.nombre,
-          documento: data.persona.documento,
-          tipo: data.tipo_acceso,
-          tiempo: new Date(data.timestamp)
-        })
-        
-        // Mantener solo los últimos 10
-        if (recentActivity.value.length > 10) {
-          recentActivity.value = recentActivity.value.slice(0, 10)
-        }
-        
-        // Actualizar estadísticas
-        if (data.tipo_acceso === 'entrada') {
-          props.estadisticas.accesos_hoy++
-          props.estadisticas.accesos_activos++
-        } else {
-          props.estadisticas.accesos_activos--
-        }
-      })
-  } else {
-    console.warn('⚠️ Laravel Echo no está disponible. WebSockets deshabilitados.')
-  }
-
-  // Actualizar clima cada 10 minutos
-  setInterval(() => {
-    fetchWeather()
-  }, 600000)
-})
+// Reloj Digital
+const currentTime = ref(new Date())
+const updateClock = () => {
+  currentTime.value = new Date()
+}
 
 // Formatear hora
 const formatTime = (date) => {
-  return date.toLocaleTimeString('es-CO', {
-    hour: '2-digit',
-    minute: '2-digit',
-    second: '2-digit'
+  return date.toLocaleTimeString('es-ES', { 
+    hour: '2-digit', 
+    minute: '2-digit', 
+    second: '2-digit',
+    hour12: false 
   })
 }
 
 // Formatear fecha
 const formatDate = (date) => {
-  return date.toLocaleDateString('es-CO', {
-    weekday: 'long',
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric'
+  return date.toLocaleDateString('es-ES', { 
+    weekday: 'short', 
+    day: '2-digit', 
+    month: 'short'
   })
 }
 
-// Instalar PWA
-const installPWA = async () => {
-  if (deferredPrompt.value) {
-    deferredPrompt.value.prompt()
-    const { outcome } = await deferredPrompt.value.userChoice
-    console.log(`PWA install outcome: ${outcome}`)
-    deferredPrompt.value = null
+// Configurar WebSocket y cargar datos
+onMounted(() => {
+  // Cargar actividad reciente inicial
+  fetchRecentActivity()
+  
+  // Iniciar reloj
+  setInterval(updateClock, 1000)
+
+  // 🔥 WEBSOCKET: Escuchar nuevos accesos en tiempo real
+  if (typeof window.Echo !== 'undefined') {
+    window.Echo.channel('accesos')
+      .listen('.acceso.registrado', (data) => {
+        console.log('Nuevo acceso registrado:', data)
+        
+        const newAccess = {
+          id: data.id,
+          persona: data.persona.nombre,
+          documento: data.persona.documento,
+          tipo: data.tipo_acceso,
+          tiempo: new Date(data.timestamp),
+          isNew: true // Marcador para animación
+        }
+        
+        // Agregar al inicio de la actividad reciente
+        recentActivity.value.unshift(newAccess)
+        
+        // Mantener solo los últimos 15
+        if (recentActivity.value.length > 15) {
+          recentActivity.value = recentActivity.value.slice(0, 15)
+        }
+
+        // Quitar el marcador "isNew" después de 5 segundos
+        setTimeout(() => {
+          const index = recentActivity.value.findIndex(a => a.id === newAccess.id)
+          if (index !== -1) {
+            recentActivity.value[index].isNew = false
+          }
+        }, 5000)
+      })
   } else {
-    alert('Para instalar la app, usa el menú de tu navegador o busca la opción "Instalar app" o "Añadir a pantalla de inicio"')
+    console.warn('⚠️ Laravel Echo no está disponible. WebSockets deshabilitados.')
   }
-}
+})
 
 // 🔥 Actividad en Tiempo Real con WebSockets
 const fetchRecentActivity = async () => {
@@ -129,56 +96,6 @@ const fetchRecentActivity = async () => {
   } catch (error) {
     console.error('Error fetching recent activity:', error)
     loadingActivity.value = false
-  }
-}
-
-// 📊 Gráfico de Actividad Semanal
-const fetchWeeklyActivity = async () => {
-  try {
-    const days = ['Lun', 'Mar', 'Mié', 'Jue', 'Vie', 'Sáb', 'Dom']
-    const data = days.map(day => ({
-      day,
-      accesos: Math.floor(Math.random() * 50) + 10,
-      maxAccesos: 60
-    }))
-    
-    setTimeout(() => {
-      weeklyActivity.value = data
-      loadingWeekly.value = false
-    }, 1200)
-    
-    // API real:
-    // const response = await fetch('/api/estadisticas/semanal')
-    // weeklyActivity.value = await response.json()
-    // loadingWeekly.value = false
-  } catch (error) {
-    console.error('Error fetching weekly activity:', error)
-    loadingWeekly.value = false
-  }
-}
-
-// ⚡ Estado del Sistema
-const fetchSystemStatus = async () => {
-  try {
-    const status = {
-      sistema: { status: 'online', uptime: '99.9%', color: 'green' },
-      qr_scanner: { status: 'activo', devices: 3, color: 'green' },
-      seguridad: { status: 'óptima', incidents: 0, color: 'green' },
-      database: { status: 'saludable', response: '12ms', color: 'green' }
-    }
-    
-    setTimeout(() => {
-      systemStatus.value = status
-      loadingStatus.value = false
-    }, 600)
-    
-    // API real:
-    // const response = await fetch('/api/sistema/estado')
-    // systemStatus.value = await response.json()
-    // loadingStatus.value = false
-  } catch (error) {
-    console.error('Error fetching system status:', error)
-    loadingStatus.value = false
   }
 }
 
@@ -194,128 +111,35 @@ const formatRelativeTime = (date) => {
   if (hours < 24) return `${hours}h`
   return `${Math.floor(hours / 24)}d`
 }
-
-// 🌤️ Obtener datos del clima
-const fetchWeather = async () => {
-  try {
-    // Primero obtener geolocalización
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        async (position) => {
-          const { latitude, longitude } = position.coords
-          
-          // API Key de OpenWeatherMap desde variables de entorno
-          const API_KEY = import.meta.env.VITE_OPENWEATHER_API_KEY
-          
-          // Si no hay API key configurada, usar datos simulados
-          if (!API_KEY) {
-            useFallbackWeather()
-            return
-          }
-          
-          const url = `https://api.openweathermap.org/data/2.5/weather?lat=${latitude}&lon=${longitude}&units=metric&lang=es&appid=${API_KEY}`
-          
-          try {
-            const response = await fetch(url)
-            if (response.ok) {
-              const data = await response.json()
-              weather.value = {
-                temp: Math.round(data.main.temp),
-                feels_like: Math.round(data.main.feels_like),
-                description: data.weather[0].description,
-                icon: data.weather[0].icon,
-                humidity: data.main.humidity,
-                wind: Math.round(data.wind.speed * 3.6), // m/s a km/h
-                city: data.name
-              }
-              loadingWeather.value = false
-              weatherError.value = false
-            } else {
-              // Si falla la API, usar datos simulados
-              useFallbackWeather()
-            }
-          } catch (error) {
-            console.error('Error fetching weather:', error)
-            useFallbackWeather()
-          }
-        },
-        (error) => {
-          console.error('Geolocation error:', error)
-          useFallbackWeather()
-        }
-      )
-    } else {
-      useFallbackWeather()
-    }
-  } catch (error) {
-    console.error('Error in fetchWeather:', error)
-    useFallbackWeather()
-  }
-}
-
-// Datos de clima simulados si falla la API
-const useFallbackWeather = () => {
-  weather.value = {
-    temp: 22,
-    feels_like: 24,
-    description: 'parcialmente nublado',
-    icon: '02d',
-    humidity: 65,
-    wind: 15,
-    city: 'Tu Ciudad'
-  }
-  loadingWeather.value = false
-  weatherError.value = false
-}
-
-// Obtener emoji según el código del clima
-const getWeatherEmoji = (icon) => {
-  const emojiMap = {
-    '01d': '☀️', '01n': '🌙',
-    '02d': '⛅', '02n': '☁️',
-    '03d': '☁️', '03n': '☁️',
-    '04d': '☁️', '04n': '☁️',
-    '09d': '🌧️', '09n': '🌧️',
-    '10d': '🌦️', '10n': '🌧️',
-    '11d': '⛈️', '11n': '⛈️',
-    '13d': '❄️', '13n': '❄️',
-    '50d': '🌫️', '50n': '🌫️'
-  }
-  return emojiMap[icon] || '🌤️'
-}
-
 </script>
 
 <template>
-  <Head title="CTAccess - Sistema de Control de Acceso PWA" />
-  
-  <!-- PWA Meta Tags -->
-  <Head>
-    <meta name="description" content="Aplicación PWA de control de acceso inteligente - Instálala en tu dispositivo" />
-    <meta name="keywords" content="PWA, control acceso, seguridad, QR, gestión personas, app móvil" />
-    <meta name="author" content="CTAccess Team" />
-    <meta name="theme-color" content="#00304D" />
-    <meta name="apple-mobile-web-app-capable" content="yes" />
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
-    <meta name="apple-mobile-web-app-title" content="CTAccess" />
-    <meta property="og:title" content="CTAccess PWA - Sistema de Control de Acceso" />
-    <meta property="og:description" content="Aplicación web progresiva para gestión y control de acceso" />
-    <meta property="og:type" content="website" />
-    <link rel="manifest" href="/manifest.json" />
-  </Head>
+  <Head title="CTAccess - Sistema de Control de Acceso" />
 
   <div class="min-h-screen bg-theme-primary text-theme-primary flex flex-col">
     <!-- Header fijo -->
     <header class="bg-theme-navbar border-b border-theme-primary px-4 py-3 flex-shrink-0">
       <div class="max-w-7xl mx-auto flex items-center justify-between">
         <!-- Logo -->
-        <div class="flex items-center gap-3">
+        <div class="flex items-center gap-4">
           <div class="relative">
             <ApplicationLogo 
               alt="CTAccess Logo" 
               classes="h-12 w-auto object-contain"
             />
-            <div class="absolute -top-1 -right-1 w-3 h-3 bg-green-500 rounded-full animate-ping"></div>
+          </div>
+          
+          <!-- Reloj Digital -->
+          <div class="hidden md:flex items-center gap-2 bg-theme-secondary border-2 border-theme-primary rounded-lg px-3 py-1.5 shadow-lg">
+            <Icon name="clock" :size="16" class="text-blue-500 dark:text-blue-400" />
+            <div class="flex flex-col">
+              <div class="text-theme-primary font-bold text-sm tabular-nums leading-tight digital-clock">
+                {{ formatTime(currentTime) }}
+              </div>
+              <div class="text-theme-muted text-[10px] font-medium uppercase leading-tight">
+                {{ formatDate(currentTime) }}
+              </div>
+            </div>
           </div>
         </div>
 
@@ -360,205 +184,162 @@ const getWeatherEmoji = (icon) => {
     </header>
 
     <!-- Contenido principal -->
-    <main class="flex-1 px-4 py-6 overflow-y-auto">
+    <main class="flex-2 px-4 py-2 overflow-y-auto">
       <div class="max-w-7xl mx-auto h-full">
         
-        <!-- Reloj y Clima Compactos -->
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mb-6 max-w-4xl mx-auto">
-          
-          <!-- Reloj Digital -->
-          <div class="bg-theme-card border border-theme-primary rounded-xl p-6 shadow-theme-md">
-            <div class="text-center">
-              <div class="text-4xl font-mono font-bold text-theme-primary mb-2">
-                {{ formatTime(currentTime) }}
-              </div>
-              <div class="text-xs text-theme-secondary capitalize">
-                {{ formatDate(currentTime) }}
+        <!-- 🔥 Actividad en Tiempo Real - Diseño Compacto -->
+        <div class="relative w-fit mr-auto">
+          <!-- Título Diagonal en Esquina -->
+          <div class="absolute -top-12 -left-6 z-10">
+            <div class="bg-slate-700 dark:bg-slate-800 px-6 py-3 rounded-xl shadow-2xl border-2 border-slate-600 dark:border-slate-700 transform -rotate-2 hover:rotate-0 transition-transform duration-300">
+              <div class="flex items-center gap-3">
+                <div class="w-9 h-9 bg-slate-600 dark:bg-slate-700 rounded-lg flex items-center justify-center relative">
+                  <Icon name="activity" :size="18" class="text-white" />
+                  <div class="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 bg-green-400 rounded-full border-2 border-slate-700 dark:border-slate-800 live-indicator"></div>
+                </div>
+                <div>
+                  <h3 class="text-base font-bold text-white tracking-tight flex items-center gap-2">
+                    Actividad reciente
+                    <span class="text-xs font-normal text-slate-300">{{ recentActivity.length }} registros</span>
+                  </h3>
+                </div>
               </div>
             </div>
           </div>
 
-          <!-- Widget del Clima -->
-          <div class="bg-theme-card border border-theme-primary rounded-xl p-6 shadow-theme-md">
-            <template v-if="loadingWeather">
-              <div class="flex items-center justify-center h-full">
-                <Icon name="loader" :size="24" class="text-theme-muted animate-spin" />
-              </div>
-            </template>
-            <template v-else-if="weather">
-              <div class="flex items-center gap-4">
-                <div class="text-5xl">{{ getWeatherEmoji(weather.icon) }}</div>
-                <div class="flex-1">
-                  <div class="flex items-baseline gap-2">
-                    <span class="text-3xl font-bold text-theme-primary">{{ weather.temp }}°</span>
-                    <span class="text-sm text-theme-muted">Sensación {{ weather.feels_like }}°</span>
-                  </div>
-                  <p class="text-xs text-theme-secondary capitalize mb-1">{{ weather.description }}</p>
-                  <div class="flex gap-3 text-xs text-theme-muted">
-                    <span class="flex items-center gap-1">
-                      <Icon name="droplet" :size="12" />
-                      {{ weather.humidity }}%
-                    </span>
-                    <span class="flex items-center gap-1">
-                      <Icon name="wind" :size="12" />
-                      {{ weather.wind }} km/h
-                    </span>
-                  </div>
-                </div>
-              </div>
-            </template>
-          </div>
-
-        </div>
-
-
-        <!-- Estadísticas en tiempo real -->
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-          <div 
-            v-for="(stat, index) in [
-              { key: 'personas_registradas', label: 'Personas', icon: 'users' },
-              { key: 'accesos_hoy', label: 'Accesos Hoy', icon: 'calendar' },
-              { key: 'accesos_activos', label: 'Activos', icon: 'activity' },
-              { key: 'total_accesos', label: 'Total', icon: 'bar-chart' }
-            ]" 
-            :key="stat.key"
-          >
-            <div class="bg-theme-card border border-theme-primary rounded-xl p-4 hover:bg-theme-secondary transition-all duration-200 shadow-theme-sm">
-              <div class="flex items-center gap-3 mb-2">
-                <div class="w-8 h-8 bg-theme-tertiary rounded-lg flex items-center justify-center">
-                  <Icon :name="stat.icon" :size="16" class="text-theme-primary" />
-                </div>
-                <div class="text-xl font-bold text-theme-primary">
-                  {{ estadisticas[stat.key]?.toLocaleString() || '0' }}
-                </div>
-              </div>
-              <h3 class="text-xs font-medium text-theme-secondary">{{ stat.label }}</h3>
-            </div>
-          </div>
-        </div>
-
-        <!-- Widgets Dinámicos -->
-        <div class="grid grid-cols-1 lg:grid-cols-3 gap-4 mb-6">
-          
-          <!-- 🔥 Actividad en Tiempo Real -->
-          <div class="bg-theme-card border border-theme-primary rounded-xl p-4 shadow-theme-sm">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-8 h-8 bg-red-600 rounded-lg flex items-center justify-center">
-                <Icon name="activity" :size="16" class="text-white" />
-              </div>
-              <h3 class="text-sm font-semibold text-theme-primary">Actividad Reciente</h3>
-              <div class="ml-auto">
-                <div class="w-2 h-2 bg-green-500 rounded-full animate-pulse"></div>
-              </div>
-            </div>
-            
-            <div class="space-y-2">
+          <!-- Contenedor de la Tabla -->
+          <div class="bg-theme-card border-2 border-theme-primary rounded-xl shadow-xl overflow-hidden mt-12 w-fit">
+            <!-- Feed de Registros Compacto -->
+            <div class="p-2 bg-theme-secondary">
+              <div class="space-y-1.5 max-h-[480px] overflow-y-auto custom-scrollbar pr-1">
+              
+              <!-- Loading State -->
               <template v-if="loadingActivity">
-                <div v-for="i in 3" :key="i" class="flex items-center gap-2 animate-pulse">
-                  <div class="w-2 h-2 bg-theme-tertiary rounded-full"></div>
-                  <div class="h-3 bg-theme-tertiary rounded flex-1"></div>
-                  <div class="h-3 bg-theme-tertiary rounded w-8"></div>
-                </div>
-              </template>
-              <template v-else>
-                <div 
-                  v-for="activity in recentActivity" 
-                  :key="activity.id"
-                  class="flex items-center gap-2 text-xs"
-                >
-                  <div 
-                    :class="[
-                      'w-2 h-2 rounded-full',
-                      activity.tipo === 'entrada' ? 'bg-green-500' : 'bg-red-500'
-                    ]"
-                  ></div>
-                  <span class="text-theme-primary flex-1 truncate">{{ activity.persona }}</span>
-                  <span class="text-theme-muted">{{ formatRelativeTime(activity.tiempo) }}</span>
-                </div>
-              </template>
-            </div>
-          </div>
-
-          <!-- 📊 Gráfico de Actividad Semanal -->
-          <div class="bg-theme-card border border-theme-primary rounded-xl p-4 shadow-theme-sm">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-8 h-8 bg-blue-600 rounded-lg flex items-center justify-center">
-                <Icon name="bar-chart" :size="16" class="text-white" />
-              </div>
-              <h3 class="text-sm font-semibold text-theme-primary">Actividad Semanal</h3>
-            </div>
-            
-            <div class="space-y-2">
-              <template v-if="loadingWeekly">
-                <div v-for="i in 7" :key="i" class="flex items-center gap-2 animate-pulse">
-                  <div class="w-6 h-3 bg-theme-tertiary rounded"></div>
-                  <div class="h-2 bg-theme-tertiary rounded flex-1"></div>
-                  <div class="w-6 h-3 bg-theme-tertiary rounded"></div>
-                </div>
-              </template>
-              <template v-else>
-                <div 
-                  v-for="day in weeklyActivity" 
-                  :key="day.day"
-                  class="flex items-center gap-2 text-xs"
-                >
-                  <span class="text-theme-secondary w-6">{{ day.day }}</span>
-                  <div class="flex-1 bg-theme-tertiary rounded-full h-2 overflow-hidden">
-                    <div 
-                      class="h-full bg-blue-500 rounded-full transition-all duration-500"
-                      :style="{ width: `${(day.accesos / day.maxAccesos) * 100}%` }"
-                    ></div>
+                <div v-for="i in 4" :key="i" class="flex items-center gap-2 p-1.5 bg-theme-card border border-theme-primary rounded-lg animate-pulse w-fit min-w-[400px]">
+                  <div class="w-8 h-8 bg-theme-tertiary rounded-lg"></div>
+                  <div class="flex-1 space-y-1">
+                    <div class="h-2.5 bg-theme-tertiary rounded w-32"></div>
+                    <div class="h-2 bg-theme-tertiary rounded w-24"></div>
                   </div>
-                  <span class="text-theme-primary w-6 text-right">{{ day.accesos }}</span>
+                  <div class="w-9 h-6 bg-theme-tertiary rounded"></div>
                 </div>
               </template>
-            </div>
-          </div>
 
-          <!-- ⚡ Estado del Sistema -->
-          <div class="bg-theme-card border border-theme-primary rounded-xl p-4 shadow-theme-sm">
-            <div class="flex items-center gap-2 mb-4">
-              <div class="w-8 h-8 bg-green-600 rounded-lg flex items-center justify-center">
-                <Icon name="shield" :size="16" class="text-white" />
-              </div>
-              <h3 class="text-sm font-semibold text-theme-primary">Estado Sistema</h3>
-            </div>
-            
-            <div class="space-y-2">
-              <template v-if="loadingStatus">
-                <div v-for="i in 4" :key="i" class="flex items-center gap-2 animate-pulse">
-                  <div class="w-2 h-2 bg-theme-tertiary rounded-full"></div>
-                  <div class="h-3 bg-theme-tertiary rounded flex-1"></div>
-                  <div class="h-3 bg-theme-tertiary rounded w-12"></div>
-                </div>
+              <!-- Lista de Actividades -->
+              <template v-else-if="recentActivity.length > 0">
+                <transition-group name="spotlight">
+                  <div 
+                    v-for="activity in recentActivity" 
+                    :key="activity.id"
+                    :class="[
+                      'relative flex items-center gap-2 p-1.5 rounded-lg border-2 transition-all duration-500 w-fit min-w-[400px]',
+                      activity.isNew 
+                        ? 'bg-yellow-50 dark:bg-yellow-900/20 border-yellow-400 dark:border-yellow-600 spotlight-card' 
+                        : 'bg-theme-card border-theme-primary hover:border-slate-400 dark:hover:border-slate-600 hover:shadow-lg',
+                      'cursor-pointer group'
+                    ]"
+                  >
+                    <!-- Spotlight Effect para nuevos (4 esquinas brillantes) -->
+                    <div v-if="activity.isNew" class="corner-spotlight top-left"></div>
+                    <div v-if="activity.isNew" class="corner-spotlight top-right"></div>
+                    <div v-if="activity.isNew" class="corner-spotlight bottom-left"></div>
+                    <div v-if="activity.isNew" class="corner-spotlight bottom-right"></div>
+                    
+                    <!-- Avatar Mate con Icono -->
+                    <div class="relative flex-shrink-0">
+                      <div 
+                        :class="[
+                          'w-8 h-8 rounded-lg flex items-center justify-center text-white font-bold border-2 transition-all duration-300',
+                          activity.tipo === 'entrada' 
+                            ? 'bg-green-500 border-green-600 dark:bg-green-600 dark:border-green-700' 
+                            : 'bg-red-500 border-red-600 dark:bg-red-600 dark:border-red-700',
+                          activity.isNew ? 'scale-110 shake' : 'group-hover:scale-105'
+                        ]"
+                      >
+                        <Icon :name="activity.tipo === 'entrada' ? 'log-in' : 'log-out'" :size="14" />
+                      </div>
+                      <!-- Notificación Badge Animado -->
+                      <div 
+                        v-if="activity.isNew"
+                        class="absolute -top-0.5 -right-0.5 w-3.5 h-3.5 bg-yellow-400 border-2 border-white dark:border-gray-900 rounded-full flex items-center justify-center notification-badge"
+                      >
+                        <span class="text-[7px] font-black text-yellow-900">!</span>
+                      </div>
+                    </div>
+
+                    <!-- Información Compacta -->
+                    <div class="flex-1 min-w-0">
+                      <div class="flex items-center gap-1.5 mb-0.5">
+                        <p :class="[
+                          'font-bold text-[13px] truncate',
+                          activity.isNew ? 'text-yellow-900 dark:text-yellow-200' : 'text-theme-primary'
+                        ]">
+                          {{ activity.persona }}
+                        </p>
+                        <!-- Badge "NUEVO" llamativo -->
+                        <span 
+                          v-if="activity.isNew"
+                          class="px-1.5 py-0.5 bg-yellow-400 text-yellow-900 text-[8px] font-black rounded uppercase tracking-wider border border-yellow-500 blink-badge"
+                        >
+                          ¡Nuevo!
+                        </span>
+                      </div>
+                      <div class="flex items-center gap-1.5 text-[10px]">
+                        <Icon name="credit-card" :size="9" :class="activity.isNew ? 'text-yellow-700 dark:text-yellow-400' : 'text-theme-muted'" />
+                        <span :class="activity.isNew ? 'text-yellow-800 dark:text-yellow-300 font-semibold' : 'text-theme-muted'">
+                          {{ activity.documento }}
+                        </span>
+                        <span class="text-theme-muted text-[8px]">•</span>
+                        <Icon name="clock" :size="9" :class="activity.isNew ? 'text-yellow-700 dark:text-yellow-400' : 'text-theme-muted'" />
+                        <span :class="[
+                          'font-semibold',
+                          activity.isNew ? 'text-yellow-800 dark:text-yellow-300' : 'text-theme-muted'
+                        ]">
+                          {{ formatRelativeTime(activity.tiempo) }}
+                        </span>
+                      </div>
+                    </div>
+
+                    <!-- Badge de Estado Ultra Compacto -->
+                    <div class="flex-shrink-0">
+                      <div 
+                        :class="[
+                          'px-1.5 py-0.5 rounded text-[9px] font-black uppercase border-2 transition-transform duration-300',
+                          activity.tipo === 'entrada' 
+                            ? 'bg-green-500 text-white border-green-600 dark:bg-green-600 dark:border-green-700' 
+                            : 'bg-red-500 text-white border-red-600 dark:bg-red-600 dark:border-red-700',
+                          'group-hover:scale-105'
+                        ]"
+                      >
+                        <div class="flex items-center gap-0.5">
+                          <div 
+                            :class="[
+                              'w-1 h-1 rounded-full bg-white',
+                              activity.isNew ? 'pulse-dot' : ''
+                            ]"
+                          ></div>
+                          {{ activity.tipo === 'entrada' ? 'IN' : 'OUT' }}
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </transition-group>
               </template>
+
+              <!-- Empty State -->
               <template v-else>
-                <div class="flex items-center gap-2 text-xs">
-                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span class="text-theme-primary flex-1">Sistema</span>
-                  <span class="text-green-400">{{ systemStatus.sistema?.uptime }}</span>
-                </div>
-                <div class="flex items-center gap-2 text-xs">
-                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span class="text-theme-primary flex-1">QR Scanner</span>
-                  <span class="text-green-400">{{ systemStatus.qr_scanner?.devices }} activos</span>
-                </div>
-                <div class="flex items-center gap-2 text-xs">
-                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span class="text-theme-primary flex-1">Seguridad</span>
-                  <span class="text-green-400">Óptima</span>
-                </div>
-                <div class="flex items-center gap-2 text-xs">
-                  <div class="w-2 h-2 bg-green-500 rounded-full"></div>
-                  <span class="text-theme-primary flex-1">Base de datos</span>
-                  <span class="text-green-400">{{ systemStatus.database?.response }}</span>
+                <div class="text-center py-12 text-theme-muted">
+                  <div class="w-14 h-14 mx-auto mb-3 bg-theme-tertiary rounded-xl flex items-center justify-center border-2 border-theme-primary">
+                    <Icon name="inbox" :size="28" class="opacity-40" />
+                  </div>
+                  <p class="text-sm font-bold">Sin actividad reciente</p>
+                  <p class="text-xs mt-1 opacity-70">Los accesos aparecerán aquí automáticamente</p>
                 </div>
               </template>
             </div>
           </div>
-          
         </div>
-
+      </div>
 
       </div>
     </main>
@@ -573,13 +354,268 @@ const getWeatherEmoji = (icon) => {
 </template>
 
 <style scoped>
-@keyframes float {
-  0%, 100% { transform: translateY(0px); }
-  50% { transform: translateY(-10px); }
+/* ⚡ ANIMACIÓN SPOTLIGHT - Efecto super llamativo para registros nuevos */
+.spotlight-enter-active {
+  animation: spotlightEntrance 0.8s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
-.animate-float {
-  animation: float 3s ease-in-out infinite;
+.spotlight-leave-active {
+  animation: spotlightExit 0.5s ease-in-out;
+  position: absolute;
+  width: 100%;
+}
+
+.spotlight-move {
+  transition: transform 0.6s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* 🎬 Entrada dramática con zoom y rotación */
+@keyframes spotlightEntrance {
+  0% {
+    opacity: 0;
+    transform: translateX(150px) scale(0.3) rotate(15deg);
+    filter: brightness(3);
+  }
+  50% {
+    transform: translateX(-20px) scale(1.15) rotate(-2deg);
+    filter: brightness(1.5);
+  }
+  70% {
+    transform: translateX(5px) scale(0.95) rotate(1deg);
+  }
+  100% {
+    opacity: 1;
+    transform: translateX(0) scale(1) rotate(0);
+    filter: brightness(1);
+  }
+}
+
+@keyframes spotlightExit {
+  from {
+    opacity: 1;
+    transform: scale(1);
+  }
+  to {
+    opacity: 0;
+    transform: scale(0.8) translateX(-50px);
+  }
+}
+
+/* � Spotlight Card - Efecto de reflector en las 4 esquinas */
+.spotlight-card {
+  animation: cardPulse 2s ease-in-out infinite;
+  position: relative;
+}
+
+@keyframes cardPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(251, 191, 36, 0.5),
+                0 8px 24px -4px rgba(251, 191, 36, 0.3);
+  }
+  50% {
+    box-shadow: 0 0 30px rgba(251, 191, 36, 0.6),
+                0 12px 32px -4px rgba(251, 191, 36, 0.4);
+  }
+}
+
+/* 💡 Corner Spotlights - Luces en las esquinas */
+.corner-spotlight {
+  position: absolute;
+  width: 16px;
+  height: 16px;
+  background: #fbbf24;
+  opacity: 0;
+  animation: cornerFlash 1.5s ease-in-out infinite;
+}
+
+.corner-spotlight.top-left {
+  top: -2px;
+  left: -2px;
+  border-radius: 0 0 100% 0;
+  animation-delay: 0s;
+}
+
+.corner-spotlight.top-right {
+  top: -2px;
+  right: -2px;
+  border-radius: 0 0 0 100%;
+  animation-delay: 0.3s;
+}
+
+.corner-spotlight.bottom-left {
+  bottom: -2px;
+  left: -2px;
+  border-radius: 0 100% 0 0;
+  animation-delay: 0.6s;
+}
+
+.corner-spotlight.bottom-right {
+  bottom: -2px;
+  right: -2px;
+  border-radius: 100% 0 0 0;
+  animation-delay: 0.9s;
+}
+
+@keyframes cornerFlash {
+  0%, 100% {
+    opacity: 0;
+    transform: scale(0);
+  }
+  50% {
+    opacity: 0.8;
+    transform: scale(1);
+  }
+}
+
+/* � Notification Badge - Badge amarillo animado */
+.notification-badge {
+  animation: badgeBounce 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) 3;
+}
+
+@keyframes badgeBounce {
+  0%, 100% {
+    transform: scale(1) rotate(0deg);
+  }
+  25% {
+    transform: scale(1.3) rotate(-10deg);
+  }
+  75% {
+    transform: scale(1.3) rotate(10deg);
+  }
+}
+
+/* 🌀 Shake Animation - Avatar temblando */
+.shake {
+  animation: shake 0.5s cubic-bezier(0.36, 0.07, 0.19, 0.97) 3;
+}
+
+@keyframes shake {
+  0%, 100% {
+    transform: translateX(0) scale(1.1);
+  }
+  25% {
+    transform: translateX(-5px) rotate(-5deg) scale(1.15);
+  }
+  75% {
+    transform: translateX(5px) rotate(5deg) scale(1.15);
+  }
+}
+
+/* ⚡ Blink Badge - Parpadeo llamativo del badge "NUEVO" */
+.blink-badge {
+  animation: blinkScale 1s ease-in-out infinite;
+}
+
+@keyframes blinkScale {
+  0%, 100% {
+    opacity: 1;
+    transform: scale(1);
+  }
+  50% {
+    opacity: 0.7;
+    transform: scale(1.1);
+  }
+}
+
+/* 🔴 Pulse Dot - Punto pulsante en badge de estado */
+.pulse-dot {
+  animation: pulseDot 1.5s ease-in-out infinite;
+}
+
+@keyframes pulseDot {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.5);
+    opacity: 0.5;
+  }
+}
+
+/* 🟢 Live Indicator - Indicador verde pulsante */
+.live-indicator {
+  animation: liveIndicator 2s ease-in-out infinite;
+}
+
+@keyframes liveIndicator {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 1;
+  }
+  50% {
+    transform: scale(1.3);
+    opacity: 0.7;
+  }
+}
+
+/* 📐 Título Diagonal - Hover suave */
+.transform.-rotate-2 {
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3);
+}
+
+.transform.-rotate-2:hover {
+  box-shadow: 0 15px 35px -5px rgba(0, 0, 0, 0.4);
+}
+
+/* 🕐 Reloj Digital - Estilo LED moderno */
+.digital-clock {
+  font-family: 'Consolas', 'Monaco', 'Courier New', monospace;
+  letter-spacing: 0.05em;
+  text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  animation: digitGlow 2s ease-in-out infinite;
+}
+
+@keyframes digitGlow {
+  0%, 100% {
+    text-shadow: 0 0 8px rgba(59, 130, 246, 0.5);
+  }
+  50% {
+    text-shadow: 0 0 12px rgba(59, 130, 246, 0.8), 0 0 20px rgba(59, 130, 246, 0.4);
+  }
+}
+
+/* Números con espaciado uniforme */
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+}
+
+/* 📜 Custom Scrollbar - Mate y moderno */
+.custom-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: #3b82f6 transparent;
+}
+
+.custom-scrollbar::-webkit-scrollbar {
+  width: 6px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+  border-radius: 10px;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #3b82f6;
+  border-radius: 10px;
+  transition: all 0.3s ease;
+}
+
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #2563eb;
+}
+
+/* 🎨 Hover effects para cards */
+.group:hover {
+  transform: translateY(-2px);
+  transition: all 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* ✨ Transiciones suaves globales */
+* {
+  transition-property: transform, background-color, border-color, box-shadow, opacity;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 </style>
 
