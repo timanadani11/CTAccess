@@ -221,5 +221,8 @@ const logoutHref = computed(() => (isSystem.value ? route('system.logout') : rou
                 <slot />
             </main>
         </div>
+        
+        <!-- 🔥 Loader Global -->
+        <GlobalLoader />
     </div>
 </template>

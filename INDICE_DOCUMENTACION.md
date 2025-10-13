@@ -8,6 +8,7 @@ Bienvenido a la documentación completa del sistema CTAccess. Este índice te ay
 
 - **[README.md](README.md)** - Descripción general del proyecto
 - **[PRUEBA_SISTEMA_MEJORADO.md](PRUEBA_SISTEMA_MEJORADO.md)** ⭐ **NUEVO** - Guía de pruebas del sistema mejorado
+- **[LOADER_GLOBAL_GUIDE.md](LOADER_GLOBAL_GUIDE.md)** 🔥 **NUEVO** - Sistema de Loader Global (2025-10-12)
 
 ---
 
@@ -23,6 +24,7 @@ Bienvenido a la documentación completa del sistema CTAccess. Este índice te ay
 #### Para Desarrolladores
 - **[EJEMPLOS_CODIGO_CAMBIOS.md](EJEMPLOS_CODIGO_CAMBIOS.md)** ⭐ **NUEVO** - Código ANTES vs AHORA
 - **[PRUEBA_SISTEMA_MEJORADO.md](PRUEBA_SISTEMA_MEJORADO.md)** ⭐ **NUEVO** - Casos de prueba y SQL
+- **[LOADER_GLOBAL_GUIDE.md](LOADER_GLOBAL_GUIDE.md)** 🔥 **NUEVO** - Loader Global (2025-10-12)
 
 ### 📋 Documentación Anterior (Referencia)
 - **[FLUJO_ACCESO_ACTUALIZADO.md](FLUJO_ACCESO_ACTUALIZADO.md)** - Flujo anterior

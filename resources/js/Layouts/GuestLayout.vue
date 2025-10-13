@@ -18,5 +18,8 @@ import { Link } from '@inertiajs/vue3';
         >
             <slot />
         </div>
+        
+        <!-- 🔥 Loader Global -->
+        <GlobalLoader />
     </div>
 </template>

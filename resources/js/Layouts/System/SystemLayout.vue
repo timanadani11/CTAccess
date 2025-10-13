@@ -121,5 +121,8 @@ onMounted(() => {
 
     <!-- PWA Install Prompt -->
     <PWAInstallPrompt />
+    
+    <!-- 🔥 Loader Global -->
+    <GlobalLoader />
   </div>
 </template>
