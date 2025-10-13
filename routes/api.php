@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Models\Acceso;
-
 /**
  * API pública para accesos recientes (usado en Home con WebSockets)
  */
