@@ -26,24 +26,6 @@ Route::get('/debug/personas/{persona}', function (Persona $persona) {
     return view('debug.persona', compact('persona'));
 });
 
-// Rutas de Personas optimizadas para Inertia.js (CRUD - Admin)
-Route::resource('personas', App\Http\Controllers\PersonaController::class);
-
-// Portal de Personas (Autenticación y Dashboard)
-Route::prefix('personas')->name('personas.')->group(function () {
-    // Rutas públicas
-    Route::middleware('guest:web')->group(function () {
-        Route::get('/login', [PersonaAuthController::class, 'create'])->name('login');
-        Route::post('/login', [PersonaAuthController::class, 'store'])->name('login.store');
-    });
-
-    // Rutas protegidas
-    Route::middleware('auth:web')->group(function () {
-        Route::get('/home', [PersonaDashboardController::class, 'index'])->name('home');
-        Route::get('/perfil', [PersonaProfileController::class, 'show'])->name('profile');
-        Route::post('/logout', [PersonaAuthController::class, 'destroy'])->name('logout');
-    });
-});
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
