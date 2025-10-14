@@ -37,7 +37,21 @@ return [
                 'label' => 'Gestión de Usuarios',
                 'icon'  => 'heroicon-m-user-cog',
                 'route' => 'system.admin.users.index',
-                'can'   => 'manage-users',
+            ],
+            [
+                'label' => 'Permisos',
+                'icon'  => 'heroicon-m-lock-closed',
+                'route' => 'system.admin.permissions.index',
+            ],
+            [
+                'label' => 'Portátiles',
+                'icon'  => 'heroicon-m-computer-desktop',
+                'route' => 'system.admin.portatiles.index',
+            ],
+            [
+                'label' => 'Vehículos',
+                'icon'  => 'heroicon-m-truck',
+                'route' => 'system.admin.vehiculos.index',
             ],
         ],
         'celador' => [

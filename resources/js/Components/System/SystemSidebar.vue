@@ -9,6 +9,8 @@ const props = defineProps({
   collapsed: { type: Boolean, default: false },
 })
 
+const emit = defineEmits(['toggle-collapse'])
+
 const currentRoute = computed(() => route().current())
 
 const go = (routeName) => {
@@ -28,7 +30,10 @@ const getIconName = (label) => {
     'Verificación QR': 'qr-code',
     'Incidencias': 'alert-triangle',
     'Historial': 'clock',
-    'Gestión de Usuarios': 'user-cog'
+    'Gestión de Usuarios': 'user-cog',
+    'Permisos': 'shield',
+    'Portátiles': 'laptop',
+    'Vehículos': 'car'
   }
   return iconMap[label] || 'circle'
 }
@@ -41,7 +46,7 @@ const getIconName = (label) => {
   ]">
     <!-- Rol Badge -->
     <div v-if="!collapsed" class="flex items-center gap-3 border-b border-theme-primary bg-theme-secondary p-4">
-      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600">
+      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-sena-green-600 dark:bg-cyan-600">
         <Icon name="user" :size="16" class="text-white" />
       </div>
       <div>
@@ -52,48 +57,81 @@ const getIconName = (label) => {
 
     <!-- Collapsed role indicator -->
     <div v-if="collapsed" class="flex justify-center border-b border-theme-primary bg-theme-secondary p-4">
-      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-green-600" :title="`Rol: ${role || '—'}`">
+      <div class="flex h-8 w-8 items-center justify-center rounded-full bg-sena-green-600 dark:bg-cyan-600" :title="`Rol: ${role || '—'}`">
         <Icon name="user" :size="16" class="text-white" />
       </div>
     </div>
 
     <!-- Navigation Menu -->
-    <nav class="flex-1 space-y-1 p-3">
+    <nav class="flex-1 space-y-2 p-3">
       <button
         v-for="item in menus"
         :key="item.route"
         :class="[
-          'group flex w-full items-center rounded-lg text-left text-sm font-medium transition-all duration-200',
-          collapsed ? 'px-2 py-2.5 justify-center' : 'px-3 py-2.5',
+          'group flex w-full items-center rounded-lg text-left font-semibold transition-all duration-200 ease-in-out',
+          collapsed ? 'px-2 py-3 justify-center' : 'px-4 py-3',
           isActiveRoute(item.route)
-            ? 'bg-theme-tertiary text-theme-primary shadow-theme-sm' + (collapsed ? '' : ' border-l-4 border-green-600')
-            : 'text-theme-secondary hover:bg-theme-secondary hover:text-theme-primary'
+            ? 'bg-gradient-to-r from-sena-green-600 to-sena-green-500 dark:from-blue-600 dark:to-blue-500 text-white shadow-lg shadow-sena-green-600/30 dark:shadow-blue-600/30 scale-105' + (collapsed ? '' : ' border-l-4 border-sena-green-300 dark:border-cyan-400')
+            : 'text-theme-secondary hover:bg-gradient-to-r hover:from-sena-green-50 hover:to-sena-green-100 dark:hover:from-sena-blue-900/20 dark:hover:to-sena-blue-800/20 hover:text-sena-green-700 dark:hover:text-cyan-400 hover:shadow-md hover:scale-105 hover:border-l-4 hover:border-sena-green-500 dark:hover:border-cyan-500'
         ]"
         @click="go(item.route)"
         :title="collapsed ? item.label : undefined"
       >
-        <div :class="['flex items-center', collapsed ? '' : 'gap-3']">
+        <div :class="['flex items-center', collapsed ? '' : 'gap-3.5']">
           <div :class="[
-            'flex h-8 w-8 items-center justify-center rounded-md transition-colors',
+            'flex h-9 w-9 items-center justify-center rounded-lg transition-all duration-200',
             isActiveRoute(item.route)
-              ? 'bg-green-600 text-white'
-              : 'bg-theme-tertiary text-theme-muted group-hover:bg-green-200 group-hover:text-green-700'
+              ? 'bg-white/20 text-white shadow-inner'
+              : 'bg-theme-tertiary text-theme-muted group-hover:bg-sena-green-500 dark:group-hover:bg-cyan-500 group-hover:text-white group-hover:shadow-lg group-hover:scale-110'
           ]">
-            <Icon :name="getIconName(item.label)" :size="16" />
+            <Icon :name="getIconName(item.label)" :size="18" />
           </div>
-          <span v-if="!collapsed" class="font-medium">{{ item.label }}</span>
+          <span v-if="!collapsed" :class="[
+            'text-[15px] font-semibold transition-all duration-200',
+            isActiveRoute(item.route)
+              ? 'text-white'
+              : 'group-hover:translate-x-1'
+          ]">{{ item.label }}</span>
         </div>
       </button>
     </nav>
 
-    <!-- Footer -->
-    <div class="border-t border-theme-primary p-3">
-      <div v-if="!collapsed" class="text-xs text-theme-muted text-center">
-        CTAccess v2.0
+    <!-- Footer with collapse button -->
+    <div class="border-t border-theme-primary bg-theme-secondary">
+      <!-- Collapse Button -->
+      <div class="p-2">
+        <button
+          @click="emit('toggle-collapse')"
+          :class="[
+            'group relative w-full overflow-hidden rounded-lg p-3 transition-all duration-300',
+            'bg-gradient-to-r from-sena-green-500/10 to-sena-green-600/10 dark:from-blue-500/10 dark:to-blue-600/10',
+            'hover:from-sena-green-500/20 hover:to-sena-green-600/20 dark:hover:from-blue-500/20 dark:hover:to-blue-600/20',
+            'border border-sena-green-500/30 dark:border-cyan-500/30',
+            'hover:border-sena-green-500 dark:hover:border-cyan-500',
+            'hover:shadow-lg hover:shadow-sena-green-500/20 dark:hover:shadow-cyan-500/20',
+            'hover:scale-105',
+            collapsed ? 'flex justify-center' : 'flex items-center gap-3'
+          ]"
+          :title="collapsed ? (collapsed ? 'Expandir menú' : 'Contraer menú') : undefined"
+        >
+          <div class="flex items-center justify-center rounded-lg bg-sena-green-500 dark:bg-cyan-500 p-2 text-white shadow-md group-hover:shadow-lg group-hover:scale-110 transition-all duration-300">
+            <Icon name="menu" :size="18" />
+          </div>
+          <span v-if="!collapsed" class="text-sm font-semibold text-sena-green-700 dark:text-cyan-400 group-hover:translate-x-1 transition-transform duration-200">
+            {{ collapsed ? 'Expandir' : 'Contraer' }} menú
+          </span>
+        </button>
       </div>
-      <div v-else class="flex justify-center">
-        <div class="text-xs text-theme-muted" title="CTAccess v2.0">
-          CT
+      
+      <!-- Version -->
+      <div class="px-3 pb-3 pt-1">
+        <div v-if="!collapsed" class="text-xs text-theme-muted text-center">
+          CTAccess v2.0
+        </div>
+        <div v-else class="flex justify-center">
+          <div class="text-xs text-theme-muted" title="CTAccess v2.0">
+            CT
+          </div>
         </div>
       </div>
     </div>

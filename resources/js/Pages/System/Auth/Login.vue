@@ -41,57 +41,81 @@ const submit = () => {
     <GuestLayout>
         <Head title="Login Sistema" />
 
-        <div v-if="status" class="mb-4 text-sm font-medium text-green-600">
+        <!-- Encabezado del formulario -->
+        <div class="text-center mb-6">
+            <h2 class="text-2xl font-bold text-gray-800 dark:text-white mb-2">
+                Iniciar Sesión
+            </h2>
+            <p class="text-sm text-gray-600 dark:text-gray-400">
+                Ingresa tus credenciales para acceder
+            </p>
+        </div>
+
+        <div v-if="status" class="mb-4 text-sm font-medium text-sena-green-600 dark:text-cyan-400 bg-sena-green-50 dark:bg-cyan-900/20 border border-sena-green-200 dark:border-cyan-700 rounded-lg p-3">
             {{ status }}
         </div>
 
-        <form @submit.prevent="submit">
+        <form @submit.prevent="submit" class="space-y-5">
             <div>
-                <InputLabel for="UserName" value="Usuario" />
+                <InputLabel for="UserName" value="Usuario" class="text-gray-700 dark:text-gray-300 font-semibold" />
 
                 <TextInput
                     id="UserName"
                     type="text"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 focus:border-sena-green-500 dark:focus:border-cyan-500 focus:ring-sena-green-500 dark:focus:ring-cyan-500 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white transition-all duration-200"
                     v-model="form.UserName"
                     required
                     autofocus
                     autocomplete="username"
+                    placeholder="Ingresa tu usuario"
                 />
 
                 <InputError class="mt-2" :message="form.errors.UserName" />
             </div>
 
-            <div class="mt-4">
-                <InputLabel for="password" value="Contraseña" />
+            <div>
+                <InputLabel for="password" value="Contraseña" class="text-gray-700 dark:text-gray-300 font-semibold" />
 
                 <TextInput
                     id="password"
                     type="password"
-                    class="mt-1 block w-full"
+                    class="mt-1 block w-full border-gray-300 dark:border-gray-600 focus:border-sena-green-500 dark:focus:border-cyan-500 focus:ring-sena-green-500 dark:focus:ring-cyan-500 rounded-lg shadow-sm dark:bg-gray-700 dark:text-white transition-all duration-200"
                     v-model="form.password"
                     required
                     autocomplete="current-password"
+                    placeholder="Ingresa tu contraseña"
                 />
 
                 <InputError class="mt-2" :message="form.errors.password" />
             </div>
 
-            <div class="mt-4 block">
-                <label class="flex items-center">
-                    <Checkbox name="remember" v-model:checked="form.remember" />
-                    <span class="ms-2 text-sm text-gray-600">Recordarme</span>
+            <div class="block">
+                <label class="flex items-center cursor-pointer group">
+                    <Checkbox 
+                        name="remember" 
+                        v-model:checked="form.remember"
+                        class="text-sena-green-600 dark:text-cyan-500 focus:ring-sena-green-500 dark:focus:ring-cyan-500"
+                    />
+                    <span class="ms-2 text-sm text-gray-600 dark:text-gray-400 group-hover:text-gray-800 dark:group-hover:text-gray-200 transition-colors">
+                        Recordarme
+                    </span>
                 </label>
             </div>
 
-            <div class="mt-4 flex items-center justify-end">
-                <PrimaryButton
-                    class="ms-4"
-                    :class="{ 'opacity-25': form.processing }"
+            <div class="flex items-center justify-end pt-2">
+                <button
+                    type="submit"
+                    class="w-full inline-flex items-center justify-center px-6 py-3 bg-gradient-to-r from-sena-green-600 to-sena-green-700 dark:from-blue-600 dark:to-blue-700 border border-transparent rounded-lg font-semibold text-sm text-white uppercase tracking-widest hover:from-sena-green-700 hover:to-sena-green-800 dark:hover:from-blue-700 dark:hover:to-blue-800 focus:outline-none focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 focus:ring-offset-2 disabled:opacity-50 transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 active:scale-95"
+                    :class="{ 'opacity-50 cursor-not-allowed': form.processing }"
                     :disabled="form.processing"
                 >
-                    Entrar
-                </PrimaryButton>
+                    <svg v-if="form.processing" class="animate-spin -ml-1 mr-3 h-5 w-5 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                    </svg>
+                    <span v-if="!form.processing">Entrar</span>
+                    <span v-else>Ingresando...</span>
+                </button>
             </div>
         </form>
     </GuestLayout>

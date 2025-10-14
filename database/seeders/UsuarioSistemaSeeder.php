@@ -18,16 +18,9 @@ class UsuarioSistemaSeeder extends Seeder
             [
                 'password' => 'admin12345', // Se hasheará por el mutator del modelo
                 'nombre' => 'Administrador General',
-                'activo' => true,
-            ]
-        );
-
-        // Celador
-        UsuarioSistema::updateOrCreate(
-            ['UserName' => 'celador'],
-            [
-                'password' => 'celador12345', // Se hasheará por el mutator del modelo
-                'nombre' => 'Celador Principal',
+                'tipo_documento' => 'DNI',
+                'documento' => '12345678',
+                'correo' => 'admin@ctaccess.com',
                 'activo' => true,
             ]
         );

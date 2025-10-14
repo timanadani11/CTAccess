@@ -1,19 +1,53 @@
 <script setup>
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
-import { Head, router } from '@inertiajs/vue3'
-import { ref, onMounted, reactive } from 'vue'
+import Modal from '@/Components/Modal.vue'
+import Icon from '@/Components/Icon.vue'
+import { Head, router, useForm } from '@inertiajs/vue3'
+import { ref, onMounted, reactive, computed } from 'vue'
 import axios from 'axios'
 
 // People management state
 const personas = ref({ data: [], links: [], total: 0, from: 0, to: 0 })
-const showPersonaModal = ref(false)
-const selectedPersona = ref(null)
+const showModal = ref(false)
+const isEditing = ref(false)
+const editingPersonaId = ref(null)
 const loading = ref(false)
 
 const searchForm = reactive({
   search: '',
   per_page: 15,
 })
+
+// Form
+const form = useForm({
+  Nombre: '',
+  TipoDocumento: '',
+  documento: '',
+  TipoPersona: '',
+  Correo: '',
+  Telefono: '',
+  Direccion: '',
+  Empresa: '',
+  observaciones: '',
+})
+
+const tiposDocumento = [
+  { value: 'DNI', label: 'DNI' },
+  { value: 'Pasaporte', label: 'Pasaporte' },
+  { value: 'Cédula', label: 'Cédula' },
+  { value: 'RUC', label: 'RUC' },
+  { value: 'Carnet de Extranjería', label: 'Carnet de Extranjería' },
+]
+
+const tiposPersona = [
+  { value: 'Estudiante', label: 'Estudiante' },
+  { value: 'Docente', label: 'Docente' },
+  { value: 'Administrativo', label: 'Administrativo' },
+  { value: 'Visitante', label: 'Visitante' },
+  { value: 'Proveedor', label: 'Proveedor' },
+  { value: 'Contratista', label: 'Contratista' },
+  { value: 'Aprendiz', label: 'Aprendiz' },
+]
 
 // Debounce function
 const debounce = (func, wait) => {
@@ -48,34 +82,78 @@ const search = debounce(() => {
   loadPersonas()
 }, 300)
 
-// Show persona details in modal
-const showPersonaDetails = (persona) => {
-  selectedPersona.value = persona
-  showPersonaModal.value = true
+// Open create modal
+const openCreateModal = () => {
+  isEditing.value = false
+  editingPersonaId.value = null
+  form.reset()
+  form.clearErrors()
+  showModal.value = true
+}
+
+// Open edit modal
+const openEditModal = (persona) => {
+  isEditing.value = true
+  editingPersonaId.value = persona.id
+  form.Nombre = persona.nombre
+  form.TipoDocumento = persona.tipo_documento
+  form.documento = persona.documento
+  form.TipoPersona = persona.tipo_persona
+  form.Correo = persona.correo || ''
+  form.Telefono = persona.telefono || ''
+  form.Direccion = persona.direccion || ''
+  form.Empresa = persona.empresa || ''
+  form.observaciones = persona.observaciones || ''
+  form.clearErrors()
+  showModal.value = true
 }
 
 // Close modal
 const closeModal = () => {
-  showPersonaModal.value = false
-  selectedPersona.value = null
+  showModal.value = false
+  form.reset()
+  form.clearErrors()
+}
+
+// Can save
+const canSave = computed(() => {
+  return form.Nombre && form.TipoDocumento && form.documento && form.TipoPersona
+})
+
+// Submit form
+const submit = () => {
+  if (isEditing.value) {
+    form.put(route('system.admin.personas.update', editingPersonaId.value), {
+      preserveScroll: true,
+      onSuccess: () => {
+        closeModal()
+        loadPersonas()
+      },
+    })
+  } else {
+    form.post(route('system.admin.personas.store'), {
+      preserveScroll: true,
+      onSuccess: () => {
+        closeModal()
+        loadPersonas()
+      },
+    })
+  }
 }
 
 // Delete persona
-const confirmDelete = async (persona) => {
+const confirmDelete = (persona) => {
   if (confirm(`¿Estás seguro de eliminar a ${persona.nombre}?`)) {
-    try {
-      await router.delete(`/personas/${persona.id}`)
-      loadPersonas() // Reload the list
-    } catch (error) {
-      alert('Error al eliminar: ' + error.message)
-    }
+    router.delete(route('system.admin.personas.destroy', persona.id), {
+      preserveScroll: true,
+      onSuccess: () => loadPersonas(),
+    })
   }
 }
 
 // Load personas from pagination link
 const loadPersonasPage = async (url) => {
   if (!url) return
-
   loading.value = true
   try {
     const response = await axios.get(url)
@@ -85,18 +163,6 @@ const loadPersonasPage = async (url) => {
   } finally {
     loading.value = false
   }
-}
-
-// Format date
-const formatDate = (dateString) => {
-  if (!dateString) return '—'
-  return new Date(dateString).toLocaleDateString('es-ES', {
-    year: 'numeric',
-    month: 'long',
-    day: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit'
-  })
 }
 
 // Load data on component mount
@@ -112,22 +178,20 @@ onMounted(() => {
     <template #header>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-forest-600">
+          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sena-green-600 dark:bg-cyan-600">
             <svg class="h-5 w-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
             </svg>
           </div>
           <h2 class="text-2xl font-bold text-theme-primary">Gestión de Personas</h2>
         </div>
-        <a
-          href="/personas/create"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-forest-600 text-white rounded-lg hover:bg-forest-700 transition-colors"
+        <button
+          @click="openCreateModal"
+          class="inline-flex items-center gap-2 px-4 py-2 bg-sena-green-600 hover:bg-sena-green-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-lg transition-colors"
         >
-          <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
-          </svg>
+          <Icon name="user-plus" class="w-4 h-4" />
           Nueva Persona
-        </a>
+        </button>
       </div>
     </template>
 
@@ -142,13 +206,13 @@ onMounted(() => {
               @input="search"
               type="text"
               placeholder="Buscar por nombre, documento o tipo..."
-              class="w-full px-4 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-forest-500 focus:border-transparent"
+              class="w-full px-4 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 focus:border-transparent"
             >
           </div>
           <select
             v-model="searchForm.per_page"
             @change="search"
-            class="px-3 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary focus:ring-2 focus:ring-forest-500"
+            class="px-3 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500"
           >
             <option value="10">10 por página</option>
             <option value="15">15 por página</option>
@@ -200,42 +264,35 @@ onMounted(() => {
                 <td class="px-6 py-4 text-theme-secondary">{{ persona.documento || '—' }}</td>
                 <td class="px-6 py-4 font-medium text-theme-primary">{{ persona.nombre }}</td>
                 <td class="px-6 py-4">
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-forest-100 dark:bg-forest-800 text-forest-700 dark:text-forest-300">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-sena-green-100 dark:bg-sena-green-800 text-sena-green-700 dark:text-sena-green-300">
                     {{ persona.tipoPersona }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-cyan-100 dark:bg-cyan-800 text-cyan-700 dark:text-cyan-300">
                     {{ persona.portatiles?.length || 0 }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-purple-100 dark:bg-purple-800 text-purple-700 dark:text-purple-300">
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-sena-yellow-100 dark:bg-sena-yellow-800 text-sena-yellow-700 dark:text-sena-yellow-300">
                     {{ persona.vehiculos?.length || 0 }}
                   </span>
                 </td>
                 <td class="px-6 py-4">
                   <div class="flex items-center gap-2">
                     <button
-                      @click="showPersonaDetails(persona)"
-                      class="px-3 py-1 text-xs bg-blue-600 dark:bg-blue-700 text-white rounded hover:bg-blue-700 dark:hover:bg-blue-600 transition-colors"
-                      title="Ver detalles"
-                    >
-                      Ver
-                    </button>
-                    <a
-                      :href="`/personas/${persona.id}/edit`"
-                      class="px-3 py-1 text-xs bg-yellow-600 dark:bg-yellow-700 text-white rounded hover:bg-yellow-700 dark:hover:bg-yellow-600 transition-colors"
+                      @click="openEditModal(persona)"
+                      class="px-3 py-1 text-xs bg-sena-green-600 hover:bg-sena-green-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded transition-colors"
                       title="Editar persona"
                     >
-                      Editar
-                    </a>
+                      <Icon name="pencil" class="w-3 h-3" />
+                    </button>
                     <button
                       @click="confirmDelete(persona)"
-                      class="px-3 py-1 text-xs bg-red-600 dark:bg-red-700 text-white rounded hover:bg-red-700 dark:hover:bg-red-600 transition-colors"
+                      class="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded transition-colors"
                       title="Eliminar persona"
                     >
-                      Eliminar
+                      <Icon name="trash" class="w-3 h-3" />
                     </button>
                   </div>
                 </td>
@@ -269,7 +326,7 @@ onMounted(() => {
                 :class="[
                   'px-3 py-2 text-sm border rounded transition-colors',
                   link.active
-                    ? 'bg-forest-600 text-white border-forest-600'
+                    ? 'bg-sena-green-600 dark:bg-blue-600 text-white border-sena-green-600 dark:border-blue-600'
                     : link.url
                       ? 'bg-theme-card text-theme-secondary border-theme-primary hover:bg-theme-secondary'
                       : 'bg-theme-tertiary text-theme-muted border-theme-primary cursor-not-allowed'
@@ -282,140 +339,189 @@ onMounted(() => {
       </div>
     </div>
 
-    <!-- Modal para detalles de persona -->
-    <div v-if="showPersonaModal" class="fixed inset-0 z-50 overflow-y-auto">
-      <div class="flex items-center justify-center min-h-screen px-4 pt-4 pb-20 text-center sm:block sm:p-0">
-        <!-- Overlay -->
-        <div
-          class="fixed inset-0 transition-opacity bg-black bg-opacity-50"
-          @click="closeModal"
-        ></div>
+    <!-- Modal para crear/editar persona -->
+    <Modal :show="showModal" @close="closeModal" max-width="lg">
+      <div class="p-6">
+        <div class="flex items-center justify-between mb-4">
+          <h3 class="text-lg font-semibold text-sage-800 dark:text-sage-100">
+            <Icon :name="isEditing ? 'pencil' : 'user-plus'" class="w-5 h-5 inline mr-2" />
+            {{ isEditing ? 'Editar Persona' : 'Nueva Persona' }}
+          </h3>
+          <button @click="closeModal" class="text-sage-400 hover:text-sage-600 dark:hover:text-sage-300">
+            <Icon name="x" class="w-5 h-5" />
+          </button>
+        </div>
 
-        <!-- Modal -->
-        <div class="inline-block align-bottom bg-theme-card rounded-lg px-4 pt-5 pb-4 text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-4xl sm:w-full sm:p-6">
-          <div class="flex justify-between items-center mb-6">
-            <h3 class="text-lg font-semibold text-theme-primary">Detalles de Persona</h3>
-            <button
-              @click="closeModal"
-              class="text-theme-muted hover:text-theme-secondary"
+        <form @submit.prevent="submit" class="space-y-3">
+          <!-- Nombre -->
+          <div>
+            <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+              <Icon name="user" class="w-3 h-3 inline mr-1" />
+              Nombre *
+            </label>
+            <input
+              v-model="form.Nombre"
+              type="text"
+              required
+              class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+              :class="{ 'border-red-500': form.errors.Nombre }"
+            />
+            <p v-if="form.errors.Nombre" class="mt-1 text-xs text-red-500">{{ form.errors.Nombre }}</p>
+          </div>
+
+          <!-- Tipo Documento y Documento -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+                <Icon name="file-text" class="w-3 h-3 inline mr-1" />
+                Tipo Documento *
+              </label>
+              <select
+                v-model="form.TipoDocumento"
+                required
+                class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+                :class="{ 'border-red-500': form.errors.TipoDocumento }"
+              >
+                <option value="">Seleccionar</option>
+                <option v-for="tipo in tiposDocumento" :key="tipo.value" :value="tipo.value">
+                  {{ tipo.label }}
+                </option>
+              </select>
+              <p v-if="form.errors.TipoDocumento" class="mt-1 text-xs text-red-500">{{ form.errors.TipoDocumento }}</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+                <Icon name="badge" class="w-3 h-3 inline mr-1" />
+                Documento *
+              </label>
+              <input
+                v-model="form.documento"
+                type="text"
+                required
+                class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+                :class="{ 'border-red-500': form.errors.documento }"
+              />
+              <p v-if="form.errors.documento" class="mt-1 text-xs text-red-500">{{ form.errors.documento }}</p>
+            </div>
+          </div>
+
+          <!-- Tipo Persona -->
+          <div>
+            <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+              <Icon name="users" class="w-3 h-3 inline mr-1" />
+              Tipo Persona *
+            </label>
+            <select
+              v-model="form.TipoPersona"
+              required
+              class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+              :class="{ 'border-red-500': form.errors.TipoPersona }"
             >
-              <svg class="h-6 w-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-              </svg>
+              <option value="">Seleccionar</option>
+              <option v-for="tipo in tiposPersona" :key="tipo.value" :value="tipo.value">
+                {{ tipo.label }}
+              </option>
+            </select>
+            <p v-if="form.errors.TipoPersona" class="mt-1 text-xs text-red-500">{{ form.errors.TipoPersona }}</p>
+          </div>
+
+          <!-- Correo y Teléfono -->
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+                <Icon name="mail" class="w-3 h-3 inline mr-1" />
+                Correo
+              </label>
+              <input
+                v-model="form.Correo"
+                type="email"
+                class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+                :class="{ 'border-red-500': form.errors.Correo }"
+              />
+              <p v-if="form.errors.Correo" class="mt-1 text-xs text-red-500">{{ form.errors.Correo }}</p>
+            </div>
+
+            <div>
+              <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+                <Icon name="phone" class="w-3 h-3 inline mr-1" />
+                Teléfono
+              </label>
+              <input
+                v-model="form.Telefono"
+                type="text"
+                class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+                :class="{ 'border-red-500': form.errors.Telefono }"
+              />
+              <p v-if="form.errors.Telefono" class="mt-1 text-xs text-red-500">{{ form.errors.Telefono }}</p>
+            </div>
+          </div>
+
+          <!-- Dirección -->
+          <div>
+            <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+              <Icon name="map-pin" class="w-3 h-3 inline mr-1" />
+              Dirección
+            </label>
+            <input
+              v-model="form.Direccion"
+              type="text"
+              class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+              :class="{ 'border-red-500': form.errors.Direccion }"
+            />
+            <p v-if="form.errors.Direccion" class="mt-1 text-xs text-red-500">{{ form.errors.Direccion }}</p>
+          </div>
+
+          <!-- Empresa -->
+          <div>
+            <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+              <Icon name="building" class="w-3 h-3 inline mr-1" />
+              Empresa
+            </label>
+            <input
+              v-model="form.Empresa"
+              type="text"
+              class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+              :class="{ 'border-red-500': form.errors.Empresa }"
+            />
+            <p v-if="form.errors.Empresa" class="mt-1 text-xs text-red-500">{{ form.errors.Empresa }}</p>
+          </div>
+
+          <!-- Observaciones -->
+          <div>
+            <label class="block text-xs font-medium text-sage-700 dark:text-sage-300 mb-1">
+              <Icon name="file-text" class="w-3 h-3 inline mr-1" />
+              Observaciones
+            </label>
+            <textarea
+              v-model="form.observaciones"
+              rows="2"
+              class="w-full px-3 py-1.5 text-sm border border-sage-300 dark:border-sage-600 rounded-lg focus:ring-2 focus:ring-sena-green-500 dark:focus:ring-cyan-500 bg-white dark:bg-sage-700 text-sage-900 dark:text-sage-100"
+              :class="{ 'border-red-500': form.errors.observaciones }"
+            ></textarea>
+            <p v-if="form.errors.observaciones" class="mt-1 text-xs text-red-500">{{ form.errors.observaciones }}</p>
+          </div>
+
+          <!-- Buttons -->
+          <div class="flex justify-end gap-2 pt-3 border-t border-sage-200 dark:border-sage-700">
+            <button
+              type="button"
+              @click="closeModal"
+              class="px-4 py-1.5 text-sm border border-sage-300 dark:border-sage-600 text-sage-700 dark:text-sage-300 rounded-lg hover:bg-sage-50 dark:hover:bg-sage-700"
+            >
+              Cancelar
+            </button>
+            <button
+              type="submit"
+              :disabled="!canSave || form.processing"
+              class="px-4 py-1.5 text-sm bg-sena-green-600 hover:bg-sena-green-700 dark:bg-blue-600 dark:hover:bg-blue-500 text-white rounded-lg disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-1.5"
+            >
+              <Icon name="save" class="w-3.5 h-3.5" />
+              {{ form.processing ? 'Guardando...' : (isEditing ? 'Actualizar' : 'Guardar') }}
             </button>
           </div>
-
-          <div v-if="selectedPersona" class="space-y-6">
-            <!-- Información personal -->
-            <div class="bg-theme-secondary rounded-lg p-4">
-              <h4 class="text-md font-semibold mb-4 text-theme-primary">Información Personal</h4>
-              <div class="grid md:grid-cols-2 gap-4">
-                <div>
-                  <label class="block text-sm font-medium text-theme-secondary mb-1">ID</label>
-                  <p class="text-theme-primary">{{ selectedPersona.id }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-theme-secondary mb-1">Documento</label>
-                  <p class="text-theme-primary">{{ selectedPersona.documento || '—' }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-theme-secondary mb-1">Nombre</label>
-                  <p class="text-theme-primary font-medium">{{ selectedPersona.nombre }}</p>
-                </div>
-                <div>
-                  <label class="block text-sm font-medium text-theme-secondary mb-1">Tipo de Persona</label>
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-forest-100 dark:bg-forest-800 text-forest-700 dark:text-forest-300">
-                    {{ selectedPersona.tipoPersona }}
-                  </span>
-                </div>
-                <div v-if="selectedPersona.correo" class="md:col-span-2">
-                  <label class="block text-sm font-medium text-theme-secondary mb-1">Correo Electrónico</label>
-                  <p class="text-theme-primary">{{ selectedPersona.correo }}</p>
-                </div>
-                <div class="md:col-span-2">
-                  <label class="block text-sm font-medium text-theme-secondary mb-1">Fechas</label>
-                  <div class="text-sm text-theme-secondary">
-                    <p>Creado: {{ formatDate(selectedPersona.createdAt) }}</p>
-                    <p>Actualizado: {{ formatDate(selectedPersona.updatedAt) }}</p>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Portátiles -->
-            <div v-if="selectedPersona.portatiles && selectedPersona.portatiles.length > 0" class="bg-theme-secondary rounded-lg p-4">
-              <h4 class="text-md font-semibold mb-4 text-theme-primary">Portátiles Registrados</h4>
-              <div class="space-y-3">
-                <div
-                  v-for="portatil in selectedPersona.portatiles"
-                  :key="portatil.id"
-                  class="border border-theme-primary rounded-lg p-3 bg-theme-card"
-                >
-                  <div class="grid md:grid-cols-3 gap-3">
-                    <div>
-                      <label class="block text-sm font-medium text-theme-secondary mb-1">Serial</label>
-                      <p class="text-theme-primary font-mono text-sm">{{ portatil.serial }}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-theme-secondary mb-1">Marca</label>
-                      <p class="text-theme-primary">{{ portatil.marca }}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-theme-secondary mb-1">Modelo</label>
-                      <p class="text-theme-primary">{{ portatil.modelo }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Vehículos -->
-            <div v-if="selectedPersona.vehiculos && selectedPersona.vehiculos.length > 0" class="bg-theme-secondary rounded-lg p-4">
-              <h4 class="text-md font-semibold mb-4 text-theme-primary">Vehículos Registrados</h4>
-              <div class="space-y-3">
-                <div
-                  v-for="vehiculo in selectedPersona.vehiculos"
-                  :key="vehiculo.id"
-                  class="border border-theme-primary rounded-lg p-3 bg-theme-card"
-                >
-                  <div class="grid md:grid-cols-2 gap-3">
-                    <div>
-                      <label class="block text-sm font-medium text-theme-secondary mb-1">Tipo</label>
-                      <p class="text-theme-primary">{{ vehiculo.tipo }}</p>
-                    </div>
-                    <div>
-                      <label class="block text-sm font-medium text-theme-secondary mb-1">Placa</label>
-                      <p class="text-theme-primary font-mono">{{ vehiculo.placa }}</p>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <!-- Mensaje si no hay portátiles ni vehículos -->
-            <div v-if="(!selectedPersona.portatiles || selectedPersona.portatiles.length === 0) && (!selectedPersona.vehiculos || selectedPersona.vehiculos.length === 0)"
-                 class="bg-theme-tertiary border border-theme-primary rounded-lg p-4 text-center">
-              <p class="text-theme-secondary">Esta persona no tiene portátiles ni vehículos registrados.</p>
-            </div>
-
-            <!-- Acciones -->
-            <div class="flex justify-end gap-3 pt-4 border-t border-theme-primary">
-              <a
-                :href="`/personas/${selectedPersona.id}/edit`"
-                class="px-4 py-2 bg-yellow-600 dark:bg-yellow-700 text-white rounded-lg hover:bg-yellow-700 dark:hover:bg-yellow-600 transition-colors"
-              >
-                Editar
-              </a>
-              <button
-                @click="closeModal"
-                class="px-4 py-2 bg-sage-600 dark:bg-sage-700 text-white rounded-lg hover:bg-sage-700 dark:hover:bg-sage-600 transition-colors"
-              >
-                Cerrar
-              </button>
-            </div>
-          </div>
-        </div>
+        </form>
       </div>
-    </div>
+    </Modal>
   </SystemLayout>
 </template>

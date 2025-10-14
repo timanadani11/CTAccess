@@ -42,7 +42,10 @@ const getMenuIcon = (label) => {
     'Verificación QR': 'qr-code',
     'Incidencias': 'alert-triangle',
     'Historial': 'file-text',
-    'Gestión de Usuarios': 'user-cog'
+    'Gestión de Usuarios': 'user-cog',
+    'Permisos': 'shield',
+    'Portátiles': 'laptop',
+    'Vehículos': 'car'
   }
   return iconMap[label] || 'circle'
 }
@@ -66,7 +69,12 @@ onMounted(() => {
 
     <div class="flex">
       <!-- Desktop Sidebar -->
-      <SystemSidebar :menus="menus" :role="role" :collapsed="sidebarCollapsed" />
+      <SystemSidebar 
+        :menus="menus" 
+        :role="role" 
+        :collapsed="sidebarCollapsed"
+        @toggle-collapse="toggleSidebarCollapse"
+      />
 
       <!-- Mobile Sidebar Overlay -->
       <div v-if="sidebarOpen" class="fixed inset-0 z-40 lg:hidden" @click="closeSidebar">
@@ -96,7 +104,7 @@ onMounted(() => {
             @click="() => { router.visit(route(item.route)); closeSidebar(); }"
           >
             <div class="flex items-center gap-3">
-              <div class="flex h-8 w-8 items-center justify-center rounded-md bg-theme-tertiary text-theme-muted transition-colors group-hover:bg-green-200 group-hover:text-green-700">
+              <div class="flex h-8 w-8 items-center justify-center rounded-md bg-theme-tertiary text-theme-muted transition-colors group-hover:bg-sena-green-200 dark:group-hover:bg-cyan-600 group-hover:text-sena-green-700 dark:group-hover:text-white">
                 <Icon :name="getMenuIcon(item.label)" :size="16" />
               </div>
               <span class="font-medium">{{ item.label }}</span>

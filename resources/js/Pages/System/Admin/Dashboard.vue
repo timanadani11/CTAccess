@@ -25,10 +25,10 @@ const meta = page.props.meta || {}
       <section>
         <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4 xl:gap-6">
           <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-sm transition-all hover:shadow-theme-lg hover:scale-105">
-            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-green-400 to-green-600 opacity-20"></div>
+            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-sena-green-400 to-sena-green-600 opacity-20"></div>
             <div class="relative">
               <div class="flex items-center gap-3 mb-3">
-                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl bg-gradient-to-br from-sena-green-600 to-sena-green-700 shadow-md">
                   <Icon name="users" :size="24" class="text-white" />
                 </div>
                 <div class="text-sm lg:text-base font-medium text-theme-secondary">Personas registradas</div>
@@ -38,10 +38,10 @@ const meta = page.props.meta || {}
             </div>
           </div>
           <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-sm transition-all hover:shadow-theme-lg hover:scale-105">
-            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-blue-400 to-blue-600 opacity-20"></div>
+            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-cyan-400 to-cyan-600 opacity-20"></div>
             <div class="relative">
               <div class="flex items-center gap-3 mb-3">
-                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #50E5F9, #00B4D8);">
+                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl bg-gradient-to-br from-cyan-500 to-cyan-600 shadow-md">
                   <Icon name="user-cog" :size="24" class="text-white" />
                 </div>
                 <div class="text-sm lg:text-base font-medium text-theme-secondary">Usuarios del sistema</div>
@@ -51,11 +51,11 @@ const meta = page.props.meta || {}
             </div>
           </div>
           <div class="group relative overflow-hidden rounded-xl border border-theme-primary bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-sm transition-all hover:shadow-theme-lg hover:scale-105">
-            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-yellow-400 to-yellow-600 opacity-20"></div>
+            <div class="absolute top-0 right-0 h-24 w-24 -translate-y-12 translate-x-12 rounded-full bg-gradient-to-br from-sena-yellow-400 to-sena-yellow-600 opacity-20"></div>
             <div class="relative">
               <div class="flex items-center gap-3 mb-3">
-                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #FDC300, #E6B000);">
-                  <Icon name="log-in" :size="24" class="text-black" />
+                <div class="flex h-12 w-12 lg:h-14 lg:w-14 items-center justify-center rounded-xl bg-gradient-to-br from-sena-yellow-500 to-sena-yellow-600 shadow-md">
+                  <Icon name="log-in" :size="24" class="text-gray-900" />
                 </div>
                 <div class="text-sm lg:text-base font-medium text-theme-secondary">Accesos hoy</div>
               </div>
@@ -82,14 +82,14 @@ const meta = page.props.meta || {}
       <!-- Últimos accesos -->
       <section>
         <div class="overflow-hidden rounded-xl border-2 border-theme-primary bg-theme-card shadow-theme-md hover:shadow-theme-lg transition-shadow">
-          <div class="flex items-center gap-3 border-b-2 border-theme-primary bg-gradient-to-r from-theme-secondary to-theme-tertiary p-5 lg:p-6">
-            <div class="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-xl shadow-md" style="background: linear-gradient(135deg, #39A900, #2d7a00);">
+          <div class="flex items-center gap-3 border-b-2 border-theme-primary bg-gradient-to-r from-sena-green-50 to-sena-green-100 dark:from-sena-blue-900/20 dark:to-sena-blue-900/30 p-5 lg:p-6">
+            <div class="flex h-10 w-10 lg:h-12 lg:w-12 items-center justify-center rounded-xl bg-gradient-to-br from-sena-green-600 to-sena-green-700 dark:from-cyan-500 dark:to-cyan-600 shadow-md">
               <Icon name="clock" :size="20" class="text-white lg:hidden" />
               <Icon name="clock" :size="24" class="text-white hidden lg:block" />
             </div>
             <div>
-              <h3 class="text-lg lg:text-xl font-bold text-theme-primary">Últimos accesos</h3>
-              <p class="text-xs text-theme-muted">Movimientos recientes del día</p>
+              <h3 class="text-lg lg:text-xl font-bold text-sena-green-800 dark:text-cyan-300">Últimos accesos</h3>
+              <p class="text-xs text-sena-green-600 dark:text-cyan-400">Movimientos recientes del día</p>
             </div>
           </div>
           <div class="overflow-x-auto">
@@ -112,7 +112,7 @@ const meta = page.props.meta || {}
                   <td class="px-4 lg:px-6 py-3 lg:py-4">
                     <span :class="[
                       'inline-flex items-center rounded-full px-3 py-1 text-xs lg:text-sm font-semibold shadow-sm',
-                      row.estado === 'Dentro' ? 'bg-green-100 dark:bg-green-800 text-green-700 dark:text-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
+                      row.estado === 'Dentro' ? 'bg-sena-green-100 dark:bg-sena-green-800 text-sena-green-700 dark:text-sena-green-300' : 'bg-gray-100 dark:bg-gray-800 text-gray-700 dark:text-gray-300'
                     ]">
                       {{ row.estado || '—' }}
                     </span>
@@ -122,7 +122,7 @@ const meta = page.props.meta || {}
                 </tr>
                 <tr v-if="!recent.accesos?.length">
                   <td colspan="6" class="px-6 py-16 text-center">
-                    <Icon name="inbox" :size="48" class="mx-auto text-theme-muted mb-3" />
+                    <Icon name="inbox" :size="48" class="mx-auto text-sena-green-500 dark:text-cyan-500 mb-3 opacity-50" />
                     <p class="text-theme-muted text-base">Sin datos disponibles</p>
                   </td>
                 </tr>
@@ -168,7 +168,7 @@ const meta = page.props.meta || {}
                 </tr>
                 <tr v-if="!recent.incidencias?.length">
                   <td colspan="4" class="px-6 py-16 text-center">
-                    <Icon name="check-circle" :size="48" class="mx-auto text-green-500 mb-3" />
+                    <Icon name="check-circle" :size="48" class="mx-auto text-sena-green-500 dark:text-cyan-500 mb-3" />
                     <p class="text-theme-muted text-base">Sin incidencias reportadas</p>
                     <p class="text-xs text-theme-muted mt-1">¡Todo está en orden!</p>
                   </td>

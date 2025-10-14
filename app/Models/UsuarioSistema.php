@@ -13,7 +13,7 @@ class UsuarioSistema extends Authenticatable
 
     protected $table = 'usuarios_sistema';
     protected $primaryKey = 'idUsuario';
-    protected $fillable = ['UserName', 'password', 'nombre', 'rol', 'activo'];
+    protected $fillable = ['UserName', 'password', 'nombre', 'rol', 'activo', 'tipo_documento', 'documento', 'correo'];
 
     protected $hidden = [
         'password',

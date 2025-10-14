@@ -2,100 +2,337 @@
 @tailwind components;
 @tailwind utilities;
 
+/* ============================================
+   🎨 SISTEMA DE TEMAS PROFESIONAL - CTAccess
+   ============================================ */
+
 /* Variables CSS para temas */
 :root {
-  /* Colores corporativos base */
-  --color-primary: #39A900;
-  --color-secondary: #50E5F9;
-  --color-accent: #FDC300;
-  --color-corporate: #00304D;
+  /* 🏢 Colores corporativos SENA */
+  --color-sena-green: #39A900;
+  --color-sena-green-dark: #2d8700;
+  --color-sena-green-darker: #216500;
+  --color-sena-green-light: #4ade80;
+  --color-sena-cyan: #50E5F9;
+  --color-sena-yellow: #FDC300;
+  --color-sena-blue: #00304D;
+  --color-sena-blue-light: #1e5a8e;
+  --color-sena-blue-lighter: #2b7bbf;
   
-  /* Tema claro */
-  --bg-primary: #ffffff;
-  --bg-secondary: #f8fafc;
-  --bg-tertiary: #f1f5f9;
-  --bg-card: #ffffff;
-  --bg-sidebar: #ffffff;
-  --bg-navbar: #ffffff;
+  /* 🎨 Colores de tema principal por modo */
+  --color-primary-light: #2d8700;      /* Verde oscuro para modo claro */
+  --color-primary-dark: #2b7bbf;       /* Azul corporativo claro para modo oscuro */
+  --color-primary-hover-light: #216500; /* Verde más oscuro hover modo claro */
+  --color-primary-hover-dark: #3b8fd8;  /* Azul más claro hover modo oscuro */
   
-  --text-primary: #1e293b;
-  --text-secondary: #64748b;
-  --text-muted: #94a3b8;
-  --text-inverse: #ffffff;
+  /* ☀️ MODO CLARO - Colores profesionales y legibles */
+  --bg-primary: #ffffff;           /* Fondo principal blanco puro */
+  --bg-secondary: #f8fafc;         /* Fondo secundario gris muy claro */
+  --bg-tertiary: #f1f5f9;          /* Fondo terciario gris claro */
+  --bg-card: #ffffff;              /* Cards blanco con sombra */
+  --bg-sidebar: #ffffff;           /* Sidebar blanco */
+  --bg-navbar: #ffffff;            /* Navbar blanco */
+  --bg-hover: #f1f5f9;             /* Hover gris claro */
+  --bg-active: #e2e8f0;            /* Activo gris medio-claro */
   
-  --border-primary: #e2e8f0;
-  --border-secondary: #cbd5e1;
+  /* Textos modo claro - Alto contraste */
+  --text-primary: #0f172a;         /* Negro azulado oscuro - excelente legibilidad */
+  --text-secondary: #475569;       /* Gris oscuro para texto secundario */
+  --text-muted: #64748b;           /* Gris medio para texto auxiliar */
+  --text-inverse: #ffffff;         /* Blanco para fondos oscuros */
+  --text-link: #2563eb;            /* Azul para enlaces */
+  --text-link-hover: #1d4ed8;      /* Azul oscuro para hover */
   
+  /* Bordes modo claro */
+  --border-primary: #e2e8f0;       /* Borde gris claro */
+  --border-secondary: #cbd5e1;     /* Borde gris medio */
+  --border-hover: #94a3b8;         /* Borde hover */
+  --border-focus: #3b82f6;         /* Borde focus azul */
+  
+  /* Colores de estado - Modo claro (más saturados y oscuros) */
+  --color-success: #16a34a;        /* Verde oscuro */
+  --color-success-bg: #dcfce7;     /* Verde claro fondo */
+  --color-success-border: #86efac; /* Verde claro borde */
+  
+  --color-error: #dc2626;          /* Rojo oscuro */
+  --color-error-bg: #fee2e2;       /* Rojo claro fondo */
+  --color-error-border: #fca5a5;   /* Rojo claro borde */
+  
+  --color-warning: #d97706;        /* Naranja oscuro */
+  --color-warning-bg: #fef3c7;     /* Naranja claro fondo */
+  --color-warning-border: #fcd34d; /* Naranja claro borde */
+  
+  --color-info: #0284c7;           /* Azul oscuro */
+  --color-info-bg: #e0f2fe;        /* Azul claro fondo */
+  --color-info-border: #7dd3fc;    /* Azul claro borde */
+  
+  /* Sombras modo claro */
   --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.05);
   --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
   --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.1), 0 4px 6px -4px rgb(0 0 0 / 0.1);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.1), 0 8px 10px -6px rgb(0 0 0 / 0.1);
 }
 
-/* Tema oscuro - Colores mate y profesionales */
+/* 🌙 MODO OSCURO - Colores profesionales con azul corporativo */
 .dark {
-  /* Fondos oscuros mate (menos azulados, más neutros) */
-  --bg-primary: #18181b;      /* Casi negro mate */
-  --bg-secondary: #27272a;    /* Gris oscuro mate */
-  --bg-tertiary: #3f3f46;     /* Gris medio mate */
-  --bg-card: #27272a;         /* Cards gris oscuro mate */
-  --bg-sidebar: #18181b;      /* Sidebar casi negro */
-  --bg-navbar: #1f1f23;       /* Navbar negro suave */
+  /* Fondos oscuros - Tonos azulados corporativos sutiles */
+  --bg-primary: #0a0f14;           /* Negro con toque azul - fondo principal */
+  --bg-secondary: #10181f;         /* Azul muy oscuro - fondo secundario */
+  --bg-tertiary: #1a2633;          /* Azul oscuro - fondo terciario */
+  --bg-card: #141d26;              /* Cards azul muy oscuro */
+  --bg-sidebar: #0c1419;           /* Sidebar negro azulado */
+  --bg-navbar: #0f1821;            /* Navbar negro azul suave */
+  --bg-hover: #1f2d3d;             /* Hover azul oscuro */
+  --bg-active: #2a3f54;            /* Activo azul medio */
   
-  /* Textos con buen contraste */
-  --text-primary: #fafafa;    /* Blanco suave */
-  --text-secondary: #d4d4d8;  /* Gris claro */
-  --text-muted: #a1a1aa;      /* Gris medio */
-  --text-inverse: #18181b;    /* Negro para fondos claros */
+  /* Textos modo oscuro - Excelente contraste con tonos azulados */
+  --text-primary: #f8fafc;         /* Blanco casi puro - máxima legibilidad */
+  --text-secondary: #d1e3f5;       /* Gris azulado claro */
+  --text-muted: #8ba5bf;           /* Gris azulado medio - buen contraste */
+  --text-inverse: #0a0f14;         /* Negro azulado para fondos claros */
+  --text-link: #50a8e8;            /* Cyan corporativo claro para enlaces */
+  --text-link-hover: #7fc4f5;      /* Cyan más claro para hover */
   
-  /* Bordes sutiles */
-  --border-primary: #3f3f46;  /* Gris medio sutil */
-  --border-secondary: #52525b; /* Gris medio-claro */
+  /* Bordes modo oscuro - Tonos azulados sutiles */
+  --border-primary: #2a3f54;       /* Azul oscuro medio */
+  --border-secondary: #3d5468;     /* Azul medio */
+  --border-hover: #4d6b85;         /* Azul medio-claro */
+  --border-focus: #50a8e8;         /* Cyan corporativo para focus */
   
-  /* Sombras más profundas para modo oscuro */
-  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.5);
-  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.4), 0 2px 4px -2px rgb(0 0 0 / 0.4);
-  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.5), 0 4px 6px -4px rgb(0 0 0 / 0.5);
+  /* Colores de estado - Modo oscuro (tonos brillantes con base azulada) */
+  --color-success: #50E5F9;        /* Cyan SENA brillante */
+  --color-success-bg: #0a2e3a;     /* Azul-verde oscuro fondo */
+  --color-success-border: #1e5a8e; /* Azul corporativo medio borde */
+  
+  --color-error: #ef4444;          /* Rojo brillante */
+  --color-error-bg: #3d1a1a;       /* Rojo oscuro azulado fondo */
+  --color-error-border: #dc2626;   /* Rojo medio borde */
+  
+  --color-warning: #FDC300;        /* Amarillo SENA brillante */
+  --color-warning-bg: #3d2f0a;     /* Amarillo oscuro azulado fondo */
+  --color-warning-border: #d97706; /* Naranja medio borde */
+  
+  --color-info: #50a8e8;           /* Cyan corporativo brillante */
+  --color-info-bg: #0d2538;        /* Azul corporativo oscuro fondo */
+  --color-info-border: #2b7bbf;    /* Azul corporativo medio borde */
+  
+  /* Sombras modo oscuro - Más profundas y dramáticas */
+  --shadow-sm: 0 1px 2px 0 rgb(0 0 0 / 0.6);
+  --shadow-md: 0 4px 6px -1px rgb(0 0 0 / 0.5), 0 2px 4px -2px rgb(0 0 0 / 0.5);
+  --shadow-lg: 0 10px 15px -3px rgb(0 0 0 / 0.6), 0 4px 6px -4px rgb(0 0 0 / 0.6);
+  --shadow-xl: 0 20px 25px -5px rgb(0 0 0 / 0.7), 0 8px 10px -6px rgb(0 0 0 / 0.7);
 }
 
-/* Clases utilitarias para temas */
+/* ============================================
+   🎨 CLASES UTILITARIAS DE TEMAS
+   ============================================ */
+
+/* Fondos */
 .bg-theme-primary { background-color: var(--bg-primary); }
 .bg-theme-secondary { background-color: var(--bg-secondary); }
 .bg-theme-tertiary { background-color: var(--bg-tertiary); }
 .bg-theme-card { background-color: var(--bg-card); }
 .bg-theme-sidebar { background-color: var(--bg-sidebar); }
 .bg-theme-navbar { background-color: var(--bg-navbar); }
+.bg-theme-hover { background-color: var(--bg-hover); }
+.bg-theme-active { background-color: var(--bg-active); }
 
+/* Textos */
 .text-theme-primary { color: var(--text-primary); }
 .text-theme-secondary { color: var(--text-secondary); }
 .text-theme-muted { color: var(--text-muted); }
 .text-theme-inverse { color: var(--text-inverse); }
+.text-theme-link { color: var(--text-link); }
+.text-theme-link:hover { color: var(--text-link-hover); }
 
+/* Bordes */
 .border-theme-primary { border-color: var(--border-primary); }
 .border-theme-secondary { border-color: var(--border-secondary); }
+.border-theme-hover { border-color: var(--border-hover); }
+.border-theme-focus { border-color: var(--border-focus); }
 
+/* Sombras */
 .shadow-theme-sm { box-shadow: var(--shadow-sm); }
 .shadow-theme-md { box-shadow: var(--shadow-md); }
 .shadow-theme-lg { box-shadow: var(--shadow-lg); }
+.shadow-theme-xl { box-shadow: var(--shadow-xl); }
+
+/* Estados */
+.bg-success { background-color: var(--color-success-bg); }
+.text-success { color: var(--color-success); }
+.border-success { border-color: var(--color-success-border); }
+
+.bg-error { background-color: var(--color-error-bg); }
+.text-error { color: var(--color-error); }
+.border-error { border-color: var(--color-error-border); }
+
+.bg-warning { background-color: var(--color-warning-bg); }
+.text-warning { color: var(--color-warning); }
+.border-warning { border-color: var(--color-warning-border); }
+
+.bg-info { background-color: var(--color-info-bg); }
+.text-info { color: var(--color-info); }
+.border-info { border-color: var(--color-info-border); }
+
+/* ============================================
+   ✨ TRANSICIONES Y ANIMACIONES
+   ============================================ */
 
 /* Transiciones suaves para cambios de tema */
-* {
-  transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+*,
+*::before,
+*::after {
+  transition-property: background-color, color, border-color, box-shadow, opacity, transform;
+  transition-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  transition-duration: 200ms;
 }
 
-/* Scrollbar personalizada para modo oscuro */
-.dark ::-webkit-scrollbar {
-  width: 8px;
+/* Desactivar transiciones en elementos específicos */
+.no-transition,
+.no-transition *,
+.no-transition::before,
+.no-transition::after {
+  transition: none !important;
 }
 
-.dark ::-webkit-scrollbar-track {
+/* ============================================
+   📜 SCROLLBAR PERSONALIZADA
+   ============================================ */
+
+/* Scrollbar modo claro */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
   background: var(--bg-secondary);
+  border-radius: 8px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-secondary);
+  border-radius: 8px;
+  border: 2px solid var(--bg-secondary);
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+::-webkit-scrollbar-thumb:active {
+  background: var(--text-muted);
+}
+
+/* Scrollbar modo oscuro */
+.dark ::-webkit-scrollbar-track {
+  background: var(--bg-tertiary);
 }
 
 .dark ::-webkit-scrollbar-thumb {
   background: var(--border-secondary);
-  border-radius: 4px;
+  border: 2px solid var(--bg-tertiary);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
+  background: var(--border-hover);
+}
+
+.dark ::-webkit-scrollbar-thumb:active {
   background: var(--text-muted);
+}
+
+/* Firefox scrollbar */
+* {
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-secondary) var(--bg-secondary);
+}
+
+.dark * {
+  scrollbar-color: var(--border-secondary) var(--bg-tertiary);
+}
+
+/* ============================================
+   🎯 UTILIDADES ADICIONALES
+   ============================================ */
+
+/* Hover states mejorados */
+.hover-lift {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.hover-lift:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Focus states accesibles */
+.focus-ring:focus {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--border-focus);
+}
+
+.focus-ring:focus-visible {
+  outline: 2px solid var(--border-focus);
+  outline-offset: 2px;
+}
+
+/* Glassmorphism effect */
+.glass-effect {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.dark .glass-effect {
+  background: rgba(0, 48, 77, 0.2);
+  border: 1px solid rgba(80, 168, 232, 0.2);
+}
+
+/* ============================================
+   🎨 CLASES ADICIONALES PARA MODO CORPORATIVO
+   ============================================ */
+
+/* Accent corporativo - Verde para modo claro, Azul para modo oscuro */
+.accent-corporate {
+  color: #2d8700;
+}
+
+.dark .accent-corporate {
+  color: #50a8e8;
+}
+
+.bg-accent-corporate {
+  background-color: #2d8700;
+}
+
+.dark .bg-accent-corporate {
+  background-color: #2b7bbf;
+}
+
+.border-accent-corporate {
+  border-color: #2d8700;
+}
+
+.dark .border-accent-corporate {
+  border-color: #2b7bbf;
+}
+
+/* Hover states para accent corporativo */
+.hover-accent-corporate:hover {
+  color: #216500;
+}
+
+.dark .hover-accent-corporate:hover {
+  color: #50E5F9;
+}
+
+/* Efectos de glow corporativo */
+.glow-corporate {
+  box-shadow: 0 0 20px rgba(45, 135, 0, 0.3);
+}
+
+.dark .glow-corporate {
+  box-shadow: 0 0 20px rgba(43, 123, 191, 0.3);
 }

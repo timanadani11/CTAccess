@@ -49,6 +49,7 @@ import {
   User,
   UserCheck,
   UserX,
+  UserPlus,
   LogIn,
   LogOut,
   
@@ -180,6 +181,7 @@ const iconMap = {
   'persona': User,
   'user-check': UserCheck,
   'user-x': UserX,
+  'user-plus': UserPlus,
   'log-in': LogIn,
   'entrada': LogIn,
   'log-out': LogOut,

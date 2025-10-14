@@ -38,9 +38,13 @@ class UsersController extends Controller
                 'id' => $u->idUsuario,
                 'UserName' => $u->UserName,
                 'nombre' => $u->nombre,
+                'tipo_documento' => $u->tipo_documento,
+                'documento' => $u->documento,
+                'correo' => $u->correo,
                 'activo' => (bool) $u->activo,
                 'rol_principal' => $u->principalRole?->nombre,
-                'roles' => $u->roles->pluck('nombre')->values(),
+                'rol_principal_id' => $u->rol_principal_id,
+                'roles' => $u->roles->pluck('id')->values(),
             ];
         });
 
@@ -64,6 +68,9 @@ class UsersController extends Controller
             'UserName' => ['required', 'string', 'max:255', 'unique:usuarios_sistema,UserName'],
             'password' => ['required', 'string', 'min:8'],
             'nombre'   => ['required', 'string', 'max:255'],
+            'tipo_documento' => ['nullable', 'string', 'max:20'],
+            'documento' => ['nullable', 'string', 'max:50', 'unique:usuarios_sistema,documento'],
+            'correo' => ['nullable', 'email', 'max:100', 'unique:usuarios_sistema,correo'],
             'activo'   => ['boolean'],
             'roles'    => ['array'],
             'roles.*'  => ['integer', Rule::exists('roles', 'id')],
@@ -74,6 +81,9 @@ class UsersController extends Controller
         $user->UserName = $validated['UserName'];
         $user->password = $validated['password']; // mutator hashes
         $user->nombre = $validated['nombre'];
+        $user->tipo_documento = $validated['tipo_documento'] ?? null;
+        $user->documento = $validated['documento'] ?? null;
+        $user->correo = $validated['correo'] ?? null;
         $user->activo = $validated['activo'] ?? true;
         $user->rol_principal_id = $validated['rol_principal_id'] ?? null;
         $user->save();
@@ -98,6 +108,9 @@ class UsersController extends Controller
                 'id' => $user->idUsuario,
                 'UserName' => $user->UserName,
                 'nombre' => $user->nombre,
+                'tipo_documento' => $user->tipo_documento,
+                'documento' => $user->documento,
+                'correo' => $user->correo,
                 'activo' => (bool) $user->activo,
                 'rol_principal_id' => $user->rol_principal_id,
                 'roles' => $user->roles->pluck('id')->values(),
@@ -112,6 +125,9 @@ class UsersController extends Controller
             'UserName' => ['required', 'string', 'max:255', Rule::unique('usuarios_sistema', 'UserName')->ignore($user->idUsuario, 'idUsuario')],
             'password' => ['nullable', 'string', 'min:8'],
             'nombre'   => ['required', 'string', 'max:255'],
+            'tipo_documento' => ['nullable', 'string', 'max:20'],
+            'documento' => ['nullable', 'string', 'max:50', Rule::unique('usuarios_sistema', 'documento')->ignore($user->idUsuario, 'idUsuario')],
+            'correo' => ['nullable', 'email', 'max:100', Rule::unique('usuarios_sistema', 'correo')->ignore($user->idUsuario, 'idUsuario')],
             'activo'   => ['boolean'],
             'roles'    => ['array'],
             'roles.*'  => ['integer', Rule::exists('roles', 'id')],
@@ -123,6 +139,9 @@ class UsersController extends Controller
             $user->password = $validated['password'];
         }
         $user->nombre = $validated['nombre'];
+        $user->tipo_documento = $validated['tipo_documento'] ?? null;
+        $user->documento = $validated['documento'] ?? null;
+        $user->correo = $validated['correo'] ?? null;
         $user->activo = $validated['activo'] ?? $user->activo;
         $user->rol_principal_id = $validated['rol_principal_id'] ?? null;
         $user->save();
