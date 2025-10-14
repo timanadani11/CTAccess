@@ -11,6 +11,9 @@ use App\Http\Controllers\System\Celador\IncidenciaController as CeladorIncidenci
 use App\Http\Controllers\System\Celador\HistorialController as CeladorHistorialController;
 use App\Http\Controllers\System\Celador\QrController as CeladorQrController;
 use App\Http\Controllers\System\Celador\PersonaController as CeladorPersonaController;
+use App\Http\Controllers\Personas\Auth\AuthenticatedSessionController as PersonaAuthController;
+use App\Http\Controllers\Personas\DashboardController as PersonaDashboardController;
+use App\Http\Controllers\Personas\ProfileController as PersonaProfileController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -23,8 +26,24 @@ Route::get('/debug/personas/{persona}', function (Persona $persona) {
     return view('debug.persona', compact('persona'));
 });
 
-// Rutas de Personas optimizadas para Inertia.js
+// Rutas de Personas optimizadas para Inertia.js (CRUD - Admin)
 Route::resource('personas', App\Http\Controllers\PersonaController::class);
+
+// Portal de Personas (Autenticación y Dashboard)
+Route::prefix('personas')->name('personas.')->group(function () {
+    // Rutas públicas
+    Route::middleware('guest:web')->group(function () {
+        Route::get('/login', [PersonaAuthController::class, 'create'])->name('login');
+        Route::post('/login', [PersonaAuthController::class, 'store'])->name('login.store');
+    });
+
+    // Rutas protegidas
+    Route::middleware('auth:web')->group(function () {
+        Route::get('/home', [PersonaDashboardController::class, 'index'])->name('home');
+        Route::get('/perfil', [PersonaProfileController::class, 'show'])->name('profile');
+        Route::post('/logout', [PersonaAuthController::class, 'destroy'])->name('logout');
+    });
+});
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

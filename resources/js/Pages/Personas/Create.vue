@@ -1,5 +1,5 @@
 <template>
-  <Head title="Nueva Persona - CTAccess" />
+  <Head title="Registrate aquí"/>
 
   <div class="min-h-screen bg-theme-primary text-theme-primary overflow-y-auto">
     <!-- Toggle de tema fijo -->

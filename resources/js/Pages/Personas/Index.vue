@@ -1,170 +1,227 @@
-<template>
-  <div class="p-6">
-    <div class="flex justify-between items-center mb-6">
-      <h1 class="text-2xl font-bold">Gestión de Personas</h1>
-      <Link 
-        :href="route('personas.create')" 
-        class="px-4 py-2 bg-[#39A900] text-white rounded-lg hover:bg-[#007832] transition-colors"
-      >
-        Nueva Persona
-      </Link>
-    </div>
-
-    <!-- Filtros de búsqueda -->
-    <div class="mb-6 flex items-center gap-4">
-      <div class="flex-1">
-        <input 
-          v-model="searchForm.search"
-          @input="search"
-          type="text" 
-          placeholder="Buscar por nombre, documento o tipo..."
-          class="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900] focus:border-transparent"
-        >
-      </div>
-      <select 
-        v-model="searchForm.per_page" 
-        @change="search"
-        class="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-[#39A900]"
-      >
-        <option value="10">10 por página</option>
-        <option value="15">15 por página</option>
-        <option value="25">25 por página</option>
-        <option value="50">50 por página</option>
-      </select>
-    </div>
-
-    <!-- Tabla de personas -->
-    <div class="overflow-x-auto bg-white shadow-lg rounded-lg">
-      <table class="min-w-full">
-        <thead>
-          <tr class="bg-gray-50 text-left">
-            <th class="p-4 font-semibold text-gray-700">ID</th>
-            <th class="p-4 font-semibold text-gray-700">Documento</th>
-            <th class="p-4 font-semibold text-gray-700">Nombre</th>
-            <th class="p-4 font-semibold text-gray-700">Tipo</th>
-            <th class="p-4 font-semibold text-gray-700">Portátiles</th>
-            <th class="p-4 font-semibold text-gray-700">Vehículos</th>
-            <th class="p-4 font-semibold text-gray-700">Acciones</th>
-          </tr>
-        </thead>
-        <tbody>
-          <tr v-for="persona in personas.data" :key="persona.id" class="border-t hover:bg-gray-50">
-            <td class="p-4">{{ persona.id }}</td>
-            <td class="p-4">{{ persona.documento ?? '—' }}</td>
-            <td class="p-4 font-medium">{{ persona.nombre }}</td>
-            <td class="p-4">
-              <span class="px-2 py-1 text-xs rounded-full bg-blue-100 text-blue-800">
-                {{ persona.tipoPersona }}
-              </span>
-            </td>
-            <td class="p-4">
-              <span class="px-2 py-1 text-xs rounded-full bg-green-100 text-green-800">
-                {{ persona.portatiles?.length ?? 0 }}
-              </span>
-            </td>
-            <td class="p-4">
-              <span class="px-2 py-1 text-xs rounded-full bg-purple-100 text-purple-800">
-                {{ persona.vehiculos?.length ?? 0 }}
-              </span>
-            </td>
-            <td class="p-4">
-              <div class="flex items-center gap-2">
-                <Link 
-                  :href="route('personas.show', persona.id)"
-                  class="px-3 py-1 text-xs bg-blue-600 text-white rounded hover:bg-blue-700"
-                >
-                  Ver
-                </Link>
-                <Link 
-                  :href="route('personas.edit', persona.id)"
-                  class="px-3 py-1 text-xs bg-yellow-600 text-white rounded hover:bg-yellow-700"
-                >
-                  Editar
-                </Link>
-                <button 
-                  @click="confirmDelete(persona)"
-                  class="px-3 py-1 text-xs bg-red-600 text-white rounded hover:bg-red-700"
-                >
-                  Eliminar
-                </button>
-              </div>
-            </td>
-          </tr>
-        </tbody>
-      </table>
-    </div>
-
-    <!-- Paginación -->
-    <div v-if="personas.links" class="mt-6 flex justify-between items-center">
-      <div class="text-sm text-gray-600">
-        Mostrando {{ personas.from }} a {{ personas.to }} de {{ personas.total }} registros
-      </div>
-      <div class="flex gap-1">
-        <Link 
-          v-for="link in personas.links" 
-          :key="link.label"
-          :href="link.url"
-          :class="[
-            'px-3 py-2 text-sm border rounded',
-            link.active 
-              ? 'bg-[#39A900] text-white border-[#39A900]' 
-              : 'bg-white text-gray-700 border-gray-300 hover:bg-gray-50'
-          ]"
-          v-html="link.label"
-        />
-      </div>
-    </div>
-  </div>
-</template>
-
 <script setup>
-import { Head, Link, router } from '@inertiajs/vue3'
-import { reactive, ref } from 'vue'
+import { Head } from '@inertiajs/vue3';
+import PersonaLayout from '@/Layouts/PersonaLayout.vue';
+import Icon from '@/Components/Icon.vue';
 
-// Props recibidas desde el controlador
 const props = defineProps({
-  personas: Object,
-  filters: Object,
-})
+    persona: {
+        type: Object,
+        required: true,
+    },
+    accesos_recientes: {
+        type: Array,
+        default: () => [],
+    },
+    estadisticas: {
+        type: Object,
+        default: () => ({}),
+    },
+});
 
-// Formulario de búsqueda reactivo
-const searchForm = reactive({
-  search: props.filters.search || '',
-  per_page: props.filters.per_page || 15,
-})
+// Formatear fecha
+const formatDate = (date) => {
+    if (!date) return 'N/A';
+    return new Date(date).toLocaleDateString('es-CO', {
+        year: 'numeric',
+        month: 'long',
+        day: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+    });
+};
 
-// Función debounce simple
-const debounce = (func, wait) => {
-  let timeout
-  return function executedFunction(...args) {
-    const later = () => {
-      clearTimeout(timeout)
-      func(...args)
-    }
-    clearTimeout(timeout)
-    timeout = setTimeout(later, wait)
-  }
-}
-
-// Función de búsqueda con debounce para evitar muchas peticiones
-const search = debounce(() => {
-  router.get(route('personas.index'), searchForm, {
-    preserveState: true,
-    replace: true,
-  })
-}, 300)
-
-// Función para confirmar eliminación
-const confirmDelete = (persona) => {
-  if (confirm(`¿Estás seguro de eliminar a ${persona.nombre}?`)) {
-    router.delete(route('personas.destroy', persona.id), {
-      onSuccess: () => {
-        // Inertia automáticamente recarga la página con los datos actualizados
-      },
-      onError: (errors) => {
-        alert('Error al eliminar: ' + (errors.error || 'Error desconocido'))
-      }
-    })
-  }
-}
+// Formatear estado
+const getEstadoBadge = (estado) => {
+    const badges = {
+        'activo': { class: 'bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-400', text: 'Activo' },
+        'finalizado': { class: 'bg-gray-100 text-gray-800 dark:bg-gray-700 dark:text-gray-300', text: 'Finalizado' },
+        'incidencia': { class: 'bg-red-100 text-red-800 dark:bg-red-900/30 dark:text-red-400', text: 'Incidencia' },
+    };
+    return badges[estado] || badges.finalizado;
+};
 </script>
+
+<template>
+    <Head title="Inicio - Portal de Personas" />
+
+    <PersonaLayout :persona="persona">
+        <!-- Bienvenida -->
+        <div class="mb-8">
+            <div class="bg-gradient-to-r from-sena-green-600 to-cyan-600 dark:from-blue-600 dark:to-cyan-600 rounded-2xl shadow-xl p-8 text-white">
+                <div class="flex items-center justify-between flex-wrap gap-4">
+                    <div>
+                        <h1 class="text-3xl font-bold mb-2">
+                            ¡Bienvenido, {{ persona.Nombre }}!
+                        </h1>
+                        <p class="text-white/90 text-lg">
+                            Portal de Personas - CTAccess
+                        </p>
+                    </div>
+                    <div class="flex items-center justify-center h-20 w-20 rounded-full bg-white/20 backdrop-blur-sm">
+                        <span class="text-4xl font-bold">
+                            {{ persona.Nombre.charAt(0).toUpperCase() }}
+                        </span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Información Personal -->
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+            <!-- Datos Personales -->
+            <div class="lg:col-span-2 bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <Icon name="user" :size="24" class="text-sena-green-600 dark:text-cyan-400 mr-3" />
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Información Personal</h2>
+                </div>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Nombre Completo</label>
+                        <p class="text-base font-semibold text-gray-900 dark:text-white mt-1">{{ persona.Nombre }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Documento</label>
+                        <p class="text-base font-semibold text-gray-900 dark:text-white mt-1">{{ persona.documento || 'No registrado' }}</p>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Tipo de Persona</label>
+                        <p class="text-base font-semibold text-gray-900 dark:text-white mt-1">
+                            <span class="inline-flex items-center px-3 py-1 rounded-full text-sm bg-sena-green-100 dark:bg-cyan-900/30 text-sena-green-700 dark:text-cyan-400">
+                                {{ persona.TipoPersona }}
+                            </span>
+                        </p>
+                    </div>
+                    
+                    <div>
+                        <label class="text-sm font-medium text-gray-500 dark:text-gray-400">Correo Electrónico</label>
+                        <p class="text-base font-semibold text-gray-900 dark:text-white mt-1">{{ persona.correo }}</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Estadísticas Rápidas -->
+            <div class="space-y-4">
+                <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-md p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-blue-100 text-sm mb-1">Total de Accesos</p>
+                            <p class="text-3xl font-bold">{{ estadisticas.total_accesos || 0 }}</p>
+                        </div>
+                        <Icon name="log-in" :size="32" class="opacity-80" />
+                    </div>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-md p-6 text-white">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-green-100 text-sm mb-1">Accesos Este Mes</p>
+                            <p class="text-3xl font-bold">{{ estadisticas.accesos_mes || 0 }}</p>
+                        </div>
+                        <Icon name="calendar" :size="32" class="opacity-80" />
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Portátiles y Vehículos -->
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
+            <!-- Portátiles -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <Icon name="laptop" :size="24" class="text-purple-600 dark:text-purple-400 mr-3" />
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Mis Portátiles</h2>
+                </div>
+                
+                <div v-if="persona.portatiles && persona.portatiles.length > 0" class="space-y-3">
+                    <div
+                        v-for="portatil in persona.portatiles"
+                        :key="portatil.id"
+                        class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                    >
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ portatil.marca }} {{ portatil.modelo }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Serial: {{ portatil.serial }}</p>
+                    </div>
+                </div>
+                <div v-else class="text-center py-8">
+                    <Icon name="laptop" :size="48" class="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">No tienes portátiles registrados</p>
+                </div>
+            </div>
+
+            <!-- Vehículos -->
+            <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+                <div class="flex items-center mb-4">
+                    <Icon name="truck" :size="24" class="text-orange-600 dark:text-orange-400 mr-3" />
+                    <h2 class="text-xl font-bold text-gray-900 dark:text-white">Mis Vehículos</h2>
+                </div>
+                
+                <div v-if="persona.vehiculos && persona.vehiculos.length > 0" class="space-y-3">
+                    <div
+                        v-for="vehiculo in persona.vehiculos"
+                        :key="vehiculo.id"
+                        class="p-4 bg-gray-50 dark:bg-gray-700/50 rounded-lg border border-gray-200 dark:border-gray-600"
+                    >
+                        <p class="text-sm font-semibold text-gray-900 dark:text-white">{{ vehiculo.tipo }}</p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400 mt-1">Placa: {{ vehiculo.placa }}</p>
+                        <p v-if="vehiculo.marca" class="text-xs text-gray-500 dark:text-gray-400">{{ vehiculo.marca }} {{ vehiculo.modelo }}</p>
+                    </div>
+                </div>
+                <div v-else class="text-center py-8">
+                    <Icon name="truck" :size="48" class="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                    <p class="text-gray-500 dark:text-gray-400 text-sm">No tienes vehículos registrados</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Accesos Recientes -->
+        <div class="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 border border-gray-200 dark:border-gray-700">
+            <div class="flex items-center mb-6">
+                <Icon name="clock" :size="24" class="text-sena-green-600 dark:text-cyan-400 mr-3" />
+                <h2 class="text-xl font-bold text-gray-900 dark:text-white">Historial de Accesos Recientes</h2>
+            </div>
+            
+            <div v-if="accesos_recientes && accesos_recientes.length > 0" class="overflow-x-auto">
+                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
+                    <thead>
+                        <tr>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Fecha Entrada
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Fecha Salida
+                            </th>
+                            <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                                Estado
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700">
+                        <tr v-for="acceso in accesos_recientes" :key="acceso.id" class="hover:bg-gray-50 dark:hover:bg-gray-700/50 transition-colors">
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                {{ formatDate(acceso.fecha_entrada) }}
+                            </td>
+                            <td class="px-4 py-3 text-sm text-gray-900 dark:text-gray-100">
+                                {{ acceso.fecha_salida ? formatDate(acceso.fecha_salida) : 'En curso' }}
+                            </td>
+                            <td class="px-4 py-3">
+                                <span
+                                    :class="getEstadoBadge(acceso.estado).class"
+                                    class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium"
+                                >
+                                    {{ getEstadoBadge(acceso.estado).text }}
+                                </span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div v-else class="text-center py-12">
+                <Icon name="inbox" :size="48" class="mx-auto text-gray-300 dark:text-gray-600 mb-3" />
+                <p class="text-gray-500 dark:text-gray-400">No tienes accesos registrados aún</p>
+            </div>
+        </div>
+    </PersonaLayout>
+</template>

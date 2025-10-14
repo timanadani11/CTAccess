@@ -38,6 +38,12 @@ class Persona extends Authenticatable
     {
         return $this->contraseña;
     }
+    
+    // Override para que Laravel sepa qué campo usar para la contraseña
+    public function getAuthPasswordName()
+    {
+        return 'contraseña';
+    }
 
     // Método para verificar contraseña
     public function checkPassword($password)

@@ -27,11 +27,11 @@ const form = useForm({
 const { isDark, toggleTheme } = useTheme();
 
 const submit = () => {
-    form.post(route('login'), {
+    form.post(route('personas.login.store'), {
         onFinish: () => form.reset('contraseña'),
         onError: (errors) => {
             // Si hay error de token CSRF, recargar la página
-            if (errors.message && errors.message.includes('CSRF') || errors.message && errors.message.includes('expired')) {
+            if (errors.message && (errors.message.includes('CSRF') || errors.message.includes('expired'))) {
                 window.location.reload();
             }
         },
