@@ -16,15 +16,19 @@ class IncidenciaController extends Controller
 
     public function index(Request $request)
     {
-        $query = Incidencia::with(['acceso.persona', 'reportadoPor'])
-            ->latest('created_at');
+        $query = Incidencia::with([
+            'acceso.persona', 
+            'reportadoPor:idUsuario,nombre,rol_principal_id',
+            'reportadoPor.principalRole:id,nombre'
+        ])->latest('created_at');
 
         // Filtro de búsqueda
         if ($search = $request->get('q')) {
             $query->where(function($q) use ($search) {
                 $q->where('descripcion', 'like', "%{$search}%")
                   ->orWhereHas('acceso.persona', function($q) use ($search) {
-                      $q->where('Nombre', 'like', "%{$search}%");
+                      $q->where('Nombre', 'like', "%{$search}%")
+                        ->orWhere('Documento', 'like', "%{$search}%");
                   });
             });
         }
