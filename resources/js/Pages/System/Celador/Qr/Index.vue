@@ -2,6 +2,7 @@
 import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import QrScannerModal from '@/Components/QrScannerModal.vue'
 import CedulaModal from '@/Components/CedulaModal.vue'
+import IncidenciaModal from '@/Components/IncidenciaModal.vue'
 import { Head, router, usePage } from '@inertiajs/vue3'
 import { ref, computed, onMounted, onUnmounted } from 'vue'
 import Icon from '@/Components/Icon.vue'
@@ -32,8 +33,12 @@ const notification = ref(null)
 // Modales
 const showQrScannerModal = ref(false)
 const showCedulaModal = ref(false)
+const showIncidenciaModal = ref(false)
 const qrScannerModalRef = ref(null)
 const cedulaModalRef = ref(null)
+
+// Estado para incidencia
+const incidenciaData = ref(null)
 
 // Computadas
 const canProcess = computed(() => {
@@ -83,9 +88,12 @@ const handleQrScanned = async (qrEvent) => {
     await buscarPersona(data)
   } else if (type === 'portatil') {
     scannedCodes.value.portatil = data
-  } else if (type === 'vehiculo') {
-    scannedCodes.value.vehiculo = data
+    // Si es salida y hay portátil esperado, verificar coincidencia
+    if (personaInfo.value?.acceso_activo?.requiere_verificacion_portatil) {
+      await verificarPortatil(data)
+    }
   }
+  // vehiculo eliminado - ya no se verifica
 }
 
 const buscarPersona = async (qrPersona) => {
@@ -115,14 +123,11 @@ const buscarPersona = async (qrPersona) => {
       // Mostrar información al celador
       let mensaje = `${result.persona.Nombre} - ${result.mensaje_accion}`
       
-      // Agregar info de portátil/vehículo automáticamente detectados
+      // Agregar info de portátil detectado automáticamente (vehiculo eliminado)
       if (esEntrada) {
         const elementos = []
         if (result.tiene_portatil) {
           elementos.push(`✓ Portátil: ${result.portatil_asociado.marca} ${result.portatil_asociado.modelo}`)
-        }
-        if (result.tiene_vehiculo) {
-          elementos.push(`✓ Vehículo: ${result.vehiculo_asociado.placa}`)
         }
         
         if (elementos.length > 0) {
@@ -130,21 +135,11 @@ const buscarPersona = async (qrPersona) => {
         }
       }
       
-      // Si es SALIDA, verificar si necesita escanear portátil/vehículo
+      // Si es SALIDA, verificar si necesita escanear portátil
       if (esSalida && result.acceso_activo) {
-        const requiereVerificaciones = []
-        
         if (result.acceso_activo.requiere_verificacion_portatil) {
-          requiereVerificaciones.push(`📱 Debe escanear QR del portátil: ${result.acceso_activo.portatil_entrada.serial}`)
-        }
-        
-        if (result.acceso_activo.requiere_verificacion_vehiculo) {
-          requiereVerificaciones.push(`🚗 Debe escanear QR del vehículo: ${result.acceso_activo.vehiculo_entrada.placa}`)
-        }
-        
-        if (requiereVerificaciones.length > 0) {
-          showNotification('warning', `SALIDA - Verificación requerida:\n${requiereVerificaciones.join('\n')}`)
-          // NO procesar automáticamente - debe escanear portátil/vehículo
+          showNotification('warning', `SALIDA - Verificación requerida:\n� Debe escanear QR del portátil: ${result.acceso_activo.portatil_entrada.serial}`)
+          // NO procesar automáticamente - debe escanear portátil
           showConfirmModal.value = true
           return
         }
@@ -165,22 +160,52 @@ const buscarPersona = async (qrPersona) => {
   }
 }
 
+// Nueva función para verificar portátil y detectar inconsistencias
+const verificarPortatil = async (qrPortatil) => {
+  if (!personaInfo.value?.acceso_activo?.portatil_entrada) {
+    return
+  }
+
+  const serialEsperado = personaInfo.value.acceso_activo.portatil_entrada.serial
+  const serialVerificado = qrPortatil.replace('PORTATIL_', '')
+
+  if (serialEsperado !== serialVerificado) {
+    // 🚨 NO COINCIDE - Abrir modal de incidencia
+    incidenciaData.value = {
+      errorMessage: `El portátil escaneado NO coincide con el registrado en la entrada`,
+      accesoInfo: {
+        persona: personaInfo.value.persona.Nombre,
+        documento: personaInfo.value.persona.documento,
+        equipoEsperado: `Serial: ${serialEsperado}`,
+        equipoVerificado: `Serial: ${serialVerificado}`
+      }
+    }
+    showIncidenciaModal.value = true
+  }
+}
+
 // buscarPersonaPorCedula eliminada - ahora todo usa buscarPersona con QR virtual
 
-const procesarAcceso = async () => {
+const procesarAcceso = async (descripcionIncidencia = null) => {
   if (!canProcess.value) return
 
   isProcessing.value = true
 
   try {
-    router.post(route('system.celador.qr.registrar'), {
+    const payload = {
       qr_persona: scannedCodes.value.persona,
       qr_portatil: scannedCodes.value.portatil,
-      qr_vehiculo: scannedCodes.value.vehiculo
-    }, {
+    }
+
+    // Si hay descripción de incidencia, incluirla
+    if (descripcionIncidencia) {
+      payload.descripcion_incidencia = descripcionIncidencia
+    }
+
+    router.post(route('system.celador.qr.registrar'), payload, {
       onSuccess: (page) => {
         limpiarCodigos()
-        showNotification('success', 'Acceso registrado correctamente')
+        showNotification('success', descripcionIncidencia ? 'Salida registrada con incidencia' : 'Acceso registrado correctamente')
         refreshData()
       },
       onError: (errors) => {
@@ -199,6 +224,60 @@ const procesarAcceso = async () => {
   }
 }
 
+// Handler para incidencias detectadas desde los modales hijos
+const handleIncidenciaDetectada = (incidenciaInfo) => {
+  // Cerrar los modales de escaneo
+  showQrScannerModal.value = false
+  showCedulaModal.value = false
+  
+  // Preparar datos de la incidencia
+  incidenciaData.value = {
+    errorMessage: incidenciaInfo.errorMessage,
+    accesoInfo: incidenciaInfo.accesoInfo,
+    datosRegistro: incidenciaInfo.datosRegistro // Datos para el registro
+  }
+  
+  // Abrir modal de incidencia
+  showIncidenciaModal.value = true
+}
+
+// Handler para confirmar registro con incidencia
+const handleIncidenciaConfirmada = (data) => {
+  showIncidenciaModal.value = false
+  
+  // Usar los datos de registro guardados
+  if (incidenciaData.value?.datosRegistro) {
+    const payload = {
+      ...incidenciaData.value.datosRegistro,
+      descripcion_incidencia: data.descripcion
+    }
+    
+    isProcessing.value = true
+    
+    router.post(route('system.celador.qr.registrar'), payload, {
+      onSuccess: (page) => {
+        limpiarCodigos()
+        showNotification('warning', 'Salida registrada con incidencia')
+        refreshData()
+      },
+      onError: (errors) => {
+        console.error('Error al registrar acceso:', errors)
+        const errorMessage = Object.values(errors)[0] || 'Error al procesar el acceso'
+        showNotification('error', errorMessage)
+      },
+      onFinish: () => {
+        isProcessing.value = false
+      }
+    })
+  }
+}
+
+// Handler para cerrar modal de incidencia
+const closeIncidenciaModal = () => {
+  showIncidenciaModal.value = false
+  incidenciaData.value = null
+}
+
 const limpiarCodigos = () => {
   scannedCodes.value = {
     persona: null,
@@ -208,6 +287,8 @@ const limpiarCodigos = () => {
   personaInfo.value = null
   showPersonaInfo.value = false
   showConfirmModal.value = false
+  showIncidenciaModal.value = false
+  incidenciaData.value = null
 }
 
 const cerrarModal = () => {
@@ -489,7 +570,7 @@ onUnmounted(() => {
               </div>
 
               <!-- Códigos escaneados compactos -->
-              <div v-if="scannedCodes.persona || scannedCodes.portatil || scannedCodes.vehiculo" class="space-y-2">
+              <div v-if="scannedCodes.persona || scannedCodes.portatil" class="space-y-2">
                 <div v-if="scannedCodes.persona" class="flex items-center gap-2 p-2 bg-green-50 rounded text-xs">
                   <Icon name="user" :size="14" class="text-green-600" />
                   <span class="font-medium text-green-800">Persona</span>
@@ -500,12 +581,6 @@ onUnmounted(() => {
                   <Icon name="laptop" :size="14" class="text-blue-600" />
                   <span class="font-medium text-blue-800">Portátil</span>
                   <Icon name="check" :size="14" class="text-blue-600 ml-auto" />
-                </div>
-
-                <div v-if="scannedCodes.vehiculo" class="flex items-center gap-2 p-2 bg-orange-50 rounded text-xs">
-                  <Icon name="car" :size="14" class="text-orange-600" />
-                  <span class="font-medium text-orange-800">Vehículo</span>
-                  <Icon name="check" :size="14" class="text-orange-600 ml-auto" />
                 </div>
 
                 <!-- Botón procesar compacto -->
@@ -690,16 +765,12 @@ onUnmounted(() => {
             </div>
 
             <!-- Recursos adicionales -->
-            <div v-if="scannedCodes.portatil || scannedCodes.vehiculo" class="bg-blue-50 rounded-lg p-2">
-              <h5 class="text-xs font-semibold text-blue-900 mb-1">Recursos adicionales:</h5>
+            <div v-if="scannedCodes.portatil" class="bg-blue-50 rounded-lg p-2">
+              <h5 class="text-xs font-semibold text-blue-900 mb-1">Equipo a verificar:</h5>
               <div class="space-y-1 text-xs">
-                <div v-if="scannedCodes.portatil" class="flex items-center text-blue-700">
+                <div class="flex items-center text-blue-700">
                   <Icon name="laptop" :size="14" class="mr-1" />
-                  Portátil incluido
-                </div>
-                <div v-if="scannedCodes.vehiculo" class="flex items-center text-blue-700">
-                  <Icon name="car" :size="14" class="mr-1" />
-                  Vehículo incluido
+                  Portátil verificado
                 </div>
               </div>
             </div>
@@ -735,6 +806,7 @@ onUnmounted(() => {
       :show="showQrScannerModal"
       @close="closeQrScanner"
       @acceso-registrado="handleAccesoRegistrado"
+      @incidencia-detectada="handleIncidenciaDetectada"
       ref="qrScannerModalRef"
     />
 
@@ -742,7 +814,18 @@ onUnmounted(() => {
       :show="showCedulaModal"
       @close="closeCedulaModal"
       @acceso-registrado="handleAccesoRegistrado"
+      @incidencia-detectada="handleIncidenciaDetectada"
       ref="cedulaModalRef"
+    />
+
+    <!-- Modal de Incidencia -->
+    <IncidenciaModal
+      v-if="incidenciaData"
+      :show="showIncidenciaModal"
+      :error-message="incidenciaData.errorMessage"
+      :acceso-info="incidenciaData.accesoInfo"
+      @close="closeIncidenciaModal"
+      @confirmar="handleIncidenciaConfirmada"
     />
   </SystemLayout>
 </template>

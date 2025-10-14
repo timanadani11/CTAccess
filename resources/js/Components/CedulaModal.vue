@@ -179,39 +179,8 @@
                       </button>
                     </div>
                   </div>
-                  <div v-if="personaInfo?.tiene_vehiculo" class="rounded-lg bg-orange-50 border border-orange-200 p-3">
-                    <div class="flex items-center space-x-3">
-                      <div class="flex h-10 w-10 items-center justify-center rounded-full bg-orange-600 text-white flex-shrink-0">
-                        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16V6a1 1 0 00-1-1H4a1 1 0 00-1 1v10a1 1 0 001 1h1m8-1a1 1 0 01-1 1H9m4-1V8a1 1 0 011-1h2.586a1 1 0 01.707.293l3.414 3.414a1 1 0 01.293.707V16a1 1 0 01-1 1h-1m-6-1a1 1 0 001 1h1M5 17a2 2 0 104 0m-4 0a2 2 0 114 0m6 0a2 2 0 104 0m-4 0a2 2 0 114 0"></path>
-                        </svg>
-                      </div>
-                      <div class="flex-1">
-                        <p class="text-sm font-semibold text-orange-900">{{ personaInfo?.vehiculo_asociado?.tipo || 'N/A' }}</p>
-                        <p class="text-xs text-orange-700">
-                          Placa: <span class="font-mono font-bold">{{ personaInfo?.vehiculo_asociado?.placa || 'N/A' }}</span>
-                        </p>
-                      </div>
-                      <svg v-if="personaInfo?.es_entrada" class="h-5 w-5 text-orange-600" fill="currentColor" viewBox="0 0 20 20">
-                        <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path>
-                      </svg>
-                    </div>
-                    <!-- Botones de verificación (solo en SALIDA) -->
-                    <div v-if="personaInfo?.es_salida && !verificandoEquipo" class="mt-3 flex space-x-2">
-                      <button
-                        type="button"
-                        @click="iniciarVerificacion('vehiculo')"
-                        class="flex-1 flex items-center justify-center space-x-2 rounded-lg bg-orange-600 px-3 py-2 text-sm font-semibold text-white transition-all hover:bg-orange-700 active:scale-95"
-                      >
-                        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
-                        </svg>
-                        <span>Verificar</span>
-                      </button>
-                    </div>
-                  </div>
-                  <div v-if="!personaInfo?.tiene_portatil && !personaInfo?.tiene_vehiculo" class="rounded-lg bg-gray-50 border border-gray-200 p-3 text-center">
-                    <p class="text-sm text-gray-600">Sin equipos asociados</p>
+                  <div v-if="!personaInfo?.tiene_portatil" class="rounded-lg bg-gray-50 border border-gray-200 p-3 text-center">
+                    <p class="text-sm text-gray-600">Sin portátil asociado</p>
                   </div>
                 </div>
                 <div class="rounded-lg border-2 p-3" :class="{
@@ -364,9 +333,6 @@
                   <p v-if="tipoEquipoVerificar === 'portatil'" class="text-xs text-blue-600 font-mono">
                     Serial: {{ personaInfo?.portatil_asociado?.serial }}
                   </p>
-                  <p v-else-if="tipoEquipoVerificar === 'vehiculo'" class="text-xs text-orange-600 font-mono">
-                    Placa: {{ personaInfo?.vehiculo_asociado?.placa }}
-                  </p>
                 </div>
 
                 <Transition name="error">
@@ -398,7 +364,7 @@ const props = defineProps({
   show: { type: Boolean, default: false }
 })
 
-const emit = defineEmits(['close', 'acceso-registrado'])
+const emit = defineEmits(['close', 'acceso-registrado', 'incidencia-detectada'])
 const cedula = ref('')
 const error = ref('')
 const searching = ref(false)
@@ -408,7 +374,7 @@ const cedulaInput = ref(null)
 
 // Estados para verificación de equipos en SALIDA
 const verificandoEquipo = ref(false)
-const tipoEquipoVerificar = ref(null) // 'portatil' o 'vehiculo'
+const tipoEquipoVerificar = ref(null) // solo 'portatil' (vehiculo eliminado)
 const videoElement = ref(null)
 const canvasElement = ref(null)
 let mediaStream = null
@@ -626,35 +592,26 @@ const handleQrVerificacion = (qrData) => {
     if (serialEscaneado === serialEsperado) {
       // ✅ COINCIDE - Registrar salida normal
       verificandoEquipo.value = false
-      confirmAcceso(false, serialEscaneado, null)
+      confirmAcceso(false, serialEscaneado)
     } else {
-      // ❌ NO COINCIDE - Registrar con incidencia
-      error.value = `⚠️ Serial no coincide!\nEsperado: ${serialEsperado}\nEscaneado: ${serialEscaneado}`
-      setTimeout(() => {
-        verificandoEquipo.value = false
-        confirmAcceso(false, serialEscaneado, 'portatil')
-      }, 2000)
-    }
-  } else if (tipoEquipoVerificar.value === 'vehiculo') {
-    // Extraer placa del QR: "VEHICULO_JHAJAA" -> "JHAJAA"
-    let placaEscaneada = qrData
-    if (qrData.startsWith('VEHICULO_')) {
-      placaEscaneada = qrData.replace('VEHICULO_', '')
-    }
-    
-    const placaEsperada = personaInfo.value.vehiculo_asociado.placa
-    
-    if (placaEscaneada === placaEsperada) {
-      // ✅ COINCIDE - Registrar salida normal
+      // ❌ NO COINCIDE - Emitir evento para abrir modal de incidencia
       verificandoEquipo.value = false
-      confirmAcceso(false, null, placaEscaneada)
-    } else {
-      // ❌ NO COINCIDE - Registrar con incidencia
-      error.value = `⚠️ Placa no coincide!\nEsperada: ${placaEsperada}\nEscaneada: ${placaEscaneada}`
-      setTimeout(() => {
-        verificandoEquipo.value = false
-        confirmAcceso(false, null, placaEscaneada)
-      }, 2000)
+      stopCamera()
+      
+      emit('incidencia-detectada', {
+        errorMessage: `El portátil escaneado NO coincide con el registrado en la entrada`,
+        accesoInfo: {
+          persona: personaInfo.value.persona.Nombre,
+          documento: personaInfo.value.persona.documento,
+          equipoEsperado: `Serial: ${serialEsperado}`,
+          equipoVerificado: `Serial: ${serialEscaneado}`
+        },
+        datosRegistro: {
+          qr_persona: `PERSONA_${cedula.value.trim()}`,
+          qr_portatil: personaInfo.value.tiene_portatil ? `PORTATIL_${personaInfo.value.portatil_asociado.serial}` : null,
+          serial_verificado: serialEscaneado
+        }
+      })
     }
   }
 }
@@ -667,32 +624,21 @@ const cancelarVerificacion = () => {
   error.value = ''
 }
 
-const confirmAcceso = async (confiar = false, serialVerificado = null, placaVerificada = null) => {
+const confirmAcceso = async (confiar = false, serialVerificado = null) => {
   if (!personaInfo.value) return
   confirming.value = true
   error.value = ''
   
   try {
-    // Preparar datos para registrar
+    // Preparar datos para registrar (solo portátil, vehiculo eliminado)
     const data = {
       qr_persona: `PERSONA_${cedula.value.trim()}`,
-      qr_portatil: personaInfo.value.tiene_portatil ? `PORTATIL_${personaInfo.value.portatil_asociado.serial}` : null,
-      qr_vehiculo: personaInfo.value.tiene_vehiculo ? `VEHICULO_${personaInfo.value.vehiculo_asociado.placa}` : null
+      qr_portatil: personaInfo.value.tiene_portatil ? `PORTATIL_${personaInfo.value.portatil_asociado.serial}` : null
     }
     
-    // Si es SALIDA y se verificó equipo, enviar datos de verificación
-    if (personaInfo.value.es_salida && !confiar) {
-      if (serialVerificado) {
-        data.serial_verificado = serialVerificado
-      }
-      if (placaVerificada) {
-        data.placa_verificada = placaVerificada
-      }
-    }
-    
-    // Si es SALIDA y se confió, indicarlo
-    if (personaInfo.value.es_salida && confiar) {
-      data.confiar = true
+    // Si es SALIDA y se verificó portátil, enviar datos de verificación
+    if (personaInfo.value.es_salida && serialVerificado) {
+      data.serial_verificado = serialVerificado
     }
     
     // Registrar el acceso directamente desde el modal

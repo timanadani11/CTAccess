@@ -153,20 +153,13 @@ class QrController extends Controller
     {
         $errores = [];
         $requiereVerificacion = false;
-        $confio = $request->input('confiar', false); // Nuevo: el celador confió
+        $descripcionIncidencia = $request->input('descripcion_incidencia', null);
 
-        // 🔥 VERIFICACIÓN DE PORTÁTIL EN SALIDA
+        // 🔥 SOLO VERIFICACIÓN DE PORTÁTIL EN SALIDA (vehiculo eliminado)
         if ($accesoActivo->portatil_id) {
             $requiereVerificacion = true;
             
-            if ($confio) {
-                // ✅ El celador confió - NO verificar
-                Log::info('Salida sin verificación de portátil (celador confió)', [
-                    'persona_id' => $persona->idPersona,
-                    'acceso_id' => $accesoActivo->idAcceso,
-                    'portatil_entrada' => $accesoActivo->portatil->serial
-                ]);
-            } elseif ($request->has('serial_verificado')) {
+            if ($request->has('serial_verificado')) {
                 // 🔍 Se verificó el serial
                 $serialVerificado = $request->serial_verificado;
                 $serialEsperado = $accesoActivo->portatil->serial;
@@ -175,50 +168,22 @@ class QrController extends Controller
                     // ⚠️ Serial NO COINCIDE - INCIDENCIA
                     $errores[] = "Portátil NO coincide. Entrada: {$serialEsperado}, Verificado: {$serialVerificado}";
                 }
-            } elseif (!$request->qr_portatil) {
-                // ⚠️ No escaneó QR de portátil - INCIDENCIA
-                $errores[] = 'No se verificó el portátil (Serial esperado: ' . $accesoActivo->portatil->serial . ')';
-            } else {
+            } elseif ($request->qr_portatil) {
                 // Verificación tradicional con QR completo
                 $portatil = $this->buscarPortatilPorQr($request->qr_portatil);
                 
                 if ($portatil->portatil_id != $accesoActivo->portatil_id) {
                     $errores[] = 'Portátil NO coincide. Entrada: ' . $accesoActivo->portatil->serial . ', Verificado: ' . $portatil->serial;
                 }
+            } elseif (!$descripcionIncidencia) {
+                // ⚠️ No escaneó QR de portátil Y no hay descripción de incidencia - REQUERIR VERIFICACIÓN
+                $errores[] = 'No se verificó el portátil (Serial esperado: ' . $accesoActivo->portatil->serial . ')';
             }
         }
 
-        // 🔥 VERIFICACIÓN DE VEHÍCULO EN SALIDA
-        if ($accesoActivo->vehiculo_id) {
-            $requiereVerificacion = true;
-            
-            if ($confio) {
-                // ✅ El celador confió - NO verificar
-                Log::info('Salida sin verificación de vehículo (celador confió)', [
-                    'persona_id' => $persona->idPersona,
-                    'acceso_id' => $accesoActivo->idAcceso,
-                    'vehiculo_entrada' => $accesoActivo->vehiculo->placa
-                ]);
-            } elseif ($request->has('placa_verificada')) {
-                // 🔍 Se verificó la placa
-                $placaVerificada = $request->placa_verificada;
-                $placaEsperada = $accesoActivo->vehiculo->placa;
-                
-                if ($placaVerificada != $placaEsperada) {
-                    // ⚠️ Placa NO COINCIDE - INCIDENCIA
-                    $errores[] = "Vehículo NO coincide. Entrada: {$placaEsperada}, Verificado: {$placaVerificada}";
-                }
-            } elseif (!$request->qr_vehiculo) {
-                // ⚠️ No escaneó QR de vehículo - INCIDENCIA
-                $errores[] = 'No se verificó el vehículo (Placa esperada: ' . $accesoActivo->vehiculo->placa . ')';
-            } else {
-                // Verificación tradicional con QR completo
-                $vehiculo = $this->buscarVehiculoPorQr($request->qr_vehiculo);
-                
-                if ($vehiculo->id != $accesoActivo->vehiculo_id) {
-                    $errores[] = 'Vehículo NO coincide. Entrada: ' . $accesoActivo->vehiculo->placa . ', Verificado: ' . $vehiculo->placa;
-                }
-            }
+        // Si hay descripción de incidencia proporcionada por el modal, agregarla
+        if ($descripcionIncidencia) {
+            $errores[] = $descripcionIncidencia;
         }
 
         // Si hay errores, registrar incidencia PERO PERMITIR SALIDA
@@ -245,26 +210,21 @@ class QrController extends Controller
             ]);
         }
 
-        // ✅ Registrar salida exitosa (sin errores o con confianza)
+        // ✅ Registrar salida exitosa (sin errores)
         $accesoActivo->marcarSalida($usuario->idUsuario);
 
         // 🔥 EMITIR EVENTO DE WEBSOCKET para actualización en tiempo real
         event(new AccesoRegistrado($accesoActivo->fresh()));
 
-        $mensaje = $confio 
-            ? '✅ Salida registrada (celador confió en verificación)'
-            : '✅ Salida registrada exitosamente (equipos verificados)';
-
         return back()->with('success', [
             'tipo' => 'salida',
-            'mensaje' => $mensaje,
+            'mensaje' => '✅ Salida registrada exitosamente (portátil verificado)',
             'persona' => $persona->Nombre,
             'documento' => $persona->documento,
             'hora_entrada' => $accesoActivo->fecha_entrada->format('H:i:s'),
             'hora_salida' => $accesoActivo->fecha_salida->format('H:i:s'),
             'duracion' => $accesoActivo->duracion,
-            'verificaciones_ok' => $requiereVerificacion && !$confio,
-            'confio' => $confio
+            'verificaciones_ok' => $requiereVerificacion
         ]);
     }
 
