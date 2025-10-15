@@ -136,204 +136,197 @@ const periodoActivo = computed(() => {
 
     <template #header>
       <div class="flex items-center justify-between">
-        <div class="flex items-center gap-3">
-          <Icon name="file-text" :size="24" class="text-[#50E5F9]" />
-          <h2 class="text-xl font-semibold text-theme-primary">Reportes de Accesos</h2>
+        <div class="flex items-center gap-2">
+          <Icon name="file-text" :size="20" class="text-[#50E5F9]" />
+          <h2 class="text-lg sm:text-xl font-semibold text-theme-primary">Reportes</h2>
         </div>
       </div>
     </template>
 
-    <div class="py-6 px-4 sm:px-6 lg:px-8">
-      <div class="mx-auto max-w-7xl space-y-6">
+    <div class="py-3 px-3 sm:px-4 lg:px-6">
+      <div class="mx-auto max-w-7xl space-y-3 sm:space-y-4">
         
         <!-- Banner de Información -->
-        <div class="bg-gradient-to-r from-[#50E5F9]/10 to-[#39A900]/10 border border-[#50E5F9]/30 rounded-xl p-6">
-          <div class="flex items-start gap-4">
-            <div class="p-3 bg-[#50E5F9]/20 rounded-lg">
-              <Icon name="info" :size="24" class="text-[#50E5F9]" />
+        <div class="bg-gradient-to-r from-[#50E5F9]/10 to-[#39A900]/10 border border-[#50E5F9]/30 rounded-lg p-3 sm:p-4">
+          <div class="flex items-start gap-3">
+            <div class="p-2 bg-[#50E5F9]/20 rounded-lg flex-shrink-0">
+              <Icon name="info" :size="18" class="text-[#50E5F9]" />
             </div>
-            <div class="flex-1">
-              <h3 class="text-lg font-semibold text-theme-primary mb-2">
-                Sistema de Reportes de Accesos
+            <div class="flex-1 min-w-0">
+              <h3 class="text-sm sm:text-base font-semibold text-theme-primary mb-1">
+                Sistema de Reportes
               </h3>
-              <p class="text-sm text-theme-secondary">
-                Genera reportes detallados en PDF con toda la información de accesos. 
-                Selecciona un período predefinido o personaliza las fechas. 
-                Los reportes incluyen estadísticas, gráficos y listado completo de movimientos.
+              <p class="text-xs sm:text-sm text-theme-secondary">
+                Genera reportes en PDF con estadísticas y movimientos completos.
               </p>
             </div>
           </div>
         </div>
 
         <!-- Estadísticas del Período -->
-        <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-          <div class="bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
+          <div class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-theme-secondary">Total Accesos</p>
-                <p class="text-2xl font-bold text-theme-primary mt-1">{{ estadisticas?.total ?? 0 }}</p>
+                <p class="text-xs text-theme-secondary">Total</p>
+                <p class="text-xl sm:text-2xl font-bold text-theme-primary mt-0.5">{{ estadisticas?.total ?? 0 }}</p>
               </div>
-              <div class="p-3 bg-[#50E5F9]/10 rounded-lg">
-                <Icon name="users" :size="24" class="text-[#50E5F9]" />
+              <div class="p-2 bg-[#50E5F9]/10 rounded-lg">
+                <Icon name="users" :size="18" class="text-[#50E5F9]" />
               </div>
             </div>
           </div>
 
-          <div class="bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
+          <div class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-theme-secondary">Con Portátil</p>
-                <p class="text-2xl font-bold text-[#39A900] mt-1">{{ estadisticas?.con_portatil ?? 0 }}</p>
+                <p class="text-xs text-theme-secondary">Portátil</p>
+                <p class="text-xl sm:text-2xl font-bold text-[#39A900] mt-0.5">{{ estadisticas?.con_portatil ?? 0 }}</p>
               </div>
-              <div class="p-3 bg-[#39A900]/10 rounded-lg">
-                <Icon name="laptop" :size="24" class="text-[#39A900]" />
+              <div class="p-2 bg-[#39A900]/10 rounded-lg">
+                <Icon name="laptop" :size="18" class="text-[#39A900]" />
               </div>
             </div>
           </div>
 
-          <div class="bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
+          <div class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-theme-secondary">Con Vehículo</p>
-                <p class="text-2xl font-bold text-[#FDC300] mt-1">{{ estadisticas?.con_vehiculo ?? 0 }}</p>
+                <p class="text-xs text-theme-secondary">Vehículo</p>
+                <p class="text-xl sm:text-2xl font-bold text-[#FDC300] mt-0.5">{{ estadisticas?.con_vehiculo ?? 0 }}</p>
               </div>
-              <div class="p-3 bg-[#FDC300]/10 rounded-lg">
-                <Icon name="car" :size="24" class="text-[#FDC300]" />
+              <div class="p-2 bg-[#FDC300]/10 rounded-lg">
+                <Icon name="car" :size="18" class="text-[#FDC300]" />
               </div>
             </div>
           </div>
 
-          <div class="bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
+          <div class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
             <div class="flex items-center justify-between">
               <div>
-                <p class="text-sm text-theme-secondary">Personas Únicas</p>
-                <p class="text-2xl font-bold text-purple-600 mt-1">{{ estadisticas?.personas_unicas ?? 0 }}</p>
+                <p class="text-xs text-theme-secondary">Personas</p>
+                <p class="text-xl sm:text-2xl font-bold text-purple-600 mt-0.5">{{ estadisticas?.personas_unicas ?? 0 }}</p>
               </div>
-              <div class="p-3 bg-purple-600/10 rounded-lg">
-                <Icon name="user-check" :size="24" class="text-purple-600" />
+              <div class="p-2 bg-purple-600/10 rounded-lg">
+                <Icon name="user-check" :size="18" class="text-purple-600" />
               </div>
             </div>
           </div>
         </div>
 
         <!-- Períodos Predefinidos -->
-        <div class="bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
-          <h3 class="text-sm font-semibold text-theme-primary mb-3 flex items-center gap-2">
-            <Icon name="calendar" :size="16" />
+        <div class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
+          <h3 class="text-xs sm:text-sm font-semibold text-theme-primary mb-2 flex items-center gap-1.5">
+            <Icon name="calendar" :size="14" />
             Períodos Rápidos
           </h3>
-          <div class="flex flex-wrap gap-2">
+          <div class="grid grid-cols-2 sm:flex sm:flex-wrap gap-2">
             <button 
               @click="setPeriodo('hoy')"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation',
                 periodo === 'hoy' 
-                  ? 'bg-[#50E5F9] text-white shadow-lg' 
-                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 border border-theme-primary'
+                  ? 'bg-[#50E5F9] text-white shadow-sm' 
+                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 active:bg-theme-secondary/30 border border-theme-primary'
               ]"
             >
-              <Icon name="clock" :size="14" class="inline mr-1" />
               Hoy
             </button>
             <button 
               @click="setPeriodo('ayer')"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation',
                 periodo === 'ayer' 
-                  ? 'bg-[#50E5F9] text-white shadow-lg' 
-                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 border border-theme-primary'
+                  ? 'bg-[#50E5F9] text-white shadow-sm' 
+                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 active:bg-theme-secondary/30 border border-theme-primary'
               ]"
             >
-              <Icon name="history" :size="14" class="inline mr-1" />
               Ayer
             </button>
             <button 
               @click="setPeriodo('semana')"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation',
                 periodo === 'semana' 
-                  ? 'bg-[#50E5F9] text-white shadow-lg' 
-                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 border border-theme-primary'
+                  ? 'bg-[#50E5F9] text-white shadow-sm' 
+                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 active:bg-theme-secondary/30 border border-theme-primary'
               ]"
             >
-              <Icon name="calendar" :size="14" class="inline mr-1" />
-              Esta Semana
+              Semana
             </button>
             <button 
               @click="setPeriodo('mes')"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation',
                 periodo === 'mes' 
-                  ? 'bg-[#50E5F9] text-white shadow-lg' 
-                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 border border-theme-primary'
+                  ? 'bg-[#50E5F9] text-white shadow-sm' 
+                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 active:bg-theme-secondary/30 border border-theme-primary'
               ]"
             >
-              <Icon name="calendar" :size="14" class="inline mr-1" />
               Este Mes
             </button>
             <button 
               @click="setPeriodo('mes_anterior')"
               :class="[
-                'px-4 py-2 rounded-lg text-sm font-medium transition-all',
+                'px-3 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all touch-manipulation col-span-2 sm:col-span-1',
                 periodo === 'mes_anterior' 
-                  ? 'bg-[#50E5F9] text-white shadow-lg' 
-                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 border border-theme-primary'
+                  ? 'bg-[#50E5F9] text-white shadow-sm' 
+                  : 'bg-theme-secondary/10 text-theme-primary hover:bg-theme-secondary/20 active:bg-theme-secondary/30 border border-theme-primary'
               ]"
             >
-              <Icon name="history" :size="14" class="inline mr-1" />
               Mes Anterior
             </button>
           </div>
         </div>
 
         <!-- Filtros Personalizados -->
-        <div class="bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
-          <h3 class="text-sm font-semibold text-theme-primary mb-3 flex items-center gap-2">
-            <Icon name="filter" :size="16" />
+        <div class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
+          <h3 class="text-xs sm:text-sm font-semibold text-theme-primary mb-2 flex items-center gap-1.5">
+            <Icon name="filter" :size="14" />
             Filtros Personalizados
           </h3>
-          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-2 sm:gap-3">
             <div>
-              <label class="block text-sm font-medium text-theme-secondary mb-2">
-                Fecha Desde
+              <label class="block text-xs sm:text-sm font-medium text-theme-secondary mb-1">
+                Desde
               </label>
               <input 
                 v-model="fechaDesde" 
                 type="date"
-                class="w-full rounded-lg border-theme-primary bg-theme-primary text-theme-primary px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#50E5F9] transition-all"
+                class="w-full rounded-lg border-theme-primary bg-theme-primary text-theme-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#50E5F9] transition-all touch-manipulation"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-theme-secondary mb-2">
-                Fecha Hasta
+              <label class="block text-xs sm:text-sm font-medium text-theme-secondary mb-1">
+                Hasta
               </label>
               <input 
                 v-model="fechaHasta" 
                 type="date"
-                class="w-full rounded-lg border-theme-primary bg-theme-primary text-theme-primary px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#50E5F9] transition-all"
+                class="w-full rounded-lg border-theme-primary bg-theme-primary text-theme-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#50E5F9] transition-all touch-manipulation"
               />
             </div>
 
             <div>
-              <label class="block text-sm font-medium text-theme-secondary mb-2">
-                <Icon name="search" :size="14" class="inline mr-1" />
-                Buscar Persona
+              <label class="block text-xs sm:text-sm font-medium text-theme-secondary mb-1">
+                Buscar
               </label>
               <input 
                 v-model="q" 
-                type="text"
+                type="search"
+                inputmode="search"
                 placeholder="Nombre o documento"
-                class="w-full rounded-lg border-theme-primary bg-theme-primary text-theme-primary px-4 py-2.5 focus:outline-none focus:ring-2 focus:ring-[#50E5F9] transition-all"
+                class="w-full rounded-lg border-theme-primary bg-theme-primary text-theme-primary px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#50E5F9] transition-all touch-manipulation"
               />
             </div>
 
             <div class="flex items-end">
               <button 
                 @click="fechaDesde = ''; fechaHasta = ''; periodo = ''; q = ''"
-                class="w-full px-4 py-2.5 bg-theme-secondary text-theme-inverse rounded-lg hover:bg-theme-secondary/80 transition-all flex items-center justify-center gap-2"
+                class="w-full px-3 py-2 bg-theme-secondary text-theme-inverse rounded-lg hover:bg-theme-secondary/80 active:bg-theme-secondary/90 transition-all flex items-center justify-center gap-1.5 text-xs sm:text-sm font-medium touch-manipulation"
               >
-                <Icon name="x" :size="16" />
+                <Icon name="x" :size="14" />
                 Limpiar
               </button>
             </div>
@@ -341,32 +334,87 @@ const periodoActivo = computed(() => {
         </div>
 
         <!-- Botón de Generar PDF -->
-        <div class="bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
-            <div>
-              <p class="text-sm text-theme-secondary">
-                Período: <span class="font-semibold text-theme-primary">{{ periodoActivo }}</span>
-                <span v-if="estadisticas?.total" class="text-theme-muted">
-                  • {{ estadisticas.total }} registros
+        <div class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
+          <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-2">
+            <div class="min-w-0">
+              <p class="text-xs sm:text-sm text-theme-secondary truncate">
+                <span class="font-semibold text-theme-primary">{{ periodoActivo }}</span>
+                <span v-if="estadisticas?.total" class="text-theme-muted ml-1">
+                  • {{ estadisticas.total }}
                 </span>
               </p>
             </div>
             <button 
               @click="generarPDF"
               :disabled="generandoPDF || !estadisticas?.total"
-              class="px-6 py-2.5 bg-[#39A900] text-white rounded-lg font-medium text-sm hover:bg-[#39A900]/90 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 whitespace-nowrap"
+              class="px-4 py-2 bg-[#39A900] text-white rounded-lg font-medium text-xs sm:text-sm hover:bg-[#39A900]/90 active:bg-[#39A900]/80 transition-all disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 whitespace-nowrap touch-manipulation"
             >
-              <Icon :name="generandoPDF ? 'loader' : 'download'" :size="16" :class="generandoPDF && 'animate-spin'" />
+              <Icon :name="generandoPDF ? 'loader' : 'download'" :size="14" :class="generandoPDF && 'animate-spin'" />
               {{ generandoPDF ? 'Generando...' : 'Descargar PDF' }}
             </button>
           </div>
         </div>
 
-        <!-- Preview de Datos -->
-        <div class="bg-theme-card rounded-xl border border-theme-primary overflow-hidden shadow-theme-md">
-          <div class="bg-theme-secondary/5 px-6 py-4 border-b border-theme-primary">
-            <h3 class="text-lg font-semibold text-theme-primary flex items-center gap-2">
-              <Icon name="eye" :size="20" />
+        <!-- Preview de Datos - Vista Móvil -->
+        <div class="lg:hidden space-y-2">
+          <div class="bg-theme-secondary/5 px-3 py-2 rounded-t-lg">
+            <h3 class="text-sm font-semibold text-theme-primary flex items-center gap-1.5">
+              <Icon name="eye" :size="16" />
+              Vista Previa
+            </h3>
+          </div>
+          
+          <div v-for="r in registros.data" :key="r.id" 
+            class="bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
+            <div class="flex items-start gap-3">
+              <div class="w-12 h-12 flex-shrink-0 rounded-full bg-gradient-to-br from-[#50E5F9] to-[#39A900] flex items-center justify-center text-white font-semibold">
+                {{ (r.persona?.Nombre ?? 'U').charAt(0).toUpperCase() }}
+              </div>
+              
+              <div class="flex-1 min-w-0">
+                <div class="mb-2">
+                  <p class="font-semibold text-theme-primary text-sm truncate">{{ r.persona?.Nombre ?? '—' }}</p>
+                  <p class="text-xs text-theme-secondary">{{ r.persona?.numero_documento ?? '—' }}</p>
+                </div>
+                
+                <div class="grid grid-cols-2 gap-2 text-xs mb-2">
+                  <div>
+                    <p class="text-theme-muted">Entrada</p>
+                    <p class="font-medium text-theme-primary">{{ formatDate(r.fecha_entrada).split(',')[1] }}</p>
+                  </div>
+                  <div>
+                    <p class="text-theme-muted">Salida</p>
+                    <p class="font-medium text-theme-primary">{{ r.fecha_salida ? formatDate(r.fecha_salida).split(',')[1] : '—' }}</p>
+                  </div>
+                </div>
+                
+                <div class="flex items-center justify-between pt-2 border-t border-theme-primary">
+                  <div class="flex items-center gap-2">
+                    <span v-if="r.portatil" class="inline-flex items-center gap-1 text-xs text-[#39A900]">
+                      <Icon name="laptop" :size="12" />
+                    </span>
+                    <span v-if="r.vehiculo" class="inline-flex items-center gap-1 text-xs text-[#FDC300]">
+                      <Icon name="car" :size="12" />
+                    </span>
+                  </div>
+                  <span class="text-xs text-theme-muted font-mono">{{ calcularDuracion(r.fecha_entrada, r.fecha_salida) }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          
+          <div v-if="!registros.data?.length" class="bg-theme-card rounded-lg border border-theme-primary p-8 text-center">
+            <Icon name="inbox" :size="40" class="mx-auto text-theme-muted mb-2" />
+            <p class="text-sm text-theme-secondary font-medium">Sin registros</p>
+            <p class="text-xs text-theme-muted mt-1">Ajusta los filtros</p>
+          </div>
+        </div>
+
+        <!-- Preview de Datos - Vista Desktop -->
+        <div class="hidden lg:block bg-theme-card rounded-lg border border-theme-primary overflow-hidden shadow-theme-sm">
+          <div class="bg-theme-secondary/5 px-4 py-2 border-b border-theme-primary">
+            <h3 class="text-sm font-semibold text-theme-primary flex items-center gap-2">
+              <Icon name="eye" :size="16" />
               Vista Previa de Datos
             </h3>
           </div>
@@ -374,66 +422,59 @@ const periodoActivo = computed(() => {
             <table class="min-w-full divide-y divide-theme-primary">
               <thead class="bg-theme-secondary/5">
                 <tr>
-                  <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
-                    <Icon name="user" :size="14" class="inline mr-1" />
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
                     Persona
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary hidden md:table-cell">
-                    <Icon name="briefcase" :size="14" class="inline mr-1" />
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
                     Tipo
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
-                    <Icon name="log-in" :size="14" class="inline mr-1" />
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
                     Entrada
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary hidden sm:table-cell">
-                    <Icon name="log-out" :size="14" class="inline mr-1" />
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
                     Salida
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary hidden lg:table-cell">
-                    <Icon name="clock" :size="14" class="inline mr-1" />
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
                     Duración
                   </th>
-                  <th class="px-4 py-3 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary hidden xl:table-cell">
+                  <th class="px-3 py-2 text-left text-xs font-semibold uppercase tracking-wider text-theme-secondary">
                     Recursos
                   </th>
                 </tr>
               </thead>
               <tbody class="divide-y divide-theme-primary">
                 <tr v-for="r in registros.data" :key="r.id" class="hover:bg-theme-secondary/5 transition-colors">
-                  <td class="px-4 py-4">
-                    <div class="flex items-center gap-3">
-                      <div class="w-10 h-10 rounded-full bg-gradient-to-br from-[#50E5F9] to-[#39A900] flex items-center justify-center text-white font-semibold text-sm">
+                  <td class="px-3 py-3">
+                    <div class="flex items-center gap-2">
+                      <div class="w-8 h-8 rounded-full bg-gradient-to-br from-[#50E5F9] to-[#39A900] flex items-center justify-center text-white font-semibold text-xs">
                         {{ (r.persona?.Nombre ?? 'U').charAt(0).toUpperCase() }}
                       </div>
-                      <div>
-                        <p class="font-medium text-theme-primary">{{ r.persona?.Nombre ?? '—' }}</p>
-                        <p class="text-xs text-theme-secondary hidden sm:block">{{ r.persona?.numero_documento ?? '' }}</p>
+                      <div class="min-w-0">
+                        <p class="font-medium text-theme-primary text-sm truncate">{{ r.persona?.Nombre ?? '—' }}</p>
+                        <p class="text-xs text-theme-secondary truncate">{{ r.persona?.numero_documento ?? '' }}</p>
                       </div>
                     </div>
                   </td>
-                  <td class="px-4 py-4 hidden md:table-cell">
-                    <span class="inline-flex items-center px-2.5 py-1 rounded-full text-xs font-medium bg-[#50E5F9]/10 text-[#50E5F9]">
+                  <td class="px-3 py-3">
+                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-[#50E5F9]/10 text-[#50E5F9]">
                       {{ r.persona?.tipo_persona ?? '—' }}
                     </span>
                   </td>
-                  <td class="px-4 py-4">
-                    <div class="text-sm">
-                      <p class="font-medium text-theme-primary">{{ formatDate(r.fecha_entrada).split(',')[0] }}</p>
-                      <p class="text-xs text-theme-secondary">{{ formatDate(r.fecha_entrada).split(',')[1] }}</p>
-                    </div>
+                  <td class="px-3 py-3 text-xs">
+                    <p class="font-medium text-theme-primary">{{ formatDate(r.fecha_entrada).split(',')[0] }}</p>
+                    <p class="text-theme-secondary">{{ formatDate(r.fecha_entrada).split(',')[1] }}</p>
                   </td>
-                  <td class="px-4 py-4 hidden sm:table-cell">
-                    <div v-if="r.fecha_salida" class="text-sm">
+                  <td class="px-3 py-3 text-xs">
+                    <div v-if="r.fecha_salida">
                       <p class="font-medium text-theme-primary">{{ formatDate(r.fecha_salida).split(',')[0] }}</p>
-                      <p class="text-xs text-theme-secondary">{{ formatDate(r.fecha_salida).split(',')[1] }}</p>
+                      <p class="text-theme-secondary">{{ formatDate(r.fecha_salida).split(',')[1] }}</p>
                     </div>
                     <span v-else class="text-theme-muted">—</span>
                   </td>
-                  <td class="px-4 py-4 text-sm text-theme-secondary hidden lg:table-cell">
+                  <td class="px-3 py-3 text-sm text-theme-secondary">
                     <span class="font-mono">{{ calcularDuracion(r.fecha_entrada, r.fecha_salida) }}</span>
                   </td>
-                  <td class="px-4 py-4 hidden xl:table-cell">
+                  <td class="px-3 py-3">
                     <div class="flex items-center gap-2">
                       <span v-if="r.portatil" class="inline-flex items-center gap-1 text-xs text-[#39A900]">
                         <Icon name="laptop" :size="14" />
@@ -446,10 +487,10 @@ const periodoActivo = computed(() => {
                   </td>
                 </tr>
                 <tr v-if="!registros.data?.length">
-                  <td colspan="6" class="px-4 py-12 text-center">
-                    <Icon name="inbox" :size="48" class="mx-auto text-theme-muted mb-3" />
-                    <p class="text-theme-secondary font-medium">No hay registros en este período</p>
-                    <p class="text-sm text-theme-muted mt-1">Selecciona un rango de fechas diferente</p>
+                  <td colspan="6" class="px-3 py-10 text-center">
+                    <Icon name="inbox" :size="40" class="mx-auto text-theme-muted mb-2" />
+                    <p class="text-sm text-theme-secondary font-medium">Sin registros</p>
+                    <p class="text-xs text-theme-muted mt-1">Ajusta los filtros</p>
                   </td>
                 </tr>
               </tbody>
@@ -458,22 +499,22 @@ const periodoActivo = computed(() => {
         </div>
 
         <!-- Paginación -->
-        <div v-if="registros.data?.length" class="flex flex-col sm:flex-row items-center justify-between gap-4 bg-theme-card rounded-xl border border-theme-primary p-4 shadow-theme-sm">
-          <div class="text-sm text-theme-secondary">
-            Mostrando <span class="font-semibold text-theme-primary">{{ registros.from ?? 0 }}</span> - 
+        <div v-if="registros.data?.length" class="flex flex-col sm:flex-row items-center justify-between gap-3 bg-theme-card rounded-lg border border-theme-primary p-3 shadow-theme-sm">
+          <div class="text-xs sm:text-sm text-theme-secondary">
+            <span class="font-semibold text-theme-primary">{{ registros.from ?? 0 }}</span> - 
             <span class="font-semibold text-theme-primary">{{ registros.to ?? 0 }}</span> de 
-            <span class="font-semibold text-theme-primary">{{ registros.total ?? 0 }}</span> registros
+            <span class="font-semibold text-theme-primary">{{ registros.total ?? 0 }}</span>
           </div>
-          <div class="flex flex-wrap gap-2 justify-center">
+          <div class="flex flex-wrap gap-1 justify-center">
             <Link 
               v-for="link in registros.links" 
               :key="link.url + link.label" 
               :href="link.url || '#'" 
-              class="min-w-[2.5rem] h-10 flex items-center justify-center rounded-lg px-3 text-sm font-medium transition-all"
+              class="min-w-[2rem] h-8 flex items-center justify-center rounded-md px-2 text-xs font-medium transition-all touch-manipulation"
               :class="[
                 link.active 
-                  ? 'bg-[#50E5F9] text-white shadow-lg' 
-                  : 'bg-theme-card border border-theme-primary text-theme-primary hover:bg-theme-secondary/10',
+                  ? 'bg-[#50E5F9] text-white shadow-sm' 
+                  : 'bg-theme-card border border-theme-primary text-theme-primary hover:bg-theme-secondary/10 active:bg-theme-secondary/20',
                 !link.url && 'opacity-50 cursor-not-allowed'
               ]" 
               v-html="link.label" 

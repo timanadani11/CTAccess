@@ -7,6 +7,13 @@ use App\Models\Persona;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
+use App\Mail\PersonaQrMailable;
 
 class PersonasController extends Controller
 {
@@ -18,39 +25,112 @@ class PersonasController extends Controller
     public function store(Request $request)
     {
         $validated = $request->validate([
-            'Nombre' => ['required', 'string', 'max:255'],
-            'TipoDocumento' => ['required', 'string', 'max:50'],
+            'nombre' => ['required', 'string', 'max:255'],
             'documento' => ['required', 'string', 'max:50', 'unique:personas,documento'],
-            'TipoPersona' => ['required', 'string', 'max:100'],
-            'Correo' => ['nullable', 'email', 'max:255'],
-            'Telefono' => ['nullable', 'string', 'max:50'],
-            'Direccion' => ['nullable', 'string', 'max:500'],
-            'Empresa' => ['nullable', 'string', 'max:255'],
-            'observaciones' => ['nullable', 'string', 'max:1000'],
+            'tipoPersona' => ['required', 'string', 'max:100'],
+            'correo' => ['nullable', 'email', 'max:255'],
         ]);
 
-        $persona = Persona::create($validated);
+        try {
+            $persona = DB::transaction(function () use ($validated) {
+                // Generar QR para la persona
+                $qrCode = null;
+                if (!empty($validated['documento'])) {
+                    $qrContent = 'PERSONA_' . $validated['documento'];
+                    $qrCode = $this->generateAndStoreQr($qrContent, 'persona');
+                }
 
-        return back()->with('success', 'Persona creada correctamente');
+                // Crear persona
+                $persona = Persona::create([
+                    'Nombre' => $validated['nombre'],
+                    'documento' => $validated['documento'],
+                    'TipoPersona' => $validated['tipoPersona'],
+                    'correo' => $validated['correo'] ?? null,
+                    'qrCode' => $qrCode,
+                ]);
+
+                return $persona;
+            });
+
+            // Enviar email con el QR si hay correo
+            if (!empty($persona->correo)) {
+                try {
+                    Mail::to($persona->correo)->send(new PersonaQrMailable($persona));
+                } catch (\Throwable $mailEx) {
+                    Log::error('Error enviando correo de QR a persona', [
+                        'persona_id' => $persona->idPersona,
+                        'correo' => $persona->correo,
+                        'error' => $mailEx->getMessage(),
+                    ]);
+                }
+            }
+
+            return back()->with('success', 'Persona creada correctamente' . ($persona->correo ? ' y correo enviado con QR' : ''));
+
+        } catch (\Throwable $e) {
+            Log::error('Error creando persona', [
+                'error' => $e->getMessage(),
+                'trace' => $e->getTraceAsString()
+            ]);
+            return back()->withErrors(['error' => 'Error al crear persona: ' . $e->getMessage()]);
+        }
+    }
+
+    /**
+     * Genera un código QR y lo almacena en storage
+     */
+    protected function generateAndStoreQr(string $content, string $prefix = 'qr'): string
+    {
+        $qrUrl = 'https://api.qrserver.com/v1/create-qr-code/?size=300x300&data=' . urlencode($content);
+        $response = Http::get($qrUrl);
+        
+        if (!$response->ok()) {
+            throw new \RuntimeException('No se pudo generar la imagen QR');
+        }
+        
+        $filename = sprintf('%s_%s_%s.png', $prefix, Str::slug($content), Str::random(8));
+        $path = 'qrcodes/' . $filename;
+        Storage::disk('public')->put($path, $response->body());
+        
+        return Storage::url($path);
     }
 
     public function update(Request $request, Persona $persona)
     {
         $validated = $request->validate([
-            'Nombre' => ['required', 'string', 'max:255'],
-            'TipoDocumento' => ['required', 'string', 'max:50'],
+            'nombre' => ['required', 'string', 'max:255'],
             'documento' => ['required', 'string', 'max:50', Rule::unique('personas', 'documento')->ignore($persona->idPersona, 'idPersona')],
-            'TipoPersona' => ['required', 'string', 'max:100'],
-            'Correo' => ['nullable', 'email', 'max:255'],
-            'Telefono' => ['nullable', 'string', 'max:50'],
-            'Direccion' => ['nullable', 'string', 'max:500'],
-            'Empresa' => ['nullable', 'string', 'max:255'],
-            'observaciones' => ['nullable', 'string', 'max:1000'],
+            'tipoPersona' => ['required', 'string', 'max:100'],
+            'correo' => ['nullable', 'email', 'max:255'],
         ]);
 
-        $persona->update($validated);
+        try {
+            DB::transaction(function () use ($persona, $validated) {
+                // Si el documento cambió, regenerar QR
+                if ($validated['documento'] !== $persona->documento) {
+                    $qrContent = 'PERSONA_' . $validated['documento'];
+                    $qrCode = $this->generateAndStoreQr($qrContent, 'persona');
+                    $validated['qrCode'] = $qrCode;
+                }
 
-        return back()->with('success', 'Persona actualizada correctamente');
+                $persona->update([
+                    'Nombre' => $validated['nombre'],
+                    'documento' => $validated['documento'],
+                    'TipoPersona' => $validated['tipoPersona'],
+                    'correo' => $validated['correo'] ?? null,
+                    'qrCode' => $validated['qrCode'] ?? $persona->qrCode,
+                ]);
+            });
+
+            return back()->with('success', 'Persona actualizada correctamente');
+
+        } catch (\Throwable $e) {
+            Log::error('Error actualizando persona', [
+                'error' => $e->getMessage(),
+                'persona_id' => $persona->idPersona
+            ]);
+            return back()->withErrors(['error' => 'Error al actualizar persona: ' . $e->getMessage()]);
+        }
     }
 
     public function destroy(Persona $persona)

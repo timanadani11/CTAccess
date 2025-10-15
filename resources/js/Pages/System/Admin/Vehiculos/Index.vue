@@ -168,106 +168,150 @@ onMounted(() => {
     <template #header>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-sena-yellow-600">
-            <Icon name="car" class="w-5 h-5 text-gray-900" />
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-sena-yellow-600">
+            <Icon name="car" class="w-4 h-4 text-gray-900" />
           </div>
-          <h2 class="text-2xl font-bold text-theme-primary">Gestión de Vehículos</h2>
+          <h2 class="text-lg sm:text-xl font-bold text-theme-primary">Gestión de Vehículos</h2>
         </div>
         <button
           @click="openCreateModal"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-sena-yellow-600 hover:bg-sena-yellow-700 text-gray-900 rounded-lg transition-colors font-semibold"
+          class="inline-flex items-center gap-2 px-3 py-2 bg-sena-yellow-600 hover:bg-sena-yellow-700 active:bg-sena-yellow-800 text-gray-900 rounded-lg transition-colors font-semibold text-sm touch-manipulation"
         >
           <Icon name="plus" class="w-4 h-4" />
-          Nuevo Vehículo
+          <span class="hidden sm:inline">Nuevo Vehículo</span>
+          <span class="sm:hidden">Nuevo</span>
         </button>
       </div>
     </template>
 
-    <div class="space-y-6">
+    <div class="space-y-3 sm:space-y-4">
       <!-- Filtros -->
-      <div class="bg-theme-card rounded-xl border border-theme-primary p-6 shadow-theme-sm">
-        <h3 class="text-lg font-semibold text-theme-primary mb-4">Filtros de búsqueda</h3>
-        <div class="flex flex-col sm:flex-row gap-4">
+      <div class="bg-theme-card rounded-xl border border-theme-primary p-3 shadow-theme-sm">
+        <div class="flex flex-col sm:flex-row gap-3">
           <div class="flex-1">
             <input
               v-model="searchForm.search"
               @input="search"
-              type="text"
-              placeholder="Buscar por placa, tipo o persona..."
-              class="w-full px-4 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-sena-yellow-500 focus:border-transparent"
+              type="search"
+              inputmode="search"
+              placeholder="Buscar placa, tipo o persona..."
+              class="w-full px-3 py-2 text-sm border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-sena-yellow-500 focus:border-transparent touch-manipulation"
             >
           </div>
           <select
             v-model="searchForm.per_page"
             @change="search"
-            class="px-3 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary focus:ring-2 focus:ring-sena-yellow-500"
+            class="px-3 py-2 text-sm border border-theme-primary rounded-lg bg-theme-card text-theme-primary focus:ring-2 focus:ring-sena-yellow-500 touch-manipulation"
           >
-            <option value="10">10 por página</option>
-            <option value="15">15 por página</option>
-            <option value="25">25 por página</option>
-            <option value="50">50 por página</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
           </select>
         </div>
       </div>
 
       <!-- Tabla de vehículos -->
       <div class="bg-theme-card rounded-xl border border-theme-primary shadow-theme-sm overflow-hidden">
-        <div class="border-b border-theme-primary bg-theme-secondary p-6">
-          <h3 class="text-lg font-semibold text-theme-primary">
-            Lista de vehículos registrados
-            <span v-if="vehiculos.total" class="text-sm font-normal text-theme-secondary ml-2">
-              ({{ vehiculos.total }} {{ vehiculos.total === 1 ? 'vehículo' : 'vehículos' }})
+        <div class="border-b border-theme-primary bg-theme-secondary px-3 py-3">
+          <h3 class="text-base font-semibold text-theme-primary">
+            Vehículos
+            <span v-if="vehiculos.total" class="text-sm font-normal text-theme-secondary ml-1">
+              ({{ vehiculos.total }})
             </span>
           </h3>
         </div>
 
         <!-- Loading indicator -->
-        <div v-if="loading" class="text-center py-12">
-          <div class="inline-flex items-center gap-2 text-theme-secondary">
-            <Icon name="loader" class="w-5 h-5 animate-spin" />
-            Cargando vehículos...
+        <div v-if="loading" class="text-center py-8">
+          <div class="inline-flex items-center gap-2 text-theme-secondary text-sm">
+            <Icon name="loader" class="w-4 h-4 animate-spin" />
+            Cargando...
           </div>
         </div>
 
-        <!-- Tabla -->
-        <div v-else class="overflow-x-auto">
+        <!-- Vista móvil (cards) -->
+        <div v-else class="lg:hidden divide-y divide-theme-primary">
+          <div v-for="vehiculo in vehiculos.data" :key="vehiculo.id" class="p-3 hover:bg-theme-secondary transition-colors touch-manipulation">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="flex items-center gap-2 mb-1">
+                  <span class="font-mono font-semibold text-theme-primary">{{ vehiculo.placa }}</span>
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-sena-yellow-100 dark:bg-sena-yellow-800 text-sena-yellow-700 dark:text-sena-yellow-300">
+                    {{ vehiculo.tipo }}
+                  </span>
+                </div>
+                <div v-if="vehiculo.persona" class="text-sm">
+                  <div class="text-theme-primary">{{ vehiculo.persona.Nombre }}</div>
+                  <div class="text-xs text-theme-secondary">{{ vehiculo.persona.documento }}</div>
+                </div>
+                <div v-else class="text-sm text-theme-muted">Sin persona</div>
+              </div>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <button
+                  @click="openEditModal(vehiculo)"
+                  class="p-2 bg-sena-yellow-600 hover:bg-sena-yellow-700 active:bg-sena-yellow-800 text-gray-900 rounded transition-colors touch-manipulation"
+                  title="Editar"
+                >
+                  <Icon name="pencil" class="w-3.5 h-3.5" />
+                </button>
+                <button
+                  @click="confirmDelete(vehiculo)"
+                  class="p-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded transition-colors touch-manipulation"
+                  title="Eliminar"
+                >
+                  <Icon name="trash" class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-if="!vehiculos.data?.length" class="px-3 py-8 text-center text-theme-muted">
+            <div class="flex flex-col items-center gap-2">
+              <Icon name="car" class="w-8 h-8 text-theme-muted" />
+              <span class="text-sm">No se encontraron vehículos</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista desktop (tabla) -->
+        <div class="hidden lg:block overflow-x-auto">
           <table class="min-w-full divide-y divide-theme-primary text-sm">
             <thead class="bg-theme-secondary">
               <tr>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Placa</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Tipo</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Persona</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Acciones</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Placa</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Tipo</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Persona</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-theme-primary bg-theme-card">
               <tr v-for="vehiculo in vehiculos.data" :key="vehiculo.id" class="transition-colors hover:bg-theme-secondary">
-                <td class="px-6 py-4 font-mono text-theme-primary font-semibold">{{ vehiculo.placa }}</td>
-                <td class="px-6 py-4">
-                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-medium bg-sena-yellow-100 dark:bg-sena-yellow-800 text-sena-yellow-700 dark:text-sena-yellow-300">
+                <td class="px-3 py-3 font-mono text-theme-primary font-semibold">{{ vehiculo.placa }}</td>
+                <td class="px-3 py-3">
+                  <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-sena-yellow-100 dark:bg-sena-yellow-800 text-sena-yellow-700 dark:text-sena-yellow-300">
                     {{ vehiculo.tipo }}
                   </span>
                 </td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-3">
                   <div v-if="vehiculo.persona">
                     <div class="font-medium text-theme-primary">{{ vehiculo.persona.Nombre }}</div>
                     <div class="text-xs text-theme-secondary">{{ vehiculo.persona.documento }}</div>
                   </div>
                   <span v-else class="text-theme-muted">—</span>
                 </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
+                <td class="px-3 py-3">
+                  <div class="flex items-center gap-1">
                     <button
                       @click="openEditModal(vehiculo)"
-                      class="px-3 py-1 text-xs bg-sena-yellow-600 hover:bg-sena-yellow-700 text-gray-900 rounded transition-colors font-semibold"
-                      title="Editar vehículo"
+                      class="px-2 py-1 text-xs bg-sena-yellow-600 hover:bg-sena-yellow-700 active:bg-sena-yellow-800 text-gray-900 rounded transition-colors font-semibold touch-manipulation"
+                      title="Editar"
                     >
                       <Icon name="pencil" class="w-3 h-3" />
                     </button>
                     <button
                       @click="confirmDelete(vehiculo)"
-                      class="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded transition-colors"
-                      title="Eliminar vehículo"
+                      class="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded transition-colors touch-manipulation"
+                      title="Eliminar"
                     >
                       <Icon name="trash" class="w-3 h-3" />
                     </button>
@@ -275,10 +319,10 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="!vehiculos.data?.length">
-                <td colspan="4" class="px-6 py-12 text-center text-theme-muted">
+                <td colspan="4" class="px-3 py-8 text-center text-theme-muted">
                   <div class="flex flex-col items-center gap-2">
                     <Icon name="car" class="w-8 h-8 text-theme-muted" />
-                    <span>No se encontraron vehículos</span>
+                    <span class="text-sm">No se encontraron vehículos</span>
                   </div>
                 </td>
               </tr>
@@ -287,10 +331,10 @@ onMounted(() => {
         </div>
 
         <!-- Paginación -->
-        <div v-if="vehiculos.data?.length" class="border-t border-theme-primary bg-theme-secondary px-6 py-4">
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="text-sm text-theme-secondary">
-              Mostrando {{ vehiculos.from }} a {{ vehiculos.to }} de {{ vehiculos.total }} vehículos
+        <div v-if="vehiculos.data?.length" class="border-t border-theme-primary bg-theme-secondary px-3 py-3">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-xs text-theme-secondary">
+              {{ vehiculos.from }}-{{ vehiculos.to }} de {{ vehiculos.total }}
             </div>
             <div class="flex gap-1">
               <button
@@ -299,12 +343,12 @@ onMounted(() => {
                 @click="loadVehiculosPage(link.url)"
                 :disabled="!link.url"
                 :class="[
-                  'px-3 py-2 text-sm border rounded transition-colors',
+                  'px-2 py-1 text-xs border rounded transition-colors touch-manipulation h-8 min-w-[2rem]',
                   link.active
                     ? 'bg-sena-yellow-600 text-gray-900 border-sena-yellow-600 font-semibold'
                     : link.url
-                      ? 'bg-theme-card text-theme-secondary border-theme-primary hover:bg-theme-secondary'
-                      : 'bg-theme-tertiary text-theme-muted border-theme-primary cursor-not-allowed'
+                      ? 'bg-theme-card text-theme-secondary border-theme-primary hover:bg-theme-secondary active:bg-theme-tertiary'
+                      : 'bg-theme-tertiary text-theme-muted border-theme-primary cursor-not-allowed opacity-50'
                 ]"
                 v-html="link.label"
               />

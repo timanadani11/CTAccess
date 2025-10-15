@@ -170,106 +170,149 @@ onMounted(() => {
     <template #header>
       <div class="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <div class="flex items-center gap-3">
-          <div class="flex h-10 w-10 items-center justify-center rounded-lg bg-cyan-600">
-            <Icon name="laptop" class="w-5 h-5 text-white" />
+          <div class="flex h-9 w-9 items-center justify-center rounded-lg bg-cyan-600">
+            <Icon name="laptop" class="w-4 h-4 text-white" />
           </div>
-          <h2 class="text-2xl font-bold text-theme-primary">Gestión de Portátiles</h2>
+          <h2 class="text-lg sm:text-xl font-bold text-theme-primary">Gestión de Portátiles</h2>
         </div>
         <button
           @click="openCreateModal"
-          class="inline-flex items-center gap-2 px-4 py-2 bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white rounded-lg transition-colors"
+          class="inline-flex items-center gap-2 px-3 py-2 bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white rounded-lg transition-colors text-sm touch-manipulation"
         >
           <Icon name="plus" class="w-4 h-4" />
-          Nuevo Portátil
+          <span class="hidden sm:inline">Nuevo Portátil</span>
+          <span class="sm:hidden">Nuevo</span>
         </button>
       </div>
     </template>
 
-    <div class="space-y-6">
+    <div class="space-y-3 sm:space-y-4">
       <!-- Filtros -->
-      <div class="bg-theme-card rounded-xl border border-theme-primary p-6 shadow-theme-sm">
-        <h3 class="text-lg font-semibold text-theme-primary mb-4">Filtros de búsqueda</h3>
-        <div class="flex flex-col sm:flex-row gap-4">
+      <div class="bg-theme-card rounded-xl border border-theme-primary p-3 shadow-theme-sm">
+        <div class="flex flex-col sm:flex-row gap-3">
           <div class="flex-1">
             <input
               v-model="searchForm.search"
               @input="search"
-              type="text"
-              placeholder="Buscar por serial, marca, modelo o persona..."
-              class="w-full px-4 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-cyan-500 focus:border-transparent"
+              type="search"
+              inputmode="search"
+              placeholder="Buscar serial, marca, modelo..."
+              class="w-full px-3 py-2 text-sm border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:ring-2 focus:ring-cyan-500 focus:border-transparent touch-manipulation"
             >
           </div>
           <select
             v-model="searchForm.per_page"
             @change="search"
-            class="px-3 py-2 border border-theme-primary rounded-lg bg-theme-card text-theme-primary focus:ring-2 focus:ring-cyan-500"
+            class="px-3 py-2 text-sm border border-theme-primary rounded-lg bg-theme-card text-theme-primary focus:ring-2 focus:ring-cyan-500 touch-manipulation"
           >
-            <option value="10">10 por página</option>
-            <option value="15">15 por página</option>
-            <option value="25">25 por página</option>
-            <option value="50">50 por página</option>
+            <option value="10">10</option>
+            <option value="15">15</option>
+            <option value="25">25</option>
+            <option value="50">50</option>
           </select>
         </div>
       </div>
 
       <!-- Tabla de portátiles -->
       <div class="bg-theme-card rounded-xl border border-theme-primary shadow-theme-sm overflow-hidden">
-        <div class="border-b border-theme-primary bg-theme-secondary p-6">
-          <h3 class="text-lg font-semibold text-theme-primary">
-            Lista de portátiles registrados
-            <span v-if="portatiles.total" class="text-sm font-normal text-theme-secondary ml-2">
-              ({{ portatiles.total }} {{ portatiles.total === 1 ? 'portátil' : 'portátiles' }})
+        <div class="border-b border-theme-primary bg-theme-secondary px-3 py-3">
+          <h3 class="text-base font-semibold text-theme-primary">
+            Portátiles
+            <span v-if="portatiles.total" class="text-sm font-normal text-theme-secondary ml-1">
+              ({{ portatiles.total }})
             </span>
           </h3>
         </div>
 
         <!-- Loading indicator -->
-        <div v-if="loading" class="text-center py-12">
-          <div class="inline-flex items-center gap-2 text-theme-secondary">
-            <Icon name="loader" class="w-5 h-5 animate-spin" />
-            Cargando portátiles...
+        <div v-if="loading" class="text-center py-8">
+          <div class="inline-flex items-center gap-2 text-theme-secondary text-sm">
+            <Icon name="loader" class="w-4 h-4 animate-spin" />
+            Cargando...
           </div>
         </div>
 
-        <!-- Tabla -->
-        <div v-else class="overflow-x-auto">
+        <!-- Vista móvil (cards) -->
+        <div v-else class="lg:hidden divide-y divide-theme-primary">
+          <div v-for="portatil in portatiles.data" :key="portatil.portatil_id" class="p-3 hover:bg-theme-secondary transition-colors touch-manipulation">
+            <div class="flex items-start justify-between gap-3">
+              <div class="flex-1 min-w-0">
+                <div class="font-mono font-semibold text-theme-primary mb-1">{{ portatil.serial }}</div>
+                <div class="text-sm space-y-0.5">
+                  <div class="text-theme-primary">{{ portatil.marca }} {{ portatil.modelo }}</div>
+                  <div v-if="portatil.qrCode" class="text-xs text-theme-secondary">QR: {{ portatil.qrCode }}</div>
+                  <div v-if="portatil.persona" class="text-theme-primary">
+                    <div>{{ portatil.persona.Nombre }}</div>
+                    <div class="text-xs text-theme-secondary">{{ portatil.persona.documento }}</div>
+                  </div>
+                  <div v-else class="text-theme-muted text-xs">Sin persona</div>
+                </div>
+              </div>
+              <div class="flex items-center gap-1 flex-shrink-0">
+                <button
+                  @click="openEditModal(portatil)"
+                  class="p-2 bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white rounded transition-colors touch-manipulation"
+                  title="Editar"
+                >
+                  <Icon name="pencil" class="w-3.5 h-3.5" />
+                </button>
+                <button
+                  @click="confirmDelete(portatil)"
+                  class="p-2 bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded transition-colors touch-manipulation"
+                  title="Eliminar"
+                >
+                  <Icon name="trash" class="w-3.5 h-3.5" />
+                </button>
+              </div>
+            </div>
+          </div>
+          <div v-if="!portatiles.data?.length" class="px-3 py-8 text-center text-theme-muted">
+            <div class="flex flex-col items-center gap-2">
+              <Icon name="laptop" class="w-8 h-8 text-theme-muted" />
+              <span class="text-sm">No se encontraron portátiles</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Vista desktop (tabla) -->
+        <div class="hidden lg:block overflow-x-auto">
           <table class="min-w-full divide-y divide-theme-primary text-sm">
             <thead class="bg-theme-secondary">
               <tr>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Serial</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">QR Code</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Marca</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Modelo</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Persona</th>
-                <th class="px-6 py-3 text-left font-semibold text-theme-secondary">Acciones</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Serial</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">QR</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Marca</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Modelo</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Persona</th>
+                <th class="px-3 py-2 text-left text-xs font-semibold text-theme-secondary">Acciones</th>
               </tr>
             </thead>
             <tbody class="divide-y divide-theme-primary bg-theme-card">
               <tr v-for="portatil in portatiles.data" :key="portatil.portatil_id" class="transition-colors hover:bg-theme-secondary">
-                <td class="px-6 py-4 font-mono text-theme-primary">{{ portatil.serial }}</td>
-                <td class="px-6 py-4 text-theme-secondary">{{ portatil.qrCode || '—' }}</td>
-                <td class="px-6 py-4 text-theme-primary">{{ portatil.marca }}</td>
-                <td class="px-6 py-4 text-theme-secondary">{{ portatil.modelo }}</td>
-                <td class="px-6 py-4">
+                <td class="px-3 py-3 font-mono text-theme-primary">{{ portatil.serial }}</td>
+                <td class="px-3 py-3 text-theme-secondary text-xs">{{ portatil.qrCode || '—' }}</td>
+                <td class="px-3 py-3 text-theme-primary">{{ portatil.marca }}</td>
+                <td class="px-3 py-3 text-theme-secondary">{{ portatil.modelo }}</td>
+                <td class="px-3 py-3">
                   <div v-if="portatil.persona">
                     <div class="font-medium text-theme-primary">{{ portatil.persona.Nombre }}</div>
                     <div class="text-xs text-theme-secondary">{{ portatil.persona.documento }}</div>
                   </div>
                   <span v-else class="text-theme-muted">—</span>
                 </td>
-                <td class="px-6 py-4">
-                  <div class="flex items-center gap-2">
+                <td class="px-3 py-3">
+                  <div class="flex items-center gap-1">
                     <button
                       @click="openEditModal(portatil)"
-                      class="px-3 py-1 text-xs bg-cyan-600 hover:bg-cyan-700 dark:bg-cyan-600 dark:hover:bg-cyan-500 text-white rounded transition-colors"
-                      title="Editar portátil"
+                      class="px-2 py-1 text-xs bg-cyan-600 hover:bg-cyan-700 active:bg-cyan-800 text-white rounded transition-colors touch-manipulation"
+                      title="Editar"
                     >
                       <Icon name="pencil" class="w-3 h-3" />
                     </button>
                     <button
                       @click="confirmDelete(portatil)"
-                      class="px-3 py-1 text-xs bg-red-600 hover:bg-red-700 dark:bg-red-700 dark:hover:bg-red-600 text-white rounded transition-colors"
-                      title="Eliminar portátil"
+                      class="px-2 py-1 text-xs bg-red-600 hover:bg-red-700 active:bg-red-800 text-white rounded transition-colors touch-manipulation"
+                      title="Eliminar"
                     >
                       <Icon name="trash" class="w-3 h-3" />
                     </button>
@@ -277,10 +320,10 @@ onMounted(() => {
                 </td>
               </tr>
               <tr v-if="!portatiles.data?.length">
-                <td colspan="6" class="px-6 py-12 text-center text-theme-muted">
+                <td colspan="6" class="px-3 py-8 text-center text-theme-muted">
                   <div class="flex flex-col items-center gap-2">
                     <Icon name="laptop" class="w-8 h-8 text-theme-muted" />
-                    <span>No se encontraron portátiles</span>
+                    <span class="text-sm">No se encontraron portátiles</span>
                   </div>
                 </td>
               </tr>
@@ -289,10 +332,10 @@ onMounted(() => {
         </div>
 
         <!-- Paginación -->
-        <div v-if="portatiles.data?.length" class="border-t border-theme-primary bg-theme-secondary px-6 py-4">
-          <div class="flex flex-col sm:flex-row items-center justify-between gap-4">
-            <div class="text-sm text-theme-secondary">
-              Mostrando {{ portatiles.from }} a {{ portatiles.to }} de {{ portatiles.total }} portátiles
+        <div v-if="portatiles.data?.length" class="border-t border-theme-primary bg-theme-secondary px-3 py-3">
+          <div class="flex flex-col sm:flex-row items-center justify-between gap-3">
+            <div class="text-xs text-theme-secondary">
+              {{ portatiles.from }}-{{ portatiles.to }} de {{ portatiles.total }}
             </div>
             <div class="flex gap-1">
               <button
@@ -301,12 +344,12 @@ onMounted(() => {
                 @click="loadPortatilesPage(link.url)"
                 :disabled="!link.url"
                 :class="[
-                  'px-3 py-2 text-sm border rounded transition-colors',
+                  'px-2 py-1 text-xs border rounded transition-colors touch-manipulation h-8 min-w-[2rem]',
                   link.active
-                    ? 'bg-cyan-600 text-white border-cyan-600'
+                    ? 'bg-cyan-600 text-white border-cyan-600 font-semibold'
                     : link.url
-                      ? 'bg-theme-card text-theme-secondary border-theme-primary hover:bg-theme-secondary'
-                      : 'bg-theme-tertiary text-theme-muted border-theme-primary cursor-not-allowed'
+                      ? 'bg-theme-card text-theme-secondary border-theme-primary hover:bg-theme-secondary active:bg-theme-tertiary'
+                      : 'bg-theme-tertiary text-theme-muted border-theme-primary cursor-not-allowed opacity-50'
                 ]"
                 v-html="link.label"
               />

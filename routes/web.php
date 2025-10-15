@@ -83,10 +83,13 @@ Route::prefix('system')->name('system.')->group(function () {
             Route::put('vehiculos/{vehiculo}', [App\Http\Controllers\System\Admin\VehiculosController::class, 'update'])->name('vehiculos.update');
             Route::delete('vehiculos/{vehiculo}', [App\Http\Controllers\System\Admin\VehiculosController::class, 'destroy'])->name('vehiculos.destroy');
 
-            // Accesos (reutilizando controlador del celador)
+            // Accesos (reutilizando controlador del celador) - Admin tiene todas las funcionalidades
             Route::get('/accesos', [CeladorAccesoController::class, 'index'])->name('accesos.index');
+            Route::post('/accesos', [CeladorAccesoController::class, 'store'])->name('accesos.store');
+            Route::get('/accesos/portatiles/{persona}', [CeladorAccesoController::class, 'getPortatiles'])->name('accesos.portatiles');
+            Route::get('/accesos/vehiculos/{persona}', [CeladorAccesoController::class, 'getVehiculos'])->name('accesos.vehiculos');
 
-            // Verificación QR (reutilizando controlador del celador)
+            // Verificación QR (reutilizando controlador del celador) - Admin tiene todas las funcionalidades
             Route::get('/qr', [CeladorQrController::class, 'index'])->name('qr.index');
             Route::post('/qr/registrar', [CeladorQrController::class, 'registrarAcceso'])->name('qr.registrar');
             Route::get('/qr/accesos-activos', [CeladorQrController::class, 'accesosActivos'])->name('qr.accesos-activos');
@@ -95,10 +98,12 @@ Route::prefix('system')->name('system.')->group(function () {
             Route::post('/qr/buscar-persona', [CeladorQrController::class, 'buscarPersona'])->name('qr.buscar-persona');
             Route::post('/qr/buscar-cedula', [CeladorQrController::class, 'buscarPersonaPorCedula'])->name('qr.buscar-cedula');
 
-            // Incidencias (reutilizando controlador del celador)
+            // Incidencias (reutilizando controlador del celador) - Admin tiene todas las funcionalidades
             Route::get('/incidencias', [CeladorIncidenciaController::class, 'index'])->name('incidencias.index');
+            Route::post('/incidencias', [CeladorIncidenciaController::class, 'store'])->name('incidencias.store');
+            Route::get('/incidencias/accesos-activos', [CeladorIncidenciaController::class, 'getAccesosActivos'])->name('incidencias.accesos-activos');
 
-            // Historial / Reportes (reutilizando controlador del celador)
+            // Historial / Reportes (reutilizando controlador del celador) - Admin tiene todas las funcionalidades
             Route::get('/historial', [CeladorHistorialController::class, 'index'])->name('historial.index');
             Route::get('/historial/export-pdf', [CeladorHistorialController::class, 'exportPDF'])->name('historial.export-pdf');
         });
@@ -114,6 +119,9 @@ Route::prefix('system')->name('system.')->group(function () {
 
             // Accesos
             Route::get('/accesos', [CeladorAccesoController::class, 'index'])->name('accesos.index');
+            Route::post('/accesos', [CeladorAccesoController::class, 'store'])->name('accesos.store');
+            Route::get('/accesos/portatiles/{persona}', [CeladorAccesoController::class, 'getPortatiles'])->name('accesos.portatiles');
+            Route::get('/accesos/vehiculos/{persona}', [CeladorAccesoController::class, 'getVehiculos'])->name('accesos.vehiculos');
 
             // Verificación QR
             Route::get('/qr', [CeladorQrController::class, 'index'])->name('qr.index');
@@ -126,6 +134,8 @@ Route::prefix('system')->name('system.')->group(function () {
 
             // Incidencias
             Route::get('/incidencias', [CeladorIncidenciaController::class, 'index'])->name('incidencias.index');
+            Route::post('/incidencias', [CeladorIncidenciaController::class, 'store'])->name('incidencias.store');
+            Route::get('/incidencias/accesos-activos', [CeladorIncidenciaController::class, 'getAccesosActivos'])->name('incidencias.accesos-activos');
 
             // Historial / Reportes
             Route::get('/historial', [CeladorHistorialController::class, 'index'])->name('historial.index');

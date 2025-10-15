@@ -115,73 +115,84 @@ const closeModal = () => {
       </div>
     </template>
 
-    <div class="space-y-6">
-      <!-- Filtros -->
-      <div class="bg-theme-card rounded-lg shadow-theme-sm border border-theme-primary p-4">
-        <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-          <!-- Búsqueda -->
-          <div class="md:col-span-2">
-            <label for="search" class="block text-sm font-medium text-theme-primary mb-1">
-              Buscar persona
-            </label>
+    <div class="space-y-4">
+      <!-- Filtros Compactos PWA-Optimized -->
+      <div class="bg-theme-card rounded-lg shadow-theme-sm border border-theme-primary p-3 sm:p-3">
+        <!-- Primera fila: Búsqueda en móvil -->
+        <div class="mb-3 sm:hidden">
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <Icon name="search" :size="16" class="text-theme-muted" />
+            </div>
+            <input
+              id="search-mobile"
+              v-model="search"
+              type="search"
+              inputmode="search"
+              placeholder="Buscar persona..."
+              class="block w-full pl-10 pr-3 py-2.5 text-base border border-theme-primary rounded-lg bg-theme-card text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500 touch-manipulation"
+            />
+          </div>
+        </div>
+
+        <!-- Segunda fila: Filtros en móvil / Todo en escritorio -->
+        <div class="flex flex-col sm:flex-row gap-2 sm:gap-3 items-stretch sm:items-end">
+          <!-- Búsqueda en escritorio -->
+          <div class="hidden sm:block flex-1 min-w-0">
             <div class="relative">
               <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
-                <Icon name="search" :size="16" class="text-theme-muted" />
+                <Icon name="search" :size="14" class="text-theme-muted" />
               </div>
               <input
                 id="search"
                 v-model="search"
-                type="text"
-                placeholder="Nombre, documento o correo..."
-                class="block w-full pl-10 pr-3 py-2 border border-theme-primary rounded-md leading-5 bg-theme-card text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
+                type="search"
+                inputmode="search"
+                placeholder="Buscar por nombre, documento o correo..."
+                class="block w-full pl-9 pr-3 py-1.5 text-sm border border-theme-primary rounded-md bg-theme-card text-theme-primary placeholder-theme-muted focus:outline-none focus:ring-1 focus:ring-green-500 focus:border-green-500"
               />
             </div>
           </div>
 
-          <!-- Tipo de Persona -->
-          <div>
-            <label for="tipo_persona" class="block text-sm font-medium text-theme-primary mb-1">
-              Tipo de Persona
-            </label>
-            <select
-              id="tipo_persona"
-              v-model="tipoPersona"
-              class="block w-full px-3 py-2 border border-theme-primary rounded-md bg-theme-card text-theme-primary focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            >
-              <option value="">Todos los tipos</option>
-              <option v-for="tipo in tiposPersona" :key="tipo" :value="tipo">
-                {{ tipo }}
-              </option>
-            </select>
-          </div>
+          <!-- Filtros en línea para móvil -->
+          <div class="flex gap-2 sm:contents">
+            <!-- Tipo de Persona -->
+            <div class="flex-1 sm:w-40">
+              <select
+                id="tipo_persona"
+                v-model="tipoPersona"
+                class="block w-full px-3 py-2.5 sm:px-2 sm:py-1.5 text-base sm:text-sm border border-theme-primary rounded-lg sm:rounded-md bg-theme-card text-theme-primary focus:outline-none focus:ring-2 sm:focus:ring-1 focus:ring-green-500 focus:border-green-500 touch-manipulation"
+              >
+                <option value="">Todos</option>
+                <option v-for="tipo in tiposPersona" :key="tipo" :value="tipo">
+                  {{ tipo }}
+                </option>
+              </select>
+            </div>
 
-          <!-- Items por página -->
-          <div>
-            <label for="per_page" class="block text-sm font-medium text-theme-primary mb-1">
-              Por página
-            </label>
-            <select
-              id="per_page"
-              v-model="perPage"
-              class="block w-full px-3 py-2 border border-theme-primary rounded-md bg-theme-card text-theme-primary focus:outline-none focus:ring-2 focus:ring-green-500 focus:border-green-500"
-            >
-              <option :value="10">10</option>
-              <option :value="15">15</option>
-              <option :value="25">25</option>
-              <option :value="50">50</option>
-            </select>
-          </div>
-        </div>
+            <!-- Items por página -->
+            <div class="w-20 sm:w-24">
+              <select
+                id="per_page"
+                v-model="perPage"
+                class="block w-full px-2 py-2.5 sm:py-1.5 text-base sm:text-sm border border-theme-primary rounded-lg sm:rounded-md bg-theme-card text-theme-primary focus:outline-none focus:ring-2 sm:focus:ring-1 focus:ring-green-500 focus:border-green-500 touch-manipulation"
+              >
+                <option :value="10">10</option>
+                <option :value="15">15</option>
+                <option :value="25">25</option>
+                <option :value="50">50</option>
+              </select>
+            </div>
 
-        <!-- Botón limpiar filtros -->
-        <div class="mt-4 flex justify-end">
-          <button
-            @click="clearFilters"
-            class="inline-flex items-center px-3 py-2 border border-theme-primary shadow-theme-sm text-sm leading-4 font-medium rounded-md text-theme-primary bg-theme-card hover:bg-theme-secondary focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-green-500"
-          >
-            <Icon name="refresh" :size="16" class="mr-2" />
-            Limpiar filtros
-          </button>
+            <!-- Botón limpiar filtros -->
+            <button
+              @click="clearFilters"
+              class="inline-flex items-center justify-center w-10 sm:w-auto sm:px-3 py-2.5 sm:py-1.5 border border-theme-primary text-sm font-medium rounded-lg sm:rounded-md text-theme-primary bg-theme-card hover:bg-theme-secondary active:bg-theme-secondary focus:outline-none focus:ring-2 sm:focus:ring-1 focus:ring-green-500 transition-colors touch-manipulation"
+              title="Limpiar filtros"
+            >
+              <Icon name="refresh" :size="16" class="sm:w-3.5 sm:h-3.5" />
+            </button>
+          </div>
         </div>
       </div>
 

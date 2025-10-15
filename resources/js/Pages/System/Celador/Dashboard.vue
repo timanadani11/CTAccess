@@ -3,7 +3,13 @@ import SystemLayout from '@/Layouts/System/SystemLayout.vue'
 import { Head, Link } from '@inertiajs/vue3'
 import { computed } from 'vue'
 import Icon from '@/Components/Icon.vue'
-import ApplicationLogo from '@/Components/ApplicationLogo.vue'
+
+const props = defineProps({
+  stats: Object,
+  accesosPorDia: Array,
+  incidenciasPorTipo: Array,
+  incidenciasPorPrioridad: Array,
+})
 
 const quickLinks = computed(() => ([
   {
@@ -42,6 +48,36 @@ const quickLinks = computed(() => ([
     icon: 'file-text',
   },
 ]))
+
+const maxAccesos = computed(() => {
+  if (!props.accesosPorDia || props.accesosPorDia.length === 0) return 1
+  return Math.max(...props.accesosPorDia.map(d => d.total))
+})
+
+const getBarHeight = (value) => {
+  const percentage = (value / maxAccesos.value) * 100
+  return Math.max(percentage, 5) // Mínimo 5% para que se vea algo
+}
+
+const getPrioridadColor = (prioridad) => {
+  const colors = {
+    'Alta': 'bg-red-500',
+    'Media': 'bg-yellow-500',
+    'Baja': 'bg-green-500',
+  }
+  return colors[prioridad] || 'bg-gray-500'
+}
+
+const getTipoColor = (tipo) => {
+  const colors = {
+    'Seguridad': 'bg-red-500',
+    'Acceso': 'bg-blue-500',
+    'Equipamiento': 'bg-purple-500',
+    'Comportamiento': 'bg-orange-500',
+    'Otro': 'bg-gray-500',
+  }
+  return colors[tipo] || 'bg-gray-500'
+}
 </script>
 
 <template>
@@ -51,54 +87,163 @@ const quickLinks = computed(() => ([
     <template #header>
       <div class="flex items-center justify-between">
         <h2 class="text-2xl font-bold text-theme-primary">Dashboard • Celador</h2>
-        <div class="text-sm text-theme-secondary">Acceso rápido a funciones principales</div>
+        <div class="text-sm text-theme-secondary">Vista general del sistema</div>
       </div>
     </template>
 
-    <div class="space-y-6 lg:space-y-8">
-      <!-- Bienvenida -->
-      <div class="relative overflow-hidden rounded-2xl lg:rounded-3xl bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-700 p-6 sm:p-8 lg:p-10 xl:p-12 shadow-2xl">
-        <div class="absolute top-0 right-0 h-40 w-40 lg:h-56 lg:w-56 -translate-y-20 translate-x-20 lg:-translate-y-28 lg:translate-x-28 rounded-full bg-white/10 blur-2xl"></div>
-        <div class="absolute bottom-0 left-0 h-32 w-32 lg:h-40 lg:w-40 translate-x-[-50%] translate-y-[50%] rounded-full bg-white/5 blur-xl"></div>
-        <div class="absolute top-1/2 left-1/2 h-20 w-20 lg:h-32 lg:w-32 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white/5 blur-3xl"></div>
-        <div class="relative">
-          <div class="flex flex-col sm:flex-row items-start sm:items-center gap-4 lg:gap-6 mb-4 lg:mb-6">
-            <div class="flex h-16 w-16 lg:h-20 lg:w-20 items-center justify-center rounded-2xl bg-white/10 backdrop-blur-sm ring-2 ring-white/20 shadow-xl">
-              <ApplicationLogo classes="h-12 lg:h-16 w-auto object-contain" alt="CTAccess Logo" />
+    <div class="space-y-5">
+      <!-- Estadísticas principales - Compactas -->
+      <div class="grid grid-cols-2 gap-3 sm:gap-4 lg:grid-cols-4">
+        <!-- Accesos Hoy -->
+        <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg p-4 text-white shadow-md">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-md backdrop-blur-sm">
+              <Icon name="log-in" :size="20" />
             </div>
-            <div>
-              <h3 class="text-2xl lg:text-3xl xl:text-4xl font-bold text-white mb-2">¡Bienvenido, Celador!</h3>
-              <p class="text-base lg:text-lg text-emerald-100">Gestiona el acceso y seguridad del Centro de Teleinformática y Producción Industrial</p>
+            <div class="flex-1">
+              <div class="text-2xl font-bold leading-none mb-1">{{ stats.accesos_hoy }}</div>
+              <div class="text-blue-100 text-xs font-medium">Accesos Hoy</div>
             </div>
           </div>
-          <div class="bg-white/10 backdrop-blur-sm rounded-xl p-4 lg:p-5 border border-white/20">
-            <p class="text-sm lg:text-base text-emerald-50 leading-relaxed">Utiliza los accesos rápidos a continuación para gestionar entradas, salidas e incidencias de manera eficiente. Todas las herramientas están diseñadas para facilitar tu trabajo diario.</p>
+        </div>
+
+        <!-- Accesos Activos -->
+        <div class="bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-lg p-4 text-white shadow-md">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-md backdrop-blur-sm">
+              <Icon name="users" :size="20" />
+            </div>
+            <div class="flex-1">
+              <div class="text-2xl font-bold leading-none mb-1">{{ stats.accesos_activos }}</div>
+              <div class="text-emerald-100 text-xs font-medium">Dentro</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incidencias Hoy -->
+        <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-lg p-4 text-white shadow-md">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-md backdrop-blur-sm">
+              <Icon name="alert-triangle" :size="20" />
+            </div>
+            <div class="flex-1">
+              <div class="text-2xl font-bold leading-none mb-1">{{ stats.incidencias_hoy }}</div>
+              <div class="text-orange-100 text-xs font-medium">Incidencias</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Total Personas -->
+        <div class="bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg p-4 text-white shadow-md">
+          <div class="flex items-center gap-3">
+            <div class="p-2 bg-white/20 rounded-md backdrop-blur-sm">
+              <Icon name="user-check" :size="20" />
+            </div>
+            <div class="flex-1">
+              <div class="text-2xl font-bold leading-none mb-1">{{ stats.total_personas }}</div>
+              <div class="text-purple-100 text-xs font-medium">Personas</div>
+            </div>
           </div>
         </div>
       </div>
 
-      <!-- Accesos rápidos -->
-      <div>
-        <div class="mb-6">
-          <h3 class="text-xl lg:text-2xl font-bold text-theme-primary mb-2">Accesos Rápidos</h3>
-          <p class="text-theme-secondary text-sm lg:text-base">Selecciona una opción para comenzar</p>
-        </div>
-        <div class="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-5 xl:gap-6">
-          <Link v-for="item in quickLinks" :key="item.title" :href="item.href" class="group relative overflow-hidden rounded-2xl bg-gradient-to-br from-theme-card to-theme-secondary p-6 lg:p-7 shadow-theme-md ring-2 ring-theme-primary transition-all duration-300 hover:shadow-2xl hover:ring-emerald-400 hover:-translate-y-2 hover:scale-105">
-            <div :class="['absolute inset-0 opacity-0 bg-gradient-to-br transition-opacity duration-300 group-hover:opacity-10', item.color]" />
-            <div class="relative">
-              <div class="mb-4 lg:mb-5 flex h-14 w-14 lg:h-16 lg:w-16 items-center justify-center rounded-xl lg:rounded-2xl bg-gradient-to-br shadow-lg transform transition-transform group-hover:scale-110 group-hover:rotate-3" :class="item.color">
-                <Icon :name="item.icon" :size="28" class="text-white lg:hidden" />
-                <Icon :name="item.icon" :size="32" class="text-white hidden lg:block" />
-              </div>
-              <div class="text-lg lg:text-xl xl:text-2xl font-bold text-theme-primary mb-2 lg:mb-3">{{ item.title }}</div>
-              <p class="text-sm lg:text-base text-theme-secondary mb-4 lg:mb-5 leading-relaxed min-h-[3rem] lg:min-h-[3.5rem]">{{ item.description }}</p>
-              <div class="flex items-center text-sm lg:text-base font-semibold text-emerald-600 dark:text-emerald-400 group-hover:text-emerald-700 dark:group-hover:text-emerald-300">
-                <span class="mr-2">Acceder ahora</span>
-                <Icon name="arrow-right" :size="18" class="transition-transform group-hover:translate-x-2" />
+      <!-- Gráficos - Optimizados -->
+      <div class="grid grid-cols-1 lg:grid-cols-2 gap-4">
+        <!-- Gráfico de Accesos por Día -->
+        <div class="bg-theme-card rounded-lg p-4 shadow-md border border-theme-primary/30">
+          <div class="flex items-center justify-between mb-4">
+            <div>
+              <h3 class="text-base font-bold text-theme-primary">Accesos - Últimos 7 días</h3>
+              <p class="text-xs text-theme-secondary mt-0.5">Total: {{ stats.accesos_semana }}</p>
+            </div>
+            <div v-if="stats.cambio_semanal !== 0" class="flex items-center gap-1 text-xs font-semibold" :class="stats.cambio_semanal > 0 ? 'text-emerald-600' : 'text-red-600'">
+              <Icon :name="stats.cambio_semanal > 0 ? 'trending-up' : 'trending-down'" :size="16" />
+              <span>{{ Math.abs(stats.cambio_semanal) }}%</span>
+            </div>
+          </div>
+          
+          <div v-if="accesosPorDia && accesosPorDia.length > 0" class="flex items-end justify-between h-40 gap-2">
+            <div v-for="(dia, index) in accesosPorDia" :key="index" class="flex-1 flex flex-col items-center gap-1.5">
+              <div class="text-xs font-bold text-theme-primary">{{ dia.total }}</div>
+              <div class="w-full bg-gradient-to-t from-emerald-500 to-emerald-400 rounded-t transition-all duration-500 hover:from-emerald-600 hover:to-emerald-500 cursor-pointer" :style="{ height: getBarHeight(dia.total) + '%' }"></div>
+              <div class="text-[10px] text-theme-secondary font-medium text-center">
+                <div>{{ dia.dia }}</div>
+                <div class="text-[9px] text-theme-tertiary">{{ dia.fecha }}</div>
               </div>
             </div>
-          </Link>
+          </div>
+          <div v-else class="flex items-center justify-center h-40 text-theme-secondary">
+            <div class="text-center">
+              <Icon name="bar-chart" :size="32" class="mx-auto mb-1 opacity-30" />
+              <p class="text-xs">No hay datos</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incidencias por Tipo -->
+        <div class="bg-theme-card rounded-lg p-4 shadow-md border border-theme-primary/30">
+          <h3 class="text-base font-bold text-theme-primary mb-1">Incidencias por Tipo</h3>
+          <p class="text-xs text-theme-secondary mb-4">Registradas este mes</p>
+          
+          <div v-if="incidenciasPorTipo && incidenciasPorTipo.length > 0" class="space-y-3">
+            <div v-for="(item, index) in incidenciasPorTipo" :key="index" class="flex items-center gap-3">
+              <div class="w-20 text-xs font-medium text-theme-primary truncate">{{ item.tipo }}</div>
+              <div class="flex-1 relative">
+                <div class="h-6 bg-theme-secondary/30 rounded overflow-hidden">
+                  <div :class="['h-full rounded transition-all duration-500', getTipoColor(item.tipo)]" :style="{ width: (item.total / Math.max(...incidenciasPorTipo.map(i => i.total)) * 100) + '%' }"></div>
+                </div>
+              </div>
+              <div class="w-8 text-right text-sm font-bold text-theme-primary">{{ item.total }}</div>
+            </div>
+          </div>
+          <div v-else class="flex items-center justify-center h-40 text-theme-secondary">
+            <div class="text-center">
+              <Icon name="alert-circle" :size="32" class="mx-auto mb-1 opacity-30" />
+              <p class="text-xs">No hay datos</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Incidencias por Prioridad -->
+        <div class="bg-theme-card rounded-lg p-4 shadow-md border border-theme-primary/30">
+          <h3 class="text-base font-bold text-theme-primary mb-1">Incidencias por Prioridad</h3>
+          <p class="text-xs text-theme-secondary mb-4">Registradas este mes</p>
+          
+          <div v-if="incidenciasPorPrioridad && incidenciasPorPrioridad.length > 0" class="space-y-3">
+            <div v-for="(item, index) in incidenciasPorPrioridad" :key="index" class="flex items-center gap-3">
+              <div class="w-16 text-xs font-medium text-theme-primary">{{ item.prioridad }}</div>
+              <div class="flex-1 relative">
+                <div class="h-6 bg-theme-secondary/30 rounded overflow-hidden">
+                  <div :class="['h-full rounded transition-all duration-500', getPrioridadColor(item.prioridad)]" :style="{ width: (item.total / Math.max(...incidenciasPorPrioridad.map(i => i.total)) * 100) + '%' }"></div>
+                </div>
+              </div>
+              <div class="w-8 text-right text-sm font-bold text-theme-primary">{{ item.total }}</div>
+            </div>
+          </div>
+          <div v-else class="flex items-center justify-center h-40 text-theme-secondary">
+            <div class="text-center">
+              <Icon name="alert-circle" :size="32" class="mx-auto mb-1 opacity-30" />
+              <p class="text-xs">No hay datos</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Accesos Rápidos Compactos -->
+        <div class="bg-theme-card rounded-lg p-4 shadow-md border border-theme-primary/30 lg:col-span-2">
+          <h3 class="text-base font-bold text-theme-primary mb-1">Accesos Rápidos</h3>
+          <p class="text-xs text-theme-secondary mb-4">Funciones principales</p>
+          
+          <div class="grid grid-cols-2 sm:grid-cols-5 gap-2.5">
+            <Link v-for="item in quickLinks" :key="item.title" :href="item.href" class="group relative overflow-hidden rounded-lg bg-gradient-to-br from-theme-secondary to-theme-tertiary p-3 shadow-sm ring-1 ring-theme-primary/20 transition-all duration-300 hover:shadow-md hover:ring-theme-primary hover:-translate-y-0.5">
+              <div :class="['absolute inset-0 opacity-0 bg-gradient-to-br transition-opacity duration-300 group-hover:opacity-10', item.color]" />
+              <div class="relative text-center">
+                <div class="mb-2 mx-auto flex h-9 w-9 items-center justify-center rounded-lg bg-gradient-to-br shadow-sm" :class="item.color">
+                  <Icon :name="item.icon" :size="18" class="text-white" />
+                </div>
+                <div class="text-xs font-bold text-theme-primary leading-tight">{{ item.title }}</div>
+              </div>
+            </Link>
+          </div>
         </div>
       </div>
     </div>

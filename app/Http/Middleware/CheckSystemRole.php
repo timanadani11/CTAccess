@@ -13,6 +13,8 @@ class CheckSystemRole
      * Handle an incoming request.
      *
      * Usage: ->middleware('check.system.role:administrador') or ->middleware('check.system.role:celador')
+     * 
+     * IMPORTANTE: El administrador tiene acceso a TODO, incluyendo rutas de celador.
      */
     public function handle(Request $request, Closure $next, string $role): Response
     {
@@ -28,6 +30,13 @@ class CheckSystemRole
             abort(500, 'RBAC no disponible en el modelo de usuario del sistema');
         }
 
+        // ✅ ADMIN TIENE ACCESO A TODO
+        // Si el usuario es administrador, siempre tiene acceso
+        if ($user->hasRole('administrador')) {
+            return $next($request);
+        }
+
+        // Si no es administrador, verificar el rol específico
         $hasRole = $user->hasRole($role);
 
         if (! $hasRole) {
