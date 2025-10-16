@@ -86,9 +86,17 @@ class PersonaController extends Controller
                 }
             }
 
-            return redirect()
-                ->route('personas.index')
-                ->with('success', 'Persona creada correctamente');
+            // Si el usuario está autenticado en el sistema, redirigir a personas.index
+            // Si no (registro público), redirigir al login de personas
+            if (auth('system')->check()) {
+                return redirect()
+                    ->route('personas.index')
+                    ->with('success', 'Persona creada correctamente');
+            } else {
+                return redirect()
+                    ->route('login')
+                    ->with('success', '¡Registro exitoso! Tu código QR ha sido enviado a tu correo. Ya puedes iniciar sesión.');
+            }
                 
         } catch (\Throwable $e) {
             return redirect()

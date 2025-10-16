@@ -322,7 +322,7 @@
           <div v-else class="hidden sm:block"></div>
 
           <div class="flex flex-col sm:flex-row gap-2 sm:gap-2.5 order-1 sm:order-2">
-            <Link :href="route('personas.index')" class="inline-flex items-center justify-center px-4 py-2.5 border-2 border-red-400 dark:border-red-500 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50/10 dark:hover:bg-red-900/20 hover:border-red-500 dark:hover:border-red-400 transition-all duration-200 font-medium text-sm">
+            <Link :href="route('home')" class="inline-flex items-center justify-center px-4 py-2.5 border-2 border-red-400 dark:border-red-500 rounded-lg text-red-600 dark:text-red-400 hover:bg-red-50/10 dark:hover:bg-red-900/20 hover:border-red-500 dark:hover:border-red-400 transition-all duration-200 font-medium text-sm">
               <Icon name="x" :size="16" class="mr-1.5" />Cancelar
             </Link>
 

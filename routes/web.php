@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\PersonaController;
 use App\Http\Controllers\System\Auth\LoginController as SystemLoginController;
 use App\Http\Controllers\System\DashboardController as SystemDashboardController;
 use App\Http\Controllers\System\AdminDashboardController;
@@ -26,6 +27,9 @@ Route::get('/debug/personas/{persona}', function (Persona $persona) {
     return view('debug.persona', compact('persona'));
 });
 
+// Rutas públicas para registro de personas (sin autenticación)
+Route::get('/personas/registrarse', [PersonaController::class, 'create'])->name('personas.create');
+Route::post('/personas/registrarse', [PersonaController::class, 'store'])->name('personas.store');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
