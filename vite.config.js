@@ -4,10 +4,21 @@ import vue from '@vitejs/plugin-vue';
 import { VitePWA } from 'vite-plugin-pwa';
 
 export default defineConfig({
+    base: process.env.APP_ENV === 'production' ? '/' : '/',
+    build: {
+        manifest: true,
+        outDir: 'public/build',
+        rollupOptions: {
+            output: {
+                manualChunks: undefined,
+            },
+        },
+    },
     plugins: [
         laravel({
             input: 'resources/js/app.js',
             refresh: true,
+            buildDirectory: 'build',
         }),
         vue({
             template: {
@@ -46,7 +57,7 @@ export default defineConfig({
                 ]
             },
             workbox: {
-                globPatterns: ['**/*.{js,css,html,ico,png,svg}'],
+                globPatterns: ['/*.{js,css,html,ico,png,svg}'],
                 cleanupOutdatedCaches: true,
                 clientsClaim: true,
                 skipWaiting: true,
@@ -91,7 +102,7 @@ export default defineConfig({
                         }
                     },
                     {
-                        urlPattern: /^.*\/system\/celador\/qr\/.*$/,
+                        urlPattern: /^.\/system\/celador\/qr\/.$/,
                         handler: 'NetworkFirst',
                         options: {
                             cacheName: 'qr-api-cache',
@@ -106,7 +117,7 @@ export default defineConfig({
                         }
                     },
                     {
-                        urlPattern: /^.*\/system\/celador\/personas\/.*$/,
+                        urlPattern: /^.\/system\/celador\/personas\/.$/,
                         handler: 'CacheFirst',
                         options: {
                             cacheName: 'personas-cache',
